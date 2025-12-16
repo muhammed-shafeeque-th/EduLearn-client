@@ -32,3 +32,5 @@ export interface Pagination {
 }
 
 export type PaginatedResponse<T> = ApiResponse<T> & { pagination: Pagination };
+
+export type PaginatedSuccessResponse<T> = { data: T } & Pagination;

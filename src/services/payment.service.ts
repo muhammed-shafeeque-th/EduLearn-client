@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseService, BaseServiceOptions, RequestOptions } from './base-api/base.service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
@@ -6,61 +7,117 @@ import { authRefreshToken, getClientAuthToken } from '@/lib/utils/auth-client-ap
 interface CreatePaymentPayload {
   orderId: string;
   provider: string;
-  amount: { amount: number; currency: string };
   successUrl?: string;
   cancelUrl?: string;
 }
 
-type Money = {
+export interface PaypalSession {
+  orderId: string;
+  /** PayPal redirect URL */
+  approvalLink: string;
+}
+
+export interface RazorpaySession {
+  providerOrderId: string;
+  keyId: string;
   amount: number;
   currency: string;
+}
+
+export interface StripeSession {
+  sessionId: string;
+  publicKey: string;
+  clientSecret: string;
+  /** Stripe hosted checkout URL (optional) */
+  url: string;
+}
+
+// Response type after creating payment session
+type PaymentResponse = {
+  userDetails?: {
+    email: string;
+    name: string;
+  };
+  paymentId: string;
+  status: string;
+  userId: string;
+  orderId: string;
+  stripe?: StripeSession;
+  paypal?: PaypalSession;
+  razorpay?: RazorpaySession;
 };
 
-type PaymentResponse =
-  | {
-      paypal: {
-        paymentId: string;
-        userId: string;
-        orderId: string;
-        providerOrderId: string;
-        amount: Money | undefined;
-        status: string;
-        approvalUrl: string;
-      };
-    }
-  | {
-      razorpay: {
-        paymentId: string;
-        userId: string;
-        orderId: string;
-        providerOrderId: string;
-        amount: Money | undefined;
-        status: string;
-        keyId: string;
-      };
-    }
-  | {
-      stripe: {
-        paymentId?: string | undefined;
-        userId?: string | undefined;
-        orderId?: string | undefined;
-        clientSecret?: string | undefined;
-        amount?: Money | undefined;
-        status?: string | undefined;
-        transactionId?: string | undefined;
-      };
-    };
+// type Money = {
+//   amount: number;
+//   currency: string;
+// };
 
-interface RazorpayVerifyPayload {
-  paymentId: string;
-  razorpayOrderId: string;
+// type PaymentResponse =
+//   | {
+//       paypal: {
+//         paymentId: string;
+//         userId: string;
+//         orderId: string;
+//         providerOrderId: string;
+//         amount: Money | undefined;
+//         status: string;
+//         approvalUrl: string;
+//       };
+//     }
+//   | {
+//       razorpay: {
+//         paymentId: string;
+//         userId: string;
+//         orderId: string;
+//         providerOrderId: string;
+//         amount: Money | undefined;
+//         status: string;
+//         keyId: string;
+//       };
+//     }
+//   | {
+//       stripe: {
+//         paymentId?: string | undefined;
+//         userId?: string | undefined;
+//         orderId?: string | undefined;
+//         clientSecret?: string | undefined;
+//         amount?: Money | undefined;
+//         status?: string | undefined;
+//         transactionId?: string | undefined;
+//       };
+//   azorpayVerifyPayload
+
+export interface RazorpayVerifyPayload {
   razorpayPaymentId: string;
-  razorpaySignature?: string;
+  razorpayOrderId: string;
+  razorpaySignature: string;
 }
-interface CapturePaypalPayload {
+export interface StripeVerifyPayload {
+  sessionId: string;
+}
+export interface PaypalVerifyPayload {
   orderId: string;
-  paymentId: string;
+}
+
+interface VerifyPaymentPayload {
+  provider: PaymentProvider;
+  stripeVerify?: StripeVerifyPayload;
+  razorpayVerify?: RazorpayVerifyPayload;
+  paypalVerify?: PaypalVerifyPayload;
+}
+
+export type PaymentProvider = 'stripe' | 'razorpay' | 'paypal';
+
+// interface VerifyPaymentPayload {
+//   provider: PaymentProvider;
+//   paymentId: string;
+//   providerSessionId: string;
+//   providerPaymentId?: string;
+//   providerSignature?: string;
+// }
+interface CancelPaymentPayload {
   providerOrderId: string;
+  provider: PaymentProvider;
 }
 
 export interface IPaymentService {
@@ -68,14 +125,9 @@ export interface IPaymentService {
     payload: CreatePaymentPayload,
     options?: RequestOptions
   ): Promise<ApiResponse<PaymentResponse>>;
-  verifyRazorpayPayment(
-    payload: RazorpayVerifyPayload,
-    options?: RequestOptions
-  ): Promise<ApiResponse<any>>;
-  capturePaypalPayment(
-    payload: CapturePaypalPayload,
-    options?: RequestOptions
-  ): Promise<ApiResponse<any>>;
+  verifyPayment(payload: VerifyPaymentPayload, options?: RequestOptions): Promise<ApiResponse<any>>;
+  cancelPayment(payload: CancelPaymentPayload, options?: RequestOptions): Promise<ApiResponse<any>>;
+  getPayment(paymentId: string, options?: RequestOptions): Promise<ApiResponse<any>>;
 }
 
 export class PaymentService extends BaseService implements IPaymentService {
@@ -98,18 +150,21 @@ export class PaymentService extends BaseService implements IPaymentService {
     return this.post<ApiResponse<PaymentResponse>>(`/${payload.provider}/create`, payload, options);
   }
 
-  public async capturePaypalPayment(
-    payload: CapturePaypalPayload,
+  public async cancelPayment(
+    payload: CancelPaymentPayload,
     options?: RequestOptions
   ): Promise<ApiResponse<any>> {
-    return this.post<ApiResponse<any>>(`/paypal/capture`, payload, options);
+    return this.patch<ApiResponse<any>>(`/${payload.provider}/cancel`, payload, options);
   }
 
-  public async verifyRazorpayPayment(
-    payload: RazorpayVerifyPayload,
+  public async verifyPayment(
+    payload: VerifyPaymentPayload,
     options?: RequestOptions
   ): Promise<ApiResponse<any>> {
-    return this.post<ApiResponse<any>>(`/razorpay/verify`, payload, options);
+    return this.patch<ApiResponse<any>>(`/${payload.provider}/verify`, payload, options);
+  }
+  public async getPayment(paymentId: string, options?: RequestOptions): Promise<ApiResponse<any>> {
+    return this.get<ApiResponse<any>>(`/${paymentId}`, options);
   }
 
   // Static factory for SSR usage (pass a token getter or headers)
@@ -119,4 +174,4 @@ export class PaymentService extends BaseService implements IPaymentService {
 }
 
 // Singleton for client-side usage
-export const cartService: IPaymentService = new PaymentService({});
+export const paymentService: IPaymentService = new PaymentService({});
