@@ -2,7 +2,7 @@
 import { BaseService, BaseServiceOptions, RequestOptions } from './base-api/base.service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
-import { authRefreshToken, getClientAuthToken } from '@/lib/utils/auth-client-apis';
+import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
 
 interface CreatePaymentPayload {
   orderId: string;
