@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { FacebookIcon, GoogleIcon, MicrosoftIcon } from './icons';
+import { toast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/utils';
 
 const socialProviders = [
   {
@@ -35,12 +36,15 @@ export function SocialSignup() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      toast.success(`Signing up with ${provider}...`);
+      toast.success({ title: `Signing up with ${provider}...` });
 
       // Implement actual social auth here
       // Example: signIn(provider.toLowerCase())
     } catch (error) {
-      toast.error(`Failed to sign up with ${provider}`);
+      toast.error({
+        title: `Failed to sign up with ${provider}`,
+        description: getErrorMessage(error),
+      });
     } finally {
       setLoadingProvider(null);
     }
