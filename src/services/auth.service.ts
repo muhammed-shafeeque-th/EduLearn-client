@@ -1,3 +1,18 @@
+// Auth Service - Handles all authentication-related API interactions and token management
+
+// -------------------- Imports --------------------
+import { config } from '@/lib/config';
+import { store } from '@/store';
+import { refreshToken } from '@/store/slices/auth-slice';
+
+import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
+
+import { ApiResponse } from '@/types/api-response';
+
+import { LoginCredentials } from '@/types/auth';
+
+import { Auth2SignData, AuthResponse, OAuthResponse, RegisterData } from '@/types/auth';
+
 import {
   CheckEmailRequest,
   CheckEmailResponse,
@@ -7,33 +22,54 @@ import {
   ResendOTPRequest,
   VerifyOTPRequest,
 } from '@/types/auth';
-import { LoginCredentials } from '@/types/auth/login-data.type';
-import { Auth2SignData, AuthResponse, RegisterData } from '@/types/auth/register-user.type';
-import { BaseService } from './base-api/base.service';
-import { config } from '@/lib/config';
-import { store } from '@/store';
-import { ApiResponse } from '@/types/api-response';
-import { refreshToken } from '@/store/slices/auth-slice';
+
+// -------------------- Types & Interface --------------------
 
 export interface IAuthService {
-  login(credentials: LoginCredentials): Promise<ApiResponse<AuthResponse>>;
-  register(userdata: RegisterData): Promise<ApiResponse<{ userId: string }>>;
-  oauthSign(userdata: Auth2SignData): Promise<ApiResponse<AuthResponse>>;
-  verify(verifyData: VerifyOTPRequest): Promise<ApiResponse<AuthResponse>>;
-  resendOtp(verifyData: ResendOTPRequest): Promise<ApiResponse<AuthResponse>>;
-  refreshToken(): Promise<ApiResponse<AuthResponse>>;
-  logout(credential: LogoutCredential): Promise<ApiResponse<void>>;
-  forgotPassword(email: string): Promise<ApiResponse<{ message: string }>>;
-  resetPassword(data: PasswordResetRequest): Promise<ApiResponse<{ message: string }>>;
-  changePassword(data: PasswordChangeRequest): Promise<ApiResponse<{ message: string }>>;
-  checkEmail(data: CheckEmailRequest): Promise<ApiResponse<CheckEmailResponse>>;
+  login(
+    credentials: LoginCredentials,
+    options?: RequestOptions
+  ): Promise<ApiResponse<AuthResponse>>;
+  register(
+    userdata: RegisterData,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ userId: string }>>;
+  oauthSign(userdata: Auth2SignData, options?: RequestOptions): Promise<ApiResponse<OAuthResponse>>;
+  verify(
+    verifyData: VerifyOTPRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<AuthResponse>>;
+  resendOtp(
+    resendData: ResendOTPRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<AuthResponse>>;
+  refreshToken(options?: RequestOptions): Promise<ApiResponse<AuthResponse>>;
+  logout(credential: LogoutCredential, options?: RequestOptions): Promise<ApiResponse<void>>;
+  forgotPassword(
+    email: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ message: string }>>;
+  resetPassword(
+    data: PasswordResetRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ message: string }>>;
+  changePassword(
+    data: PasswordChangeRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ message: string }>>;
+  checkEmail(
+    params: CheckEmailRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CheckEmailResponse>>;
 }
 
-// Token getter for client-side singleton
-const getToken = () => store?.getState()?.auth?.token;
+// -------------------- Token Utilities --------------------
 
-// Token getter for client-side singleton
-const authRefresh = async () => {
+// Safely gets the current auth token from the Redux store state (client-side)
+const getClientToken = () => store?.getState()?.auth?.token ?? null;
+
+// Handles automatic refresh of token using Redux's refreshToken, throws if unsuccessful
+const authClientRefresh = async () => {
   const response = await store.dispatch(refreshToken());
   if (
     response.meta.requestStatus === 'rejected' ||
@@ -45,72 +81,103 @@ const authRefresh = async () => {
   return { token: (response.payload as { data: { token: string } })?.data?.token };
 };
 
-class AuthService extends BaseService implements IAuthService {
-  constructor(
-    tokenGetter: () => string | null = getToken,
-    refresh: () => Promise<AuthResponse> = authRefresh
-  ) {
-    super(`${config.apiUrl}/auth`, { getToken: tokenGetter, authRefresh: refresh });
+// -------------------- Auth Service Implementation --------------------
+
+export class AuthService extends BaseService implements IAuthService {
+  constructor({
+    getToken = getClientToken,
+    authRefresh = authClientRefresh,
+    ...options
+  }: BaseServiceOptions = {}) {
+    super(`${config.apiUrl}/auth`, {
+      ...options,
+      getToken,
+      authRefresh,
+    });
   }
 
-  public async login(credentials: LoginCredentials): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>, LoginCredentials>('/login', credentials);
+  // --- Authentication Methods ---
+
+  login(
+    credentials: LoginCredentials,
+    options?: RequestOptions
+  ): Promise<ApiResponse<AuthResponse>> {
+    return this.post<ApiResponse<AuthResponse>, LoginCredentials>('/login', credentials, options);
   }
 
-  public async register(userdata: RegisterData): Promise<ApiResponse<{ userId: string }>> {
-    return this.post<ApiResponse<{ userId: string }>, RegisterData>('/register', userdata);
+  register(
+    userdata: RegisterData,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ userId: string }>> {
+    return this.post<ApiResponse<{ userId: string }>, RegisterData>('/register', userdata, options);
   }
 
-  public async oauthSign(userdata: Auth2SignData): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>, Auth2SignData>('/oauth', userdata);
+  oauthSign(
+    userdata: Auth2SignData,
+    options?: RequestOptions
+  ): Promise<ApiResponse<OAuthResponse>> {
+    return this.post<ApiResponse<OAuthResponse>, Auth2SignData>('/oauth', userdata, options);
   }
 
-  public async checkEmail(
-    credentials: CheckEmailRequest
+  checkEmail(
+    params: CheckEmailRequest,
+    options: RequestOptions = {}
   ): Promise<ApiResponse<CheckEmailResponse>> {
-    return this.post<ApiResponse<CheckEmailResponse>, CheckEmailRequest>(
-      '/email-check',
-      credentials
+    return this.get<ApiResponse<CheckEmailResponse>>('/email-check', { ...options, params });
+  }
+
+  verify(
+    verifyData: VerifyOTPRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<AuthResponse>> {
+    return this.post<ApiResponse<AuthResponse>, VerifyOTPRequest>('/verify', verifyData, options);
+  }
+
+  resendOtp(
+    resendData: ResendOTPRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<AuthResponse>> {
+    return this.post<ApiResponse<AuthResponse>, ResendOTPRequest>(
+      '/resend-otp',
+      resendData,
+      options
     );
   }
 
-  public async verify(verifyData: VerifyOTPRequest): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>, VerifyOTPRequest>('/verify', verifyData);
+  logout(credential: LogoutCredential, options?: RequestOptions): Promise<ApiResponse<void>> {
+    return this.post<ApiResponse<void>>('/logout', credential, options);
   }
 
-  public async resendOtp(resendData: ResendOTPRequest): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>, ResendOTPRequest>('/resend-otp', resendData);
-  }
-
-  public async logout(credential: LogoutCredential): Promise<ApiResponse<void>> {
-    return this.post<ApiResponse<void>>('/logout', credential);
-  }
-
-  public async forgotPassword(email: string): Promise<ApiResponse<{ message: string }>> {
-    return this.post<ApiResponse<{ message: string }>>('/forgot-password', { email });
-  }
-
-  public async resetPassword(
-    data: PasswordResetRequest
+  forgotPassword(
+    email: string,
+    options?: RequestOptions
   ): Promise<ApiResponse<{ message: string }>> {
-    return this.post<ApiResponse<{ message: string }>>('/reset-password', data);
+    return this.post<ApiResponse<{ message: string }>>('/forgot-password', { email }, options);
   }
 
-  public async changePassword(
-    data: PasswordChangeRequest
+  resetPassword(
+    data: PasswordResetRequest,
+    options?: RequestOptions
   ): Promise<ApiResponse<{ message: string }>> {
-    return this.post<ApiResponse<{ message: string }>>('/change-password', data);
+    return this.post<ApiResponse<{ message: string }>>('/reset-password', data, options);
   }
 
-  public refreshToken(): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>>('/refresh');
+  changePassword(
+    data: PasswordChangeRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ message: string }>> {
+    return this.post<ApiResponse<{ message: string }>>('/change-password', data, options);
+  }
+
+  refreshToken(options?: RequestOptions): Promise<ApiResponse<AuthResponse>> {
+    return this.post<ApiResponse<AuthResponse>>('/refresh', options);
   }
 
   // Static factory for SSR usage (pass a token getter or headers)
-  static forSSR(token: string | null) {
-    return new AuthService(() => token);
+  static create(serviceOptions: BaseServiceOptions) {
+    return new AuthService(serviceOptions);
   }
 }
 
-// Singleton for client-side usage
-export const authService: IAuthService = new AuthService();
+// -------------------- Client-side Singleton Instance --------------------
+export const authService: IAuthService = new AuthService({});

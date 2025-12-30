@@ -8,7 +8,7 @@ export const signinSchema = z.object({
     .min(1, 'Password is required')
     .min(6, 'Password must be at least 6 characters'),
 
-  rememberMe: z.boolean().default(false),
+  rememberMe: z.boolean(),
 });
 
 export type SigninFormData = z.infer<typeof signinSchema>;
