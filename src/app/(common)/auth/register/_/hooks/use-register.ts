@@ -1,8 +1,8 @@
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppDispatch, useAuthIsAuthenticated, useAuthSelector } from '@/store';
 import { clearError as handleClearError, register } from '@/store/slices/auth-slice';
-import { RegisterData } from '@/types/auth/register-user.type';
+import { RegisterData } from '@/types/auth';
 import { useRouter } from 'next/navigation';
-import { AuthType } from '@/types/user/user.type';
+import { AuthType } from '@/types/auth';
 import { SignupFormData } from '../schemas';
 import { useToast } from '@/hooks/use-toast';
 
@@ -10,7 +10,8 @@ export const useRegister = () => {
   const dispatch = useAppDispatch();
   const { common, toast } = useToast();
   const router = useRouter();
-  const { error, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { error, isLoading } = useAuthSelector();
+  const isAuthenticated = useAuthIsAuthenticated();
 
   const handleSubmit = async (data: SignupFormData) => {
     try {
