@@ -1,5 +1,5 @@
-import { useAppDispatch, useAuthIsAuthenticated, useAuthSelector } from '@/store';
-import { clearError as handleClearError, register } from '@/store/slices/auth-slice';
+import { useAppDispatch, useAuthIsAuthenticated, useAuthSelector } from '@/states/client';
+import { clearError as handleClearError, register } from '@/states/client/slices/auth-slice';
 import { RegisterData } from '@/types/auth';
 import { useRouter } from 'next/navigation';
 import { AuthType } from '@/types/auth';

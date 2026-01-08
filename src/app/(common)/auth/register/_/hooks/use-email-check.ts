@@ -45,6 +45,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { authService } from '@/services/auth.service';
+import { getErrorMessage } from '@/lib/utils';
 
 export function useCheckEmail(email: string) {
   const [isChecking, setIsChecking] = useState(false);
@@ -72,7 +73,7 @@ export function useCheckEmail(email: string) {
         setEmailExists(response.data.exists);
       } catch (err) {
         if (axios.isCancel(err)) return;
-        setError('Failed to verify email');
+        setError(getErrorMessage(err, 'Failed to verify email'));
       } finally {
         setIsChecking(false);
       }
