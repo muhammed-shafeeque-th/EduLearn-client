@@ -2,10 +2,10 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AdminLoginSchemaType } from '../schemas';
-import { useAppDispatch, useAuthIsAuthenticated } from '@/store';
+import { useAppDispatch, useAuthIsAuthenticated } from '@/states/client';
 import { toast } from '@/hooks/use-toast';
 import { useCallback, useEffect } from 'react';
-import { adminLogin } from '@/store/slices/admin-slice';
+import { adminLogin } from '@/states/client/slices/admin-slice';
 import { getErrorMessage } from '@/lib/utils';
 
 export const useAdminLogin = () => {
