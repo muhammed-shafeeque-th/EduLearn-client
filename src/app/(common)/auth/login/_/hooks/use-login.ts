@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { useAppDispatch, useAuthIsAuthenticated, useAuthSelector } from '@/store';
-import { clearError as clearAuthError, login } from '@/store/slices/auth-slice';
+import { useAppDispatch, useAuthIsAuthenticated, useAuthSelector } from '@/states/client';
+import { clearError as clearAuthError, login } from '@/states/client/slices/auth-slice';
 import { SigninFormData } from '../schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
