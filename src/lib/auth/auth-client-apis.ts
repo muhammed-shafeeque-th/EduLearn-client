@@ -1,9 +1,9 @@
 'use client';
 
-import { store } from '@/store';
-import { refreshToken } from '@/store/slices/auth-slice';
+import { store } from '@/states/client';
+import { refreshToken } from '@/states/client/slices/auth-slice';
 import { AuthPlugin } from '../providers';
-import { adminRefresh } from '@/store/slices/admin-slice';
+import { adminRefresh } from '@/states/client/slices/admin-slice';
 
 // const dispatch = useAppDispatch();
 
