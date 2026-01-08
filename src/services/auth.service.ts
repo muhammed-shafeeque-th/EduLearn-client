@@ -2,8 +2,9 @@
 
 // -------------------- Imports --------------------
 import { config } from '@/lib/config';
-import { store } from '@/store';
-import { refreshToken } from '@/store/slices/auth-slice';
+import { store } from '@/states/client';
+import { refreshToken } from '@/states/client/slices/auth-slice';
+import { logout as logoutAction } from '@/states/client/slices/auth-slice';
 
 import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
 
@@ -16,14 +17,14 @@ import { Auth2SignData, AuthResponse, OAuthResponse, RegisterData } from '@/type
 import {
   CheckEmailRequest,
   CheckEmailResponse,
-  LogoutCredential,
   PasswordChangeRequest,
   PasswordResetRequest,
   ResendOTPRequest,
   VerifyOTPRequest,
 } from '@/types/auth';
+import { AxiosResponse } from 'axios';
 
-// -------------------- Types & Interface --------------------
+//  Types & Interface
 
 export interface IAuthService {
   login(
@@ -44,7 +45,7 @@ export interface IAuthService {
     options?: RequestOptions
   ): Promise<ApiResponse<AuthResponse>>;
   refreshToken(options?: RequestOptions): Promise<ApiResponse<AuthResponse>>;
-  logout(credential: LogoutCredential, options?: RequestOptions): Promise<ApiResponse<void>>;
+  logout(options?: RequestOptions): Promise<ApiResponse<void>>;
   forgotPassword(
     email: string,
     options?: RequestOptions
@@ -81,18 +82,36 @@ const authClientRefresh = async () => {
   return { token: (response.payload as { data: { token: string } })?.data?.token };
 };
 
+// Response Hook: If user got blocked (403), trigger a logout request to clear user data
+const onResponseHook = (response: AxiosResponse) => {
+  if (response.status === 403) {
+    // Optionally: you might want to check if already logged out, but safe to dispatch logout
+    store.dispatch(logoutAction());
+  }
+};
+
 // -------------------- Auth Service Implementation --------------------
 
 export class AuthService extends BaseService implements IAuthService {
   constructor({
     getToken = getClientToken,
     authRefresh = authClientRefresh,
+    hooks,
     ...options
   }: BaseServiceOptions = {}) {
     super(`${config.apiUrl}/auth`, {
       ...options,
       getToken,
       authRefresh,
+      hooks: {
+        ...(hooks || {}),
+        onResponse: (response: AxiosResponse) => {
+          onResponseHook(response);
+          if (hooks && typeof hooks.onResponse === 'function') {
+            hooks.onResponse(response);
+          }
+        },
+      },
     });
   }
 
@@ -144,8 +163,8 @@ export class AuthService extends BaseService implements IAuthService {
     );
   }
 
-  logout(credential: LogoutCredential, options?: RequestOptions): Promise<ApiResponse<void>> {
-    return this.post<ApiResponse<void>>('/logout', credential, options);
+  logout(options?: RequestOptions): Promise<ApiResponse<void>> {
+    return this.post<ApiResponse<void>>('/logout', {}, options);
   }
 
   forgotPassword(
