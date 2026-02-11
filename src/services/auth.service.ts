@@ -1,6 +1,3 @@
-// Auth Service - Handles all authentication-related API interactions and token management
-
-// -------------------- Imports --------------------
 import { config } from '@/lib/config';
 import { store } from '@/states/client';
 import { refreshToken } from '@/states/client/slices/auth-slice';
@@ -23,8 +20,6 @@ import {
   VerifyOTPRequest,
 } from '@/types/auth';
 import { AxiosResponse } from 'axios';
-
-//  Types & Interface
 
 export interface IAuthService {
   login(
@@ -64,12 +59,8 @@ export interface IAuthService {
   ): Promise<ApiResponse<CheckEmailResponse>>;
 }
 
-// -------------------- Token Utilities --------------------
-
-// Safely gets the current auth token from the Redux store state (client-side)
 const getClientToken = () => store?.getState()?.auth?.token ?? null;
 
-// Handles automatic refresh of token using Redux's refreshToken, throws if unsuccessful
 const authClientRefresh = async () => {
   const response = await store.dispatch(refreshToken());
   if (
@@ -114,8 +105,6 @@ export class AuthService extends BaseService implements IAuthService {
       },
     });
   }
-
-  // --- Authentication Methods ---
 
   login(
     credentials: LoginCredentials,
@@ -192,11 +181,9 @@ export class AuthService extends BaseService implements IAuthService {
     return this.post<ApiResponse<AuthResponse>>('/refresh', options);
   }
 
-  // Static factory for SSR usage (pass a token getter or headers)
   static create(serviceOptions: BaseServiceOptions) {
     return new AuthService(serviceOptions);
   }
 }
 
-// -------------------- Client-side Singleton Instance --------------------
 export const authService: IAuthService = new AuthService({});
