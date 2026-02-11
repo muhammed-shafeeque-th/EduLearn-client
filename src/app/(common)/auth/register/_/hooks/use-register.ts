@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AuthType } from '@/types/auth';
 import { SignupFormData } from '../schemas';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/utils';
 
 export const useRegister = () => {
   const dispatch = useAppDispatch();
@@ -22,12 +23,11 @@ export const useRegister = () => {
         role: 'student',
         authType: AuthType.EMAIL,
       };
-      const result = await dispatch(register(registerCredentials));
+      const result = await dispatch(register(registerCredentials)).unwrap();
       console.log(JSON.stringify(result, null, 2));
 
-      if (result.meta.requestStatus === 'rejected') {
-        common.registerError(result.payload as string);
-        return;
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
       toast.success({
@@ -37,13 +37,11 @@ export const useRegister = () => {
 
       // Redirect to email verification page
       router.push(
-        `/auth/verify/?email=${data.email}&name=${data.firstName}&_id=${(result.payload as { data: { userId: string } }).data.userId}`
+        `/auth/verify/?email=${data.email}&name=${data.firstName}&_id=${(result as { data: { userId: string } }).data.userId}`
       );
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error({ title: error.message });
-        return;
-      }
+      common.registerError(getErrorMessage(error));
+      return;
     }
   };
 
