@@ -6,21 +6,10 @@ import { CartItem } from './cart-item';
 import { CartEmpty } from './cart-empty';
 import { CartSummary } from './cart-summary';
 import { CartSkeleton } from './skeletons/cart-skeleton';
-// import { useAddToWishlist } from '@/hooks/wishlist/use-wishlists';
-import { useCart, useRemoveFromCart } from '@/hooks/cart/use-cart';
-import { User } from '@/types/user';
+import { useCart } from '@/states/server/cart/use-cart';
 
-interface CartClientProps {
-  user: User | null;
-}
-
-export function CartClient({ user }: CartClientProps) {
-  // const { cart, isLoading, removeFromCart, clearCart, isRemoving } = useCart(user);
-  const { data: cartRes, isLoading } = useCart({ enabled: true });
-  const { cart } = cartRes ?? {};
-  // const { mutateAsync: addToWishlist, isPending } = useAddToWishlist();
-  const { mutateAsync: removeFromCart, isPending: isRemoving } = useRemoveFromCart();
-  // const clearCart = () => {};
+export function CartClient() {
+  const { cart, isLoading, isRemoving, removeFromCart } = useCart({ enabled: true });
 
   if (isLoading) {
     return <CartSkeleton />;
@@ -80,7 +69,7 @@ export function CartClient({ user }: CartClientProps) {
 
           {/* Cart Summary */}
           <div className="lg:col-span-1">
-            <CartSummary cart={cart} user={user} />
+            <CartSummary cart={cart} />
           </div>
         </div>
       </motion.div>
