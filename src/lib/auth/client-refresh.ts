@@ -29,7 +29,6 @@ export const clientRefreshApi = async () => {
       return response;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      // Check if error is an AxiosError with 403 status
       const status = error?.response?.status;
       if (status === 403) {
         // Logout, attach error_code to URL
@@ -38,9 +37,7 @@ export const clientRefreshApi = async () => {
             const url = new URL(window.location.href);
             url.searchParams.set('error_code', ERROR_CODES.USER_BLOCKED);
             window.history.replaceState({}, '', url.toString());
-          } catch {
-            // Ignore
-          }
+          } catch {}
         }
         store.dispatch(logoutAction());
       }
