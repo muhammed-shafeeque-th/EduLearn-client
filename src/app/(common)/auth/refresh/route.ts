@@ -2,6 +2,8 @@ import { verifyAccessToken } from '@/lib/auth/token-utils';
 import { serverRefresh } from '@/lib/server-apis';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'; // prevent caching
+
 export async function GET(req: NextRequest) {
   const next = req.nextUrl.searchParams.get('next') || '/';
 
@@ -21,7 +23,17 @@ export async function GET(req: NextRequest) {
     /**
      * Redirect back to original destination
      */
-    return NextResponse.redirect(new URL(next, req.url));
+    const res = NextResponse.redirect(new URL(next, req.url), 303);
+
+    //  Forward all cookies to browser
+    for (const cookie of response.setCookie ?? []) {
+      res.headers.append('set-cookie', cookie);
+    }
+
+    //  disable caching
+    res.headers.set('Cache-Control', 'no-store');
+
+    return res;
   } catch (error) {
     console.error(error);
     /**
@@ -30,6 +42,6 @@ export async function GET(req: NextRequest) {
     const loginUrl = new URL('/auth/login', req.url);
     loginUrl.searchParams.set('next', next);
 
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl, 303);
   }
 }
