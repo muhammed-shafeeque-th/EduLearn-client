@@ -37,7 +37,7 @@ export const CartItem = memo(({ item, onRemove, isRemoving }: CartItemProps) => 
   }, [course.students]);
 
   const discountPercentage = useMemo(() => {
-    if (course.price && course.price > course.discountPrice) {
+    if (course.price && course.discountPrice && course.price > course.discountPrice) {
       return Math.round(((course.price - course.discountPrice) / course.price) * 100);
     }
     return null;
@@ -60,7 +60,7 @@ export const CartItem = memo(({ item, onRemove, isRemoving }: CartItemProps) => 
           <div className="flex flex-col sm:flex-row">
             {/* --- Thumbnail --- */}
             <div className="relative w-full sm:w-48 h-36 overflow-hidden">
-              <Link href={`/courses/${course.id}`} className="block relative w-full h-full">
+              <Link href={`/courses/${course.slug}`} className="block relative w-full h-full">
                 {!imageLoaded && (
                   <div className="absolute inset-0 bg-muted animate-pulse rounded-none" />
                 )}
@@ -107,7 +107,7 @@ export const CartItem = memo(({ item, onRemove, isRemoving }: CartItemProps) => 
 
               {/* --- Title --- */}
               <Link
-                href={`/courses/${course.id}`}
+                href={`/courses/${course.slug}`}
                 className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-2 mb-2 text-sm sm:text-base"
               >
                 {course.title}
