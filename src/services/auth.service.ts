@@ -73,15 +73,11 @@ const authClientRefresh = async () => {
   return { token: (response.payload as { data: { token: string } })?.data?.token };
 };
 
-// Response Hook: If user got blocked (403), trigger a logout request to clear user data
 const onResponseHook = (response: AxiosResponse) => {
   if (response.status === 403) {
-    // Optionally: you might want to check if already logged out, but safe to dispatch logout
     store.dispatch(logoutAction());
   }
 };
-
-// -------------------- Auth Service Implementation --------------------
 
 export class AuthService extends BaseService implements IAuthService {
   constructor({
@@ -186,4 +182,4 @@ export class AuthService extends BaseService implements IAuthService {
   }
 }
 
-export const authService: IAuthService = new AuthService({});
+export const authService: IAuthService = new AuthService();
