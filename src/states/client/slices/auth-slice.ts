@@ -186,7 +186,6 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         const payload = action.payload;
         if (isSuccessResponse(payload)) {
-          // no-op, user should still be unauthenticated until verified
         } else if (isErrorResponse(payload)) {
           state.status = 'unauthenticated';
           state.error =
@@ -247,13 +246,11 @@ const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         removeCredentials(state);
-        // Remove credentials always sets to unauthenticated
         state.isLoading = false;
       })
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-        // On logout error, still consider unauthenticated as a fallback
         state.status = 'unauthenticated';
         removeCredentials(state);
       })
@@ -283,7 +280,6 @@ const authSlice = createSlice({
       .addCase(restoreCredentials.pending, (state) => {
         state.isLoading = true;
         state.error = null;
-        // Don't change status here, keep unknown during restore
       })
       .addCase(restoreCredentials.fulfilled, (state, action) => {
         const payload = action.payload;
@@ -308,9 +304,6 @@ const authSlice = createSlice({
 });
 
 // --- Selectors ---
-/**
- * Returns true if the user is currently authenticated and token is not expired, otherwise false.
- */
 export const selectIsAuthenticated = (state: RootState) =>
   state.auth.status === 'authenticated' && !!state.auth.token && state.auth.user !== null;
 
@@ -322,7 +315,6 @@ export const selectAuthError = (state: RootState) => state.auth.error;
 export const { setCredentials, clearCredentials, clearError, reset } = authSlice.actions;
 export default authSlice.reducer;
 
-// Helper type guards for ApiResponse
 export function isSuccessResponse<T>(
   resp: unknown
 ): resp is { success: true; message: string; data: T } {
@@ -360,10 +352,6 @@ function mapToAuthUser(data: any): AuthUser | null {
   };
 }
 
-/**
- * Set the credentials in state as authenticated.
- * Saves token to localStorage client-side.
- */
 export function applyCredentials(state: AuthState, token: string) {
   if (!state || !token) {
     removeCredentials(state);
@@ -383,10 +371,6 @@ export function applyCredentials(state: AuthState, token: string) {
   }
 }
 
-/**
- * Remove all credentials from state, set unauthenticated.
- * Also remove from localStorage on client side.
- */
 export function removeCredentials(state: AuthState) {
   state.user = null;
   state.token = null;
@@ -397,9 +381,6 @@ export function removeCredentials(state: AuthState) {
   }
 }
 
-/**
- * True if token is expired, malformed, or not a valid JWT.
- */
 export function isTokenExpired(token: string): boolean {
   try {
     const jwtToken = decodeJwt<any>(token);
