@@ -4,15 +4,19 @@ export const signupSchema = z
   .object({
     firstName: z
       .string()
+      .trim()
       .min(3, 'First name must be at least 3 characters')
       .max(50, 'First name must be less than 50 characters')
-      .regex(/^[a-zA-Z\s]+$/, 'First name can only contain letters and spaces'),
+      .regex(/^[a-zA-Z\s]+$/, 'First name can only contain letters and spaces')
+      .transform((str) => str.trim()),
 
     lastName: z
       .string()
+      .trim()
       .min(3, 'Last name must be at least 3 characters')
       .max(50, 'Last name must be less than 50 characters')
-      .regex(/^[a-zA-Z\s]+$/, 'Last name can only contain letters and spaces'),
+      .regex(/^[a-zA-Z\s]+$/, 'Last name can only contain letters and spaces')
+      .transform((str) => str.trim()),
 
     // username: z
     //   .string()
@@ -23,6 +27,7 @@ export const signupSchema = z
 
     email: z
       .string()
+      .trim()
       .email('Please enter a valid email address')
       .min(5, 'Email must be at least 5 characters')
       .max(254, 'Email must be less than 254 characters'),

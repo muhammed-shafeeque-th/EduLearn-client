@@ -35,7 +35,6 @@ export default function SignupForm() {
   const email = watch('email');
   const { isChecking, emailExists, error: emailError } = useCheckEmail(email);
 
-  // Optional UX feedback
   // if (emailExists && email) {
   //   toast.error('This email is already registered.');
   // }
