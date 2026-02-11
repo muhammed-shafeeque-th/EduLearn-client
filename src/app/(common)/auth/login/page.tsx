@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function SigninPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Hero Section - Hidden on mobile, visible on desktop */}
+      {/* Hero Section  */}
       <div className="hidden lg:flex lg:w-1/2">
         <SigninHero />
       </div>
