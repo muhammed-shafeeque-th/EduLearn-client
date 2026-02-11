@@ -6,17 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Cart } from '@/types/cart';
 import Link from 'next/link';
-import { User } from '@/types/user';
 import { formatPrice } from '@/lib/utils';
-import { useAuthSelector } from '@/store';
+import { useAuthIsAuthenticated } from '@/states/client';
 
 interface CartSummaryProps {
   cart: Cart;
-  user: User | null;
 }
 
 export function CartSummary({ cart }: CartSummaryProps) {
-  const { isAuthenticated } = useAuthSelector();
+  const isAuthenticated = useAuthIsAuthenticated();
 
   const subtotal = cart.items.reduce((sum, item) => sum + item.course.discountPrice, 0);
   const originalTotal = cart.items.reduce(

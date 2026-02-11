@@ -1,19 +1,26 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, RefreshCw, CheckCircle, ArrowRight, X } from 'lucide-react';
+import { Mail, RefreshCw, CheckCircle, ArrowRight, X, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { type VerifyEmailFormData } from '../schemas';
-// import { FormSkeleton } from './skeletons/form-skeleton';
 import { useOTP } from '../hooks/use-verify';
 import { Label } from '@/components/ui/label';
 
 const OTP_LENGTH = 6 as const;
+
+function getGmailRedirect(email: string): string | null {
+  const FROM_MAIL = 'study.edulearn@gmail.com';
+
+  if (!email) return null;
+  const matches = email.match(/^([^@]+)@((?:gmail|googlemail)\.com)$/i);
+  if (!matches) return null;
+
+  return `https://mail.google.com/mail/u/0/#search/from%3A${encodeURIComponent(FROM_MAIL)}`;
+}
 
 export function VerifyEmailForm() {
   const searchParams = useSearchParams();
@@ -23,17 +30,16 @@ export function VerifyEmailForm() {
   const {
     otpValues,
     timeLeft,
-    useFormReturn: { setValue, handleSubmit },
+    useFormReturn: { handleSubmit },
     onSubmit,
     handleInputChange,
-    setCanResend,
-    setTimeLeft,
-    inputRefs,
+    setInputRef,
     shakeError,
     focusedIndex,
     updateOtpValue,
     isLoading,
     isVerified,
+    isComplete,
     handleFocus,
     handleKeyDown,
     handlePaste,
@@ -42,84 +48,11 @@ export function VerifyEmailForm() {
     isResending,
     formatTime,
     focusInput,
-  } = useOTP(OTP_LENGTH);
+  } = useOTP(OTP_LENGTH, email, name, userId);
 
-  // Reference to prevent duplicate triggering of auto submit
-  const hasAutoSubmittedRef = useRef(false);
-
-  const allDigits = otpValues.join('');
-  const isComplete =
-    otpValues.length === OTP_LENGTH &&
-    otpValues.every((digit) => digit !== '' && /^\d$/.test(digit));
-
-  // Timer countdown effect, cancels timeout on unmount
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setCanResend(true);
-    }
-  }, [timeLeft, setCanResend, setTimeLeft]);
-
-  // Reset auto-submit ref when otp values or status changes
-  useEffect(() => {
-    if (!isLoading && !isVerified) {
-      hasAutoSubmittedRef.current = false;
-    }
-    // no return needed, passive reset
-  }, [otpValues, isLoading, isVerified, allDigits]);
-
-  // Auto-submit when all digits are filled, and not already submitting/loading/verified
-  useEffect(() => {
-    if (
-      isComplete &&
-      allDigits.length === OTP_LENGTH &&
-      !isLoading &&
-      !isVerified &&
-      !hasAutoSubmittedRef.current
-    ) {
-      otpValues.forEach((digit, idx) => {
-        setValue(`digit${idx + 1}` as keyof VerifyEmailFormData, digit);
-      });
-
-      hasAutoSubmittedRef.current = true;
-
-      const timer = setTimeout(() => {
-        handleSubmit((data) => onSubmit(data, email, name, userId))();
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [
-    isComplete,
-    allDigits,
-    handleSubmit,
-    email,
-    userId,
-    name,
-    otpValues,
-    onSubmit,
-    setValue,
-    isLoading,
-    isVerified,
-  ]);
-
-  // Focus first input on mount
-  useEffect(() => {
-    inputRefs.current[0]?.focus();
-  }, [inputRefs]);
-
-  // Fixed assignment for refs (lint fix: use null for unassigned)
-  const setInputRef = useCallback(
-    (index: number) => (el: HTMLInputElement | null) => {
-      inputRefs.current[index] = el;
-    },
-    [inputRefs]
-  );
-
-  // useMemo for index arrays (best practices for static arrays)
   const otpIndexes = Array.from({ length: OTP_LENGTH }, (_, i) => i);
+
+  const gmailRedirect = getGmailRedirect(email);
 
   if (isVerified) {
     return (
@@ -170,18 +103,29 @@ export function VerifyEmailForm() {
       className="space-y-6"
     >
       {/* Email Info */}
-      <div className="flex items-center justify-center space-x-2 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-        <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-        <span className="text-sm text-blue-800 dark:text-blue-200">
-          Code sent to <span className="font-semibold">{email}</span>
-        </span>
+      <div className="flex flex-col items-center justify-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg gap-2">
+        <div className="flex items-center space-x-2">
+          <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+          <span className="text-sm text-blue-800 dark:text-blue-200">
+            Code sent to <span className="font-semibold">{email}</span>
+          </span>
+        </div>
+        {/* Gmail "Go to inbox" shortcut link */}
+        {!!gmailRedirect && (
+          <a
+            href={gmailRedirect}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-xs text-primary underline font-medium mt-1 hover:opacity-80 transition-opacity"
+            aria-label={`Go to Gmail inbox for ${email}`}
+          >
+            Open this Gmail inbox&nbsp;
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        )}
       </div>
 
-      <form
-        onSubmit={handleSubmit((data) => onSubmit(data, email, name, userId))}
-        className="space-y-6"
-        autoComplete="off"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
         {/* OTP Input */}
         <div className="space-y-4">
           <Label htmlFor="verify-otp-input-0" className="block text-sm font-medium text-center">
@@ -376,6 +320,19 @@ export function VerifyEmailForm() {
                 )}
                 {isResending ? 'Sending...' : 'Resend Code'}
               </Button>
+              {/* On resend, show again gmail shortcut if relevant */}
+              {!!gmailRedirect && (
+                <a
+                  href={gmailRedirect}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-xs text-primary underline font-medium mt-2 hover:opacity-80 transition-opacity"
+                  aria-label={`Go to Gmail inbox for ${email}`}
+                >
+                  Open this Gmail inbox&nbsp;
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

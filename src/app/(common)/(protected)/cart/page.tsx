@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { CartContent } from './_/components/cart-content';
 import { CartSkeleton } from './_/components/skeletons/cart-skeleton';
+import { CartClient } from './_/components/cart-client';
 
 export const metadata: Metadata = {
   title: 'Shopping Cart | EduLearn',
@@ -12,7 +12,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-background">
       <Suspense fallback={<CartSkeleton />}>
-        <CartContent />
+        <CartClient />
       </Suspense>
     </main>
   );

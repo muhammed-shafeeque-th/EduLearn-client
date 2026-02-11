@@ -14,15 +14,14 @@ export const useAdminLogin = () => {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
-  // Redirect the user after authentication succeeds
   const redirectOnAuthenticated = useCallback(() => {
     const next = searchParams.get('next');
-    // only allow internal redirects for security reasons
+
     const redirectPath = next && next.startsWith('/admin') ? next : '/admin';
     router.replace(redirectPath);
+    router.refresh();
   }, [router, searchParams]);
 
-  // On successful authentication, redirect
   useEffect(() => {
     if (isAuthenticated) {
       redirectOnAuthenticated();
