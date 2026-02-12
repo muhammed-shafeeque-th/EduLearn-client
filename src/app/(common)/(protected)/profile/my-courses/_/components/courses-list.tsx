@@ -16,10 +16,6 @@ import { CourseCard } from './course-card';
 import Pagination from '@/components/ui/pagination';
 import type { Enrollment } from '@/types/enrollment';
 
-/**
- * Component to display a user's enrolled courses list,
- * with minimal, best-practice UX for filtering/searching in profile POV.
- */
 interface CoursesListProps {
   enrollments: Enrollment[];
   onCourseClick?: (enrollment: Enrollment) => void;
@@ -30,9 +26,6 @@ interface CoursesListProps {
 
 type FilterStatus = 'all' | 'ACTIVE' | 'COMPLETED' | 'DROPPED';
 
-/**
- * Returns the name of the instructor for search
- */
 // function getInstructorName(course: EnrollmentCourse) {
 //   if (course && typeof course.instructor === 'object') {
 //     if ('firstName' in course. && 'lastName' in course.instructor) {
@@ -59,7 +52,6 @@ export function CoursesList({
 
   const itemsPerPage = 12;
 
-  // [Best Practice] Extract unique course categories for filter
   const categories = useMemo(() => {
     const found = new Set<string>();
     enrollments.forEach(({ course }) => {
@@ -69,17 +61,12 @@ export function CoursesList({
     });
     return Array.from(found).sort();
   }, [enrollments]);
-
-  // [Best Practice] Only allow a single category filter at a time for simplicity
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // [Best Practice] Memoize filtering logic
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter((enrollment) => {
       const course = enrollment.course;
       if (typeof course !== 'object') return false;
 
-      // Text search: course title, instructor name, or category
       const q = searchQuery.trim().toLowerCase();
       let matchesSearch = true;
       if (q) {
@@ -89,24 +76,18 @@ export function CoursesList({
           course.category.toLowerCase().includes(q);
       }
 
-      // Status filter
       const matchesStatus = filterStatus === 'all' || enrollment.status === filterStatus;
-
-      // Category filter (only single or 'all')
       const matchesCategory = !selectedCategory || course.category === selectedCategory;
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
   }, [enrollments, searchQuery, filterStatus, selectedCategory]);
-
-  // [Best Practice] Keep to paging, not infinite scrolling, for clarity in profile
   const totalPages = Math.max(1, Math.ceil(filteredEnrollments.length / itemsPerPage));
   const paginatedEnrollments = filteredEnrollments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
@@ -128,8 +109,6 @@ export function CoursesList({
     setSelectedCategory(null);
     setCurrentPage(1);
   }, []);
-
-  // Query for active filter state
   const hasActiveFilters = !!searchQuery || filterStatus !== 'all' || !!selectedCategory;
 
   return (
