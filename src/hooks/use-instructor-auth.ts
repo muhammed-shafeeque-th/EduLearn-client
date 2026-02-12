@@ -1,8 +1,8 @@
 'use client';
 
-import { useAppSelector } from '@/store';
+import { useAppSelector, useAuthIsAuthenticated } from '@/states/client';
 import { useMemo } from 'react';
-import { selectIsAuthenticated, selectUser } from '@/store/slices/auth-slice';
+import { selectUser } from '@/states/client/slices/auth-slice';
 import { AuthUser } from '@/types/auth';
 
 /**
@@ -14,7 +14,7 @@ export function useInstructorAuth(): {
   user: AuthUser | null;
   isInstructor: boolean;
 } {
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isAuthenticated = useAuthIsAuthenticated();
   const user = useAppSelector(selectUser);
   const isInstructor = useMemo(() => user?.role === 'instructor', [user]);
   return { isAuthenticated, user, isInstructor };

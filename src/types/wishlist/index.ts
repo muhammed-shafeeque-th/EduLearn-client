@@ -1,4 +1,4 @@
-import { Course } from '../course';
+import { CourseInfo } from '../course';
 
 export interface Wishlist {
   id: string;
@@ -12,6 +12,6 @@ export interface Wishlist {
 export interface WishlistItem {
   id: string;
   courseId: string;
-  course: Course;
+  course: CourseInfo;
   addedAt: string;
 }

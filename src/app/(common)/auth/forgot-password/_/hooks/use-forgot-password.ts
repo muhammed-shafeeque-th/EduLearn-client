@@ -25,7 +25,7 @@ export const useForgotPassword = () => {
       });
     } catch (error) {
       toast.error({
-        title: 'Something went wrong',
+        title: 'Failed to send forgot link',
         description: getErrorMessage(error, 'Please try again later or contact support.'),
       });
     } finally {
