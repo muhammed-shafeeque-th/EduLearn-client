@@ -16,7 +16,11 @@ const SignupForm = dynamic(() => import('./_/components/signup-form'), {
 export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
+<<<<<<< HEAD
       {/* Hero Section - Hidden on mobile, visible on desktop */}
+=======
+      {/* Hero Section */}
+>>>>>>> cart
       <div className="hidden lg:flex lg:w-1/2 min-w-0">
         <SignupHero />
       </div>

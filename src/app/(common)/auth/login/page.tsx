@@ -1,16 +1,21 @@
 import { Metadata } from 'next';
-import { SigninForm } from './_/components/login-form';
+// import { SigninForm } from './_/components/login-form';
 import { SigninHero } from './_/components/signin-hero';
+import dynamic from 'next/dynamic';
+import { FormSkeleton } from './_/components/skeletons/form-skeleton';
+import { Suspense } from 'react';
+
+const SigninForm = dynamic(() => import('./_/components/login-form').then((mod) => mod.SigninForm));
 
 export const metadata: Metadata = {
-  title: 'Sign In - Edulearn',
-  description: 'Sign in to your Edulearn account to continue learning',
+  title: 'Sign In ',
+  description: 'Sign in to your EduLearn account to continue learning',
 };
 
 export default function SigninPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Hero Section - Hidden on mobile, visible on desktop */}
+      {/* Hero Section  */}
       <div className="hidden lg:flex lg:w-1/2">
         <SigninHero />
       </div>
@@ -24,7 +29,9 @@ export default function SigninPage() {
             </h1>
             <p className="text-muted-foreground">Welcome back! Please enter your details</p>
           </div>
-          <SigninForm />
+          <Suspense fallback={<FormSkeleton />}>
+            <SigninForm />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -1,50 +1,63 @@
-import { BaseService } from './base-api/base.service';
+import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
 import { config } from '@/lib/config';
-import { AuthResponse } from '@/types/auth';
 import { ApiResponse } from '@/types/api-response';
-import { authRefreshToken, getClientAuthToken } from '@/lib/utils/auth-client-apis';
-import { CartItem } from '@/types/user';
-import { Cart } from '@/types/cart';
+import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
+import { Cart, CartItem } from '@/types/cart';
 
 export interface ICartService {
-  getUserCart(userId: string): Promise<ApiResponse<{ cart: Cart; total: number }>>;
-  getCurrentUserCart(): Promise<ApiResponse<{ cart: Cart; total: number }>>;
-  addToCart(cartId: string, courseId: string): Promise<ApiResponse<CartItem>>;
-  toggleCartItem(cartId: string, courseId: string): Promise<ApiResponse<CartItem>>;
-  removeFromCart(cartId: string, courseId: string): Promise<ApiResponse<void>>;
+  getUserCart(userId: string, options?: RequestOptions): Promise<ApiResponse<Cart>>;
+  getCurrentUserCart(options?: RequestOptions): Promise<ApiResponse<Cart>>;
+  clearCart(options?: RequestOptions): Promise<ApiResponse<void>>;
+  addToCart(courseId: string, options?: RequestOptions): Promise<ApiResponse<CartItem>>;
+  toggleCartItem(courseId: string, options?: RequestOptions): Promise<ApiResponse<CartItem>>;
+  removeFromCart(courseId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
 }
 
 export class CartService extends BaseService implements ICartService {
-  constructor(
-    tokenGetter: () => string | null = getClientAuthToken,
-    refresh: () => Promise<AuthResponse> = authRefreshToken
-  ) {
+  constructor({
+    getToken = getClientAuthToken,
+    authRefresh = authRefreshToken,
+    ...options
+  }: BaseServiceOptions = {}) {
     super(`${config.apiUrl}/carts`, {
-      getToken: tokenGetter,
-      authRefresh: refresh,
+      ...options,
+      getToken,
+      authRefresh,
     });
   }
 
-  public async getCurrentUserCart(): Promise<ApiResponse<{ cart: Cart; total: number }>> {
-    return this.get<ApiResponse<{ cart: Cart; total: number }>>(`/me`);
+  public async getCurrentUserCart(options?: RequestOptions): Promise<ApiResponse<Cart>> {
+    return this.get<ApiResponse<Cart>>(`/me`, options);
   }
-  public async getUserCart(userId: string): Promise<ApiResponse<{ cart: Cart; total: number }>> {
-    return this.get<ApiResponse<{ cart: Cart; total: number }>>(`/${userId}`);
+  public async clearCart(options?: RequestOptions): Promise<ApiResponse<void>> {
+    return this.delete<ApiResponse<void>>(`/me`, options);
+  }
+  public async getUserCart(userId: string, options?: RequestOptions): Promise<ApiResponse<Cart>> {
+    return this.get<ApiResponse<Cart>>(`/${userId}`, options);
   }
 
-  public async addToCart(cartId: string, courseId: string): Promise<ApiResponse<CartItem>> {
-    return this.post<ApiResponse<CartItem>>('/me', { cartId, courseId });
+  public async addToCart(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CartItem>> {
+    return this.post<ApiResponse<CartItem>>('/me', { courseId }, options);
   }
-  public async toggleCartItem(cartId: string, courseId: string): Promise<ApiResponse<CartItem>> {
-    return this.post<ApiResponse<CartItem>>('/me', { cartId, courseId });
+  public async toggleCartItem(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CartItem>> {
+    return this.post<ApiResponse<CartItem>>('/me', { courseId }, options);
   }
-  public async removeFromCart(cartId: string, courseId: string): Promise<ApiResponse<void>> {
-    return this.post<ApiResponse<void>>(`/${cartId}/${courseId}`);
+  public async removeFromCart(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<void>> {
+    return this.delete<ApiResponse<void>>(`?courseId=${courseId}`, options);
   }
 
   // Static factory for SSR usage (pass a token getter or headers)
-  static forSSR(token: string | null) {
-    return new CartService(() => token);
+  static create(serviceOptions: BaseServiceOptions) {
+    return new CartService(serviceOptions);
   }
 }
 

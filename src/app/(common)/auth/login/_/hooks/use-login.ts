@@ -1,51 +1,60 @@
-import { useAppDispatch, useAppSelector } from '@/store';
-import { clearError as handleClearError, login } from '@/store/slices/auth-slice';
+import { useCallback, useEffect } from 'react';
+import { useAppDispatch, useAuthIsAuthenticated, useAuthSelector } from '@/states/client';
+import { clearError as clearAuthError, login } from '@/states/client/slices/auth-slice';
 import { SigninFormData } from '../schemas';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { LoginCredentials } from '@/types/auth/login-data.type';
-import { AuthType } from '@/types/user/user.type';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { LoginCredentials } from '@/types/auth';
+import { AuthType } from '@/types/auth';
+import { getErrorMessage } from '@/lib/utils';
 
 export const useLogin = () => {
-  const { common, toast } = useToast();
+  const { common } = useToast();
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const { error, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { error, isLoading } = useAuthSelector();
+  const isAuthenticated = useAuthIsAuthenticated();
 
-  const onSubmit = async (credentials: SigninFormData) => {
-    const loginCredentials: LoginCredentials = {
-      ...credentials,
-      authType: AuthType.EMAIL,
-    };
+  const redirectOnAuthenticated = useCallback(() => {
+    const next = searchParams.get('next');
+    const redirectPath = next && next.startsWith('/') ? next : '/';
+    router.replace(redirectPath);
+  }, [router, searchParams]);
 
-    try {
-      // Simulate API call
-
-      const result = await dispatch(login(loginCredentials));
-      if (result.meta.requestStatus === 'rejected') {
-        toast.error({ title: 'Login failed', description: result.payload as string });
-        return;
-      }
-
-      common.loginSuccess();
-      // 'Welcome back!', {
-      //   description: 'You have successfully signed in to your account.',
-      //   duration: 4000,
-      // });
-
-      // Redirect to HomePage
-
-      router.push(`/`);
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error({ title: error.message });
-        return;
-      }
-      common.loginError('Please check your email and password and try again.');
+  useEffect(() => {
+    if (isAuthenticated) {
+      redirectOnAuthenticated();
     }
-  };
+  }, [isAuthenticated, redirectOnAuthenticated]);
 
-  const clearError = () => dispatch(handleClearError());
+  const onSubmit = useCallback(
+    async (credentials: SigninFormData) => {
+      const loginCredentials: LoginCredentials = {
+        ...credentials,
+        authType: AuthType.EMAIL,
+      };
+
+      try {
+        // The unwrap() call will throw if rejected
+        await dispatch(login(loginCredentials)).unwrap();
+        common.loginSuccess();
+        redirectOnAuthenticated();
+      } catch (error) {
+        const message = getErrorMessage(
+          error,
+          'Please check your email and password and try again.'
+        );
+
+        common.loginError(message);
+      }
+    },
+    [dispatch, common, redirectOnAuthenticated]
+  );
+
+  const clearError = useCallback(() => {
+    dispatch(clearAuthError());
+  }, [dispatch]);
 
   return { error, isAuthenticated, isLoading, onSubmit, clearError };
 };

@@ -1,9 +1,8 @@
 import React, { Suspense } from 'react';
 import { Metadata } from 'next';
-import Loading from './loading';
-// import { getServerSession } from 'next-auth';
-// import { authOptions } from '@/app/api/auth/[...nextauth]/_nextAuth';
-// import { redirect } from 'next/navigation';
+import LoadingScreen from '@/components/ui/loading-screen';
+import { requireAuth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Authentication ',
@@ -11,19 +10,23 @@ export const metadata: Metadata = {
 };
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  // const session = await getServerSession(authOptions);
-  // const cookies =
-  // console.log(JSON.stringify(session, null, 2));
+  await requireAuth({
+    condition: (user) => !!user?.id,
+    onUnauthorized: () => {
+      redirect('/');
+    },
+    redirectOnException: false,
+    // If user not authenticated return null do nothing
+    returnNullInsteadOfRedirect: true,
+  });
 
-  // if (session?.user) {
-  //   // User is logged in, redirect to home or dashboard
-  //   redirect('/');
-  // }
   return (
-    // <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-    //   <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
-    <Suspense fallback={<Loading />}>{children}</Suspense>
-    //   </div>
-    // </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8"> */}
+      <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
+      {/* </div> */}
+    </div>
   );
 }
+
+export const dynamic = 'force-dynamic';

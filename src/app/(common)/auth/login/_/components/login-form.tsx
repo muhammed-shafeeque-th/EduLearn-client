@@ -14,8 +14,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { signinSchema, type SigninFormData } from '../schemas';
 import SocialSignin from '@/components/shared/social-signin';
-import { FormSkeleton } from './skeletons/form-skeleton';
+// import { FormSkeleton } from './skeletons/form-skeleton';
 import { useLogin } from '../hooks/use-login';
+import AnimatedSpinner from '@/components/shared/animated-spinner';
 
 export function SigninForm() {
   const { isLoading, onSubmit } = useLogin();
@@ -25,18 +26,21 @@ export function SigninForm() {
     register,
     handleSubmit,
     formState: { errors, isValid },
-    setValue,
     watch,
+    setValue,
   } = useForm<SigninFormData>({
     resolver: zodResolver(signinSchema),
     mode: 'onChange',
+    defaultValues: {
+      rememberMe: false,
+    },
   });
 
   const rememberMe = watch('rememberMe');
 
-  if (isLoading) {
-    return <FormSkeleton />;
-  }
+  // if (isLoading) {
+  //   return <FormSkeleton />;
+  // }
 
   return (
     <motion.div
@@ -94,6 +98,7 @@ export function SigninForm() {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="rememberMe"
+              className="bg-accent"
               checked={rememberMe}
               onCheckedChange={(checked) => setValue('rememberMe', !!checked)}
             />
@@ -116,8 +121,16 @@ export function SigninForm() {
           size="lg"
           disabled={!isValid || isLoading}
         >
-          Sign In
-          <ArrowRight className="ml-2 h-4 w-4" />
+          {isLoading ? (
+            <>
+              <AnimatedSpinner isLoading={isLoading} /> Loading...
+            </>
+          ) : (
+            <>
+              Sign In
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </>
+          )}
         </Button>
       </form>
 
@@ -138,7 +151,7 @@ export function SigninForm() {
       {/* Signup Link */}
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/register" className="font-medium text-primary hover:underline">
             Sign up for free
           </Link>
