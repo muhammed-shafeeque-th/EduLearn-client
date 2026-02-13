@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
-  // Menu,
   X,
   BookOpen,
   BarChart3,
@@ -60,8 +59,6 @@ export function EnrollmentLearningClient({
 }: EnrollmentLearningClientProps) {
   const router = useRouter();
 
-  // STATE & HOOKS
-
   const {
     progress,
     isLoading,
@@ -82,15 +79,12 @@ export function EnrollmentLearningClient({
 
   const completedToastRef = useRef<string | null>(null);
 
-  // ORGANIZE COURSE ITEMS BY SECTION: Keep lessons and quiz contiguous for each section
   const courseItems = useMemo<CourseItem[]>(() => {
-    // Defensive copy and sort sections by their order
     const sortedSections = [...initialEnrollment.sections].sort((a, b) => a.order - b.order);
 
     const items: CourseItem[] = [];
 
     sortedSections.forEach((section) => {
-      // Sort lessons within section by their order
       const sortedLessons = [...section.lessons].sort((a, b) => a.order - b.order);
 
       sortedLessons.forEach((lesson) => {
@@ -121,8 +115,6 @@ export function EnrollmentLearningClient({
     return items;
   }, [initialEnrollment]);
 
-  // DETERMINE CURRENT ITEM
-
   const currentItem = useMemo(() => {
     if (currentItemId) {
       const found = courseItems.find((item) => item.id === currentItemId);
@@ -137,7 +129,6 @@ export function EnrollmentLearningClient({
     return courseItems[0] || null;
   }, [currentItemId, courseItems, progress, isItemCompleted]);
 
-  // Set initial current item when progress loads
   useEffect(() => {
     if (!currentItemId && currentItem) {
       setCurrentItemId(currentItem.id);
@@ -145,34 +136,24 @@ export function EnrollmentLearningClient({
     }
   }, [currentItem, currentItemId]);
 
-  // ITEM LOCK LOGIC
-
   const isItemLocked = useCallback(
     (item: CourseItem): boolean => {
       if (!progress) return true;
       const itemIndex = courseItems.findIndex((i) => i.id === item.id);
 
-      // First item is never locked
       if (itemIndex === 0) return false;
 
-      // Check if previous item is completed
       const previousItem = courseItems[itemIndex - 1];
       return !isItemCompleted(previousItem.id, previousItem.type);
     },
     [courseItems, progress, isItemCompleted]
   );
 
-  const handleItemHover = useCallback(() => {
-    // if (item.type === 'lesson') {
-    //   prefetchVideoUrl(item.id);
-    // }
-  }, []);
+  const handleItemHover = useCallback(() => {}, []);
 
-  // Handle Chat With Instructor
   const handleChatWithInstructor = useCallback(async () => {
     setIsCreatingChat(true);
     try {
-      // If your API expects enrollmentId to be included for context
       router.push(`/profile/my-chats?enrollmentId=${enrollmentId}`);
     } catch (err) {
       toast.error({
@@ -184,11 +165,8 @@ export function EnrollmentLearningClient({
     }
   }, [enrollmentId, router]);
 
-  // NAVIGATION HANDLERS
-
   const handleItemClick = useCallback(
     (item: CourseItem, bypassLock = false) => {
-      // If we are bypassing (e.g., auto-advance), skip the lock check
       if (!bypassLock && isItemLocked(item)) {
         toast.error({ title: 'Complete the previous item first to unlock this one' });
         return;
@@ -197,7 +175,6 @@ export function EnrollmentLearningClient({
       setShowQuizMode(item.type === 'quiz');
       setIsSidebarOpen(false);
 
-      // Update URL for next/navigation best practice
       router.push(`/learn/${enrollmentId}?itemId=${item.id}&itemType=${item.type}`, {
         scroll: false,
       });
@@ -208,17 +185,13 @@ export function EnrollmentLearningClient({
   const handleVideoEnd = useCallback(async () => {
     if (!currentItem) return;
 
-    // ensure toast only once per item
     if (completedToastRef.current === currentItem?.id) return;
     completedToastRef.current = currentItem?.id;
 
     toast.success({ title: 'Lesson completed 🎉' });
 
-    // Trigger a background refetch to ensure Sidebar icons update visually
-    // We don't necessarily have to await this for navigation, but it helps consistency
     refetchProgress();
 
-    // Find next item
     const currentIndex = courseItems.findIndex((i) => i.id === currentItem?.id);
     const nextItem = courseItems[currentIndex + 1];
 
@@ -227,13 +200,11 @@ export function EnrollmentLearningClient({
       return;
     }
 
-    // Start prefetching the next video immediately!
     if (nextItem.type === 'lesson') {
       console.log('Prefetching next lesson:', nextItem.title);
       prefetchVideoUrl(nextItem.id);
     }
 
-    // Auto-navigate to next item
     setTimeout(() => {
       handleItemClick(nextItem, true);
     }, 1500);
@@ -248,7 +219,6 @@ export function EnrollmentLearningClient({
       try {
         const result = await submitQuizAttempt(quizId, { answers, timeSpent });
 
-        // Vital: Update local data immediately so Sidebar shows score
         await refetchProgress();
 
         if (result.passed) {
@@ -257,13 +227,12 @@ export function EnrollmentLearningClient({
           });
 
           setShowQuizMode(false);
-          // Find next item
+
           const currentIndex = courseItems.findIndex((i) => i.id === quizId);
           const nextItem = courseItems[currentIndex + 1];
 
           if (nextItem) {
             setTimeout(() => {
-              // TRUE = Bypass lock check
               handleItemClick(nextItem, true);
             }, 1500);
           }
@@ -271,7 +240,6 @@ export function EnrollmentLearningClient({
           toast.error({ title: `Quiz not passed. Score: ${result.score}%. You can try again.` });
         }
 
-        // Show milestone if achieved
         if (result.milestone) {
           setTimeout(() => {
             toast.success({ title: `🏆 ${result.milestone?.type.replace('_', ' ')}` });
@@ -287,8 +255,6 @@ export function EnrollmentLearningClient({
     },
     [submitQuizAttempt, courseItems, handleItemClick, refetchProgress]
   );
-
-  // LOADING STATE
 
   if (isLoading || isLoadingProgress || !progress || !currentItem) {
     return (
