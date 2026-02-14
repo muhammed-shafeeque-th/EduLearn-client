@@ -22,7 +22,6 @@ import { calculateTotalDuration, formatDuration } from '../utils/curriculum-util
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
-// Types for internal preview computation
 interface CourseStats {
   totalDuration: number;
   totalLessons: number;
@@ -55,7 +54,6 @@ interface SubmitTabProps {
   };
 }
 
-// Utility: Compute course preview and stats from form data
 function computeCoursePreview(
   basicForm: UseFormReturn<BasicInfoFormData>,
   advancedForm: UseFormReturn<AdvancedInfoFormData>,
@@ -65,7 +63,6 @@ function computeCoursePreview(
   const advancedData = advancedForm.getValues();
   const curriculumData = curriculumForm.getValues();
 
-  // Defensive: curriculumData.sections might be undefined
   const sections: Section[] = curriculumData.sections || [];
   const totalDuration = calculateTotalDuration(sections);
 
@@ -96,8 +93,6 @@ function computeCoursePreview(
   } as CoursePreview;
 }
 
-// ---
-
 export const SubmitTab = React.memo(
   ({
     basicForm,
@@ -109,7 +104,6 @@ export const SubmitTab = React.memo(
     isLoading,
     validationState,
   }: SubmitTabProps) => {
-    // State for pricing
     const [pricing, setPricing] = useState<{
       price: number | undefined;
       discountPrice: number | undefined;
@@ -120,14 +114,12 @@ export const SubmitTab = React.memo(
       currency: basicForm.watch('currency') || 'INR',
     });
 
-    // State to track form validation results for all tabs
     const [validationResults, setValidationResults] = useState<{
       basic: boolean;
       advanced: boolean;
       curriculum: boolean;
     }>({ basic: false, advanced: false, curriculum: false });
 
-    // Effect: Automatically validate the forms as their refs change
     useEffect(() => {
       let isMounted = true;
 
@@ -154,7 +146,6 @@ export const SubmitTab = React.memo(
       };
     }, [basicForm, advancedForm, curriculumForm]);
 
-    // Memo: Compute course preview from current form states
     const coursePreview = useMemo(() => {
       if (validationResults.basic && validationResults.advanced && validationResults.curriculum) {
         return computeCoursePreview(basicForm, advancedForm, curriculumForm);
@@ -167,10 +158,8 @@ export const SubmitTab = React.memo(
       basicForm,
       advancedForm,
       curriculumForm,
-      // BasicInfoFormData, AdvancedInfoFormData, CurriculumFormData could change (deeply) but form refs are stable
     ]);
 
-    // Form error helpers
     const {
       setValue,
       formState: { errors },
@@ -180,7 +169,6 @@ export const SubmitTab = React.memo(
 
     const basicData = watch();
 
-    // Handle controlled numeric inputs, with number/undefined conversion
     const handleFieldUpdate = useCallback(
       async (field: keyof BasicInfoFormData, value: number | undefined) => {
         setValue(field, value);
@@ -188,20 +176,17 @@ export const SubmitTab = React.memo(
           ...prev,
           [field]: value,
         }));
-        await trigger(field); // Trigger field validation
+        await trigger(field);
       },
       [setValue, trigger]
     );
 
-    // Validation: Ready for Submit?
     const allValid =
       validationResults.basic && validationResults.advanced && validationResults.curriculum;
 
-    // Error messages
     const priceError = errors.price?.message as string | undefined;
     const discountPriceError = errors.discountPrice?.message as string | undefined;
 
-    // Checklist items for UI
     const validationItems = useMemo(
       () => [
         {
@@ -223,7 +208,6 @@ export const SubmitTab = React.memo(
       [validationState]
     );
 
-    // Discount computation
     const discountPercent =
       basicData.price && basicData.discountPrice && basicData.price > 0
         ? Math.round(
@@ -233,7 +217,6 @@ export const SubmitTab = React.memo(
           )
         : undefined;
 
-    // Button handlers
     const handlePreviewClick = useCallback(() => {
       if (typeof window !== 'undefined') {
         import('@/hooks/use-toast').then(({ toast }) => {
@@ -252,8 +235,6 @@ export const SubmitTab = React.memo(
         onFormSubmit();
       }
     }, [isSubmitRetryable, retrySubmit, onFormSubmit]);
-
-    // ---
 
     return (
       <div className="max-w-6xl mx-auto">
