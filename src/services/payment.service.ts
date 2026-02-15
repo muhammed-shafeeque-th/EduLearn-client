@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-api/base.service';
+import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
 import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
@@ -85,30 +85,36 @@ type PaymentResponse = {
 //         status?: string | undefined;
 //         transactionId?: string | undefined;
 //       };
-//   azorpayVerifyPayload
+//   azorpayResolvePayload
 
-export interface RazorpayVerifyPayload {
+export interface RazorpayResolvePayload {
   razorpayPaymentId: string;
   razorpayOrderId: string;
   razorpaySignature: string;
 }
-export interface StripeVerifyPayload {
+export interface StripeResolvePayload {
   sessionId: string;
 }
-export interface PaypalVerifyPayload {
+export interface PaypalResolvePayload {
   orderId: string;
 }
 
-interface VerifyPaymentPayload {
+interface ResolvePaymentPayload {
   provider: PaymentProvider;
-  stripeVerify?: StripeVerifyPayload;
-  razorpayVerify?: RazorpayVerifyPayload;
-  paypalVerify?: PaypalVerifyPayload;
+  stripe?: StripeResolvePayload;
+  razorpay?: RazorpayResolvePayload;
+  paypal?: PaypalResolvePayload;
+}
+export interface ResolvePaymentResponse {
+  isResolved: boolean;
+  paymentId: string;
+  orderId: string;
+  provider: PaymentProvider;
 }
 
 export type PaymentProvider = 'stripe' | 'razorpay' | 'paypal';
 
-// interface VerifyPaymentPayload {
+// interface ResolvePaymentPayload {
 //   provider: PaymentProvider;
 //   paymentId: string;
 //   providerSessionId: string;
@@ -125,7 +131,10 @@ export interface IPaymentService {
     payload: CreatePaymentPayload,
     options?: RequestOptions
   ): Promise<ApiResponse<PaymentResponse>>;
-  verifyPayment(payload: VerifyPaymentPayload, options?: RequestOptions): Promise<ApiResponse<any>>;
+  resolvePayment(
+    payload: ResolvePaymentPayload,
+    options?: RequestOptions
+  ): Promise<ApiResponse<ResolvePaymentResponse>>;
   cancelPayment(payload: CancelPaymentPayload, options?: RequestOptions): Promise<ApiResponse<any>>;
   getPayment(paymentId: string, options?: RequestOptions): Promise<ApiResponse<any>>;
 }
@@ -157,21 +166,21 @@ export class PaymentService extends BaseService implements IPaymentService {
     return this.patch<ApiResponse<any>>(`/${payload.provider}/cancel`, payload, options);
   }
 
-  public async verifyPayment(
-    payload: VerifyPaymentPayload,
+  public async resolvePayment(
+    payload: ResolvePaymentPayload,
     options?: RequestOptions
-  ): Promise<ApiResponse<any>> {
-    return this.patch<ApiResponse<any>>(`/${payload.provider}/verify`, payload, options);
+  ): Promise<ApiResponse<ResolvePaymentResponse>> {
+    return this.patch<ApiResponse<any>>(`/${payload.provider}/resolve`, payload, options);
   }
   public async getPayment(paymentId: string, options?: RequestOptions): Promise<ApiResponse<any>> {
     return this.get<ApiResponse<any>>(`/${paymentId}`, options);
   }
 
   // Static factory for SSR usage (pass a token getter or headers)
-  static forSSR(serviceOptions: BaseServiceOptions) {
+  static create(serviceOptions: BaseServiceOptions = {}) {
     return new PaymentService(serviceOptions);
   }
 }
 
 // Singleton for client-side usage
-export const paymentService: IPaymentService = new PaymentService({});
+export const paymentService: IPaymentService = new PaymentService();
