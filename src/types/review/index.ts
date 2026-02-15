@@ -1,13 +1,17 @@
 import { Course } from '../course';
-import { User } from '../user';
-
 export interface Review {
   id: string;
   courseId: string;
+  enrollmentId: string;
   course: Course;
   userId: string;
-  user: User;
+  user?: {
+    name: string;
+    avatar: string;
+    id: string;
+  };
   rating: number;
   comment: string;
   createdAt: string;
+  updatedAt: string;
 }
