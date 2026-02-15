@@ -22,7 +22,7 @@ export function Logo({ className, animated = true, size = 'xl' }: LogoProps) {
       viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn(sizes[size], animated && 'animate-pulse', className)} 
+      className={cn(sizes[size], animated && 'animate-pulse', className)}
     >
       {/* Outer Circle */}
       <circle
