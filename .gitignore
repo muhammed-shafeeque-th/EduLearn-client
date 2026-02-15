@@ -10,6 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
+
+**/__*/**
+_*/**
+**/**/_*.ts*
+
 # testing
 /coverage
 
