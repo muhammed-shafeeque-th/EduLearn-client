@@ -1,26 +1,538 @@
+/* ==========================================================================
+   GLOBAL STYLESHEET - REFACTORED
+   ========================================================================== */
+
+/* 1. Imports & Plugins */
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@plugin 'tailwindcss-animate';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* 2. Utility: Custom Dark Variant */
+@custom-variant dark (&:is(.dark *));
 
+/* 3. Theme Variables: Inline (for Tailwind 'theme()' access) */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-ring: var(--ring);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Semantic colors */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Card/Popover */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 }
 
-@media (prefers-color-scheme: dark) {
+/* 4. Base Variables (Light) */
+:root {
+  /* Layouts & Surfaces */
+  --background: oklch(0.97 0.01 260);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* Primary Palette */
+  --primary: oklch(0.5 0.2377 280.09);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-light: oklch(0.7 0.2377 280.09);
+  --primary-dark: oklch(0.3 0.2377 280.09);
+  --primary-hover: oklch(0.6 0.2377 280.09);
+  --primary-active: oklch(0.4 0.2377 280.09);
+
+  --secondary: oklch(0.65 0.1 280);
+  --secondary-foreground: oklch(0.99 0 0);
+  --accent: oklch(0.75 0.16 85);
+  --accent-foreground: oklch(0.18 0.01 280);
+  --muted: oklch(0.95 0.02 280);
+  --muted-foreground: oklch(0.45 0.02 280);
+  --tertiary: oklch(0.85 0.16 150);
+  --destructive: oklch(0.62 0.19 27);
+  /* --destructive-foreground: oklch(0.18 0.01 280); */
+  --border: oklch(0.89 0.01 280);
+  --input: oklch(0.97 0.01 280);
+  --ring: oklch(0.68 0.05 280);
+
+  --chart-1: oklch(0.65 0.22 41.116);
+  --chart-2: oklch(0.6 0.12 184.704);
+  --chart-3: oklch(0.4 0.07 227.392);
+  --chart-4: oklch(0.83 0.19 84.429);
+  --chart-5: oklch(0.77 0.19 70.08);
+
+  --radius: 0.625rem;
+
+  /* Sidebar colors */
+  --sidebar: oklch(0.97 0.01 280);
+  --sidebar-foreground: oklch(0.18 0.01 280);
+  --sidebar-primary: oklch(0.32 0.18 280);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.88 0.13 260);
+  --sidebar-accent-foreground: oklch(0.18 0.01 280);
+  --sidebar-border: oklch(0.89 0.01 280);
+  --sidebar-ring: oklch(0.68 0.05 280);
+}
+
+/* 5. Base Variables (Dark) */
+.dark {
+  --background: oklch(0.12 0.02 280);
+  --foreground: oklch(0.96 0.01 280);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.5 0.2377 280.09);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.72 0.02 280);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+
+  /* Typography - dark */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-loose: 1.75;
+
+  --text-primary: oklch(0.145 0 0);
+  --text-secondary: oklch(0.4 0 0);
+  --text-muted: oklch(0.6 0 0);
+  --text-inverse: oklch(1 0 0);
+}
+
+/* 6. Base Layer: Sidebar Colors + Element applies */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 7. Typography & Font Settings */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+/* 8. Search Input appearance reset */
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+/* 9. Animations and Utility Classes */
+
+/* Keyframes - grouped and deduplicated */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Animation Classes */
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.animate-loading-bar {
+  animation: loading-bar 2s ease-in-out infinite;
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Skeleton shimmer */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::after {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 2s infinite;
+  content: '';
+}
+
+/* 10. Sonner Toast Styles - Grouped & Commented */
+[data-sonner-toaster] {
+  --normal-bg: white;
+  --normal-border: rgb(229, 231, 235);
+  --normal-text: rgb(31, 41, 55);
+
+  --success-bg: rgb(240, 253, 244);
+  --success-border: rgb(34, 197, 94);
+  --success-text: rgb(21, 128, 61);
+
+  --error-bg: rgb(254, 242, 242);
+  --error-border: rgb(239, 68, 68);
+  --error-text: rgb(153, 27, 27);
+
+  --warning-bg: rgb(255, 251, 235);
+  --warning-border: rgb(245, 158, 11);
+  --warning-text: rgb(146, 64, 14);
+
+  --info-bg: rgb(239, 246, 255);
+  --info-border: rgb(59, 130, 246);
+  --info-text: rgb(30, 64, 175);
+}
+
+[data-sonner-toaster][data-theme='dark'] {
+  --normal-bg: rgb(31, 41, 55);
+  --normal-border: rgb(75, 85, 99);
+  --normal-text: rgb(243, 244, 246);
+
+  --success-bg: rgb(6, 78, 59);
+  --success-border: rgb(34, 197, 94);
+  --success-text: rgb(167, 243, 208);
+
+  --error-bg: rgb(127, 29, 29);
+  --error-border: rgb(239, 68, 68);
+  --error-text: rgb(254, 202, 202);
+
+  --warning-bg: rgb(120, 53, 15);
+  --warning-border: rgb(245, 158, 11);
+  --warning-text: rgb(253, 230, 138);
+
+  --info-bg: rgb(30, 58, 138);
+  --info-border: rgb(59, 130, 246);
+  --info-text: rgb(191, 219, 254);
+}
+
+[data-sonner-toast] {
+  background-color: var(--normal-bg);
+  border: 1px solid var(--normal-border);
+  color: var(--normal-text);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+[data-sonner-toast]:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Sonner toast - type variations */
+[data-sonner-toast].success-toast {
+  background-color: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+[data-sonner-toast].error-toast {
+  background-color: var(--error-bg);
+  border-color: var(--error-border);
+  color: var(--error-text);
+}
+[data-sonner-toast].warning-toast {
+  background-color: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}
+[data-sonner-toast].info-toast,
+[data-sonner-toast].loading-toast {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-text);
+}
+
+/* Toast content */
+[data-sonner-toast] [data-title] {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+}
+[data-sonner-toast] [data-description] {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* Action and close buttons */
+[data-sonner-toast] [data-button] {
+  background-color: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+[data-sonner-toast] [data-button]:hover {
+  background-color: currentColor;
+  color: var(--normal-bg);
+}
+[data-sonner-toast] [data-close-button] {
+  border-radius: 4px;
+  padding: 4px;
+  transition: all 0.15s ease;
+}
+[data-sonner-toast] [data-close-button]:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+[data-sonner-toaster][data-theme='dark'] [data-sonner-toast] [data-close-button]:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Toast Animations */
+[data-sonner-toast][data-mounted='true'] {
+  animation: slideIn 0.2s ease-out;
+}
+[data-sonner-toast][data-removed='true'] {
+  animation: slideOut 0.15s ease-in forwards;
+}
+
+/* 11. Tailwind Layer Adjustments */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+}
+
+/* 12. Component Layer: Animations, Scrollbar, Plyr, Others */
+@layer components {
+  /* Animate Pulse */
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+
+  /* Plyr component customizations */
+  .plyr {
+    @apply rounded-lg overflow-hidden;
+  }
+  .plyr__control--overlaid {
+    @apply bg-orange-600 hover:bg-orange-700;
+  }
+  .plyr__progress__played {
+    @apply bg-orange-600;
+  }
+  .plyr__control:hover {
+    @apply bg-orange-600;
+  }
+
+  /* Fade and Slide Animations */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
 }
