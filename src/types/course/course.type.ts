@@ -61,7 +61,7 @@ export interface CourseMeta {
   requirements: string[];
   thumbnail: string;
   trailer: string;
-  status: string;
+  status: CourseStatus;
   slug: string;
   rating: number;
   numberOfRating: number;
