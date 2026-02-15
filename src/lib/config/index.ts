@@ -9,6 +9,10 @@ export const config = {
   nextAuthSecret: process.env.NEXTAUTH_SECRET,
   facebookClientId: process.env.FACEBOOK_CLIENT_ID,
   facebookClientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-  adminJwtSecret: process.env.AUTH_ADMIN_JWT_SECRET,
+  adminJwtSecret: process.env.JWT_ADMIN_SECRET,
+  jwtSecret: process.env.JWT_SECRET,
+  notificationWsUrl: process.env.NEXT_PUBLIC_NOTIFICATION_WS_URL || 'ws://localhost:4001',
+  chatWsUrl: process.env.NEXT_PUBLIC_CHAT_WS_URL || 'ws://localhost:4009',
   adminJwtExpiry: process.env.ADMIN_JWT_TOKEN_EXPIRY,
+  stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 } as const;
