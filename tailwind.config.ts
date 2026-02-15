@@ -16,14 +16,55 @@ const config: Config = {
       },
     },
     extend: {
+      keyframes: {
+        'caret-blink': {
+          '0%,70%,100%': { opacity: '1' },
+          '20%,50%': { opacity: '0' },
+        },
+      },
+
+      fontSize: {
+        xs: 'var(--text-xs)',
+        sm: 'var(--text-sm)',
+        base: 'var(--text-base)',
+        lg: 'var(--text-lg)',
+        xl: 'var(--text-xl)',
+        '2xl': 'var(--text-2xl)',
+        '3xl': 'var(--text-3xl)',
+        '4xl': 'var(--text-4xl)',
+        '5xl': 'var(--text-5xl)',
+      },
+      fontWeight: {
+        light: 'var(--font-weight-light)',
+        normal: 'var(--font-weight-normal)',
+        medium: 'var(--font-weight-medium)',
+        bold: 'var(--font-weight-bold)',
+      },
+      lineHeight: {
+        tight: 'var(--line-height-tight)',
+        normal: 'var(--line-height-normal)',
+        loose: 'var(--line-height-loose)',
+      },
+      animation: {
+        'caret-blink': 'caret-blink 1.25s ease-out infinite',
+      },
       colors: {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
+          inverse: 'var(--text-inverse)',
+        },
         primary: {
           DEFAULT: 'var(--primary)',
+          light: 'var(--primary-light)',
+          dark: 'var(--primary-dark)',
+          active: 'var(--primary-active)',
           foreground: 'var(--primary-foreground)',
           hover: 'var(--primary-hover)',
         },
