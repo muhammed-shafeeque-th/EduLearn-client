@@ -1,13 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { unknown } from 'zod';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-/**
- * cn - Utility to merge Tailwind and conditional class names.
- * Uses clsx for conditional logic and tailwind-merge for deduplication.
- * @param inputs - List of class values
- * @returns A single merged className string
- */
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
@@ -28,16 +22,12 @@ export function getErrorMessage(error: unknown, fallbackMessage = 'Something wen
 export function isEqual(a: any, b: any): boolean {
   if (a === b) return true;
 
-  // Handle NaN
   if (Number.isNaN(a) && Number.isNaN(b)) return true;
 
-  // Null / undefined
   if (a == null || b == null) return a === b;
 
-  // Different types
   if (typeof a !== typeof b) return false;
 
-  // Arrays
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
@@ -46,7 +36,6 @@ export function isEqual(a: any, b: any): boolean {
     return true;
   }
 
-  // Objects
   if (typeof a === 'object' && typeof b === 'object') {
     const aKeys = Object.keys(a);
     const bKeys = Object.keys(b);
@@ -59,12 +48,10 @@ export function isEqual(a: any, b: any): boolean {
     return true;
   }
 
-  // Functions → compare reference
   if (typeof a === 'function' && typeof b === 'function') {
     return a === b;
   }
 
-  // Fallback
   return a === b;
 }
 
@@ -124,19 +111,7 @@ export function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-export function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return 'Just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-
-  return date.toLocaleDateString();
-}
-
-export function generateConversationId(user1Id: string, user2Id: string): string {
+export function generateChatId(user1Id: string, user2Id: string): string {
   return [user1Id, user2Id].sort().join('-');
 }
 
@@ -219,12 +194,41 @@ function luhnCheck(num: string): boolean {
 }
 
 export function reviveDates(key: string, value: string) {
-  // Use a regular expression to test if the value is an ISO 8601 date string
   const isoDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
   if (typeof value === 'string' && isoDateFormat.test(value)) {
     return new Date(value);
   }
   return value;
+}
+
+/**
+ * Decodes the payload of a JWT token using best practices.
+ *
+ * @param token - The full JWT string (header.payload.signature)
+ * @returns The decoded payload as object, or null if invalid/undecodable
+ */
+export function decodeJwt<T = any>(token: string): T | null {
+  if (typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  let payload = parts[1];
+
+  // Convert base64url to base64
+  payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = 4 - (payload.length % 4);
+  if (pad !== 4) {
+    payload += '='.repeat(pad);
+  }
+
+  try {
+    const decoded =
+      typeof window !== 'undefined'
+        ? window.atob(payload)
+        : Buffer.from(payload, 'base64').toString('utf-8');
+    return JSON.parse(decoded) as T;
+  } catch {
+    return null;
+  }
 }
 
 export const saveToLocalStorage = <T = unknown>(key: string, value: T, expInMs?: number) => {
@@ -263,20 +267,64 @@ export const removeFromLocalStorage = (key: string) => {
 };
 
 export function isUUID(str: string): boolean {
-  // Regular expression to check for a valid UUID format.
   const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  // Test the string against the regular expression.
   return regex.test(str);
+}
 
-  // // --- Examples ---
-  // const validUUID = 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6';
-  // const invalidUUID = 'not-a-uuid';
-  // const anotherInvalid = 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6a'; // Extra character
-  // const alsoInvalid = 'f81d4fae_7dec_11d0_a765_00a0c91e6bf6'; // Wrong separator
+/**
+ * Safe getter for window object, returns undefined on server.
+ */
+export function getWindow(): Window | undefined {
+  return typeof window !== 'undefined' ? window : undefined;
+}
 
-  // console.log(`'${validUUID}' is a UUID?`, isUUID(validUUID));       // true
-  // console.log(`'${invalidUUID}' is a UUID?`, isUUID(invalidUUID)); // false
-  // console.log(`'${anotherInvalid}' is a UUID?`, isUUID(anotherInvalid)); // false
-  // console.log(`'${alsoInvalid}' is a UUID?`, isUUID(alsoInvalid)); // false
+/**
+ * Safe getter for document object, returns undefined on server.
+ */
+export function getDocument(): Document | undefined {
+  return typeof document !== 'undefined' ? document : undefined;
+}
+
+/**
+ * Safe getter for navigator object, returns undefined on server.
+ */
+export function getNavigator(): Navigator | undefined {
+  return typeof navigator !== 'undefined' ? navigator : undefined;
+}
+
+/**
+ * Converts an amount in the smallest currency unit as its standard unit as a float.
+ * Returns 0 for invalid, null, undefined, or zero values. Always returns result with 2 decimal precision.
+ *
+ * @param amountInSubunits - Amount in smallest currency unit (e.g., "1050" cents for $10.50)
+ * @returns Amount in standard currency unit (e.g., 10.5)
+ */
+export function normalizeCurrencyAmount(
+  amountInSubunits: number | string | undefined | null
+): number {
+  // Handle null or undefined explicitly
+  if (amountInSubunits === null || amountInSubunits === undefined) return 0;
+
+  let normalized: number;
+  if (typeof amountInSubunits === 'string') {
+    // Remove any commas, trim spaces
+    const sanitized = amountInSubunits.replace(/,/g, '').trim();
+    normalized = parseFloat(sanitized);
+  } else {
+    normalized = amountInSubunits;
+  }
+
+  if (
+    typeof normalized !== 'number' ||
+    !isFinite(normalized) ||
+    isNaN(normalized) ||
+    normalized === 0
+  ) {
+    return 0;
+  }
+
+  const standardUnit = normalized / 100;
+
+  return Math.round(standardUnit * 100) / 100;
 }
