@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAuth({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getUser: getAdmin as any,
     roles: ['admin'],
     redirectTo: '/admin/auth/login',
