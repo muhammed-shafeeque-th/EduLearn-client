@@ -16,7 +16,6 @@ export const CourseHeader: FC<CourseHeaderProps> = memo(function CourseHeader({
 }) {
   const router = useRouter();
 
-  // Memoize the back/clear handlers for performance and clean re-renders
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
