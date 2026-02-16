@@ -2,5 +2,7 @@ node_modules/
 .next/
 public/
 dist/
+**/__*/**
+**/**/_*.ts*
 package-lock.json
 yarn.lock

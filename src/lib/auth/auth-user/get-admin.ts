@@ -4,8 +4,9 @@ import { getCookieFromServer, serverAdminRefresh } from '@/lib/server-apis';
 import { adminAuthToken } from '@/lib/constants';
 import { AuthPayload } from './types';
 import { verifyAccessToken } from '../token-utils';
+import { AuthUser } from '../require-auth/types';
 
-export async function getAdmin(): Promise<AuthPayload | null> {
+export async function getAdmin(): Promise<AuthUser | null> {
   /**
    * STEP 1: Read access token from HTTP-only cookie
    * Cookie missing === token expired

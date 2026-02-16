@@ -3,8 +3,11 @@
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "skipLibCheck": true,
+    // "skipLibCheck": true,
     "strict": true,
+    // "noUncheckedIndexedAccess": true, // Prevents accessing array[0] without checking if it exists
+    // "noImplicitOverride": true, // Forces `override` keyword in classes
+    // "exactOptionalPropertyTypes": true, // Stricter handling of optional properties
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -20,8 +23,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "skipLibCheck": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.ts"],
+  "exclude": ["node_modules", "**/__*/**", "**/**/_*.ts*"]
 }

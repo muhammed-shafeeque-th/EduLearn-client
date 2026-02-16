@@ -1,7 +1,7 @@
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-api/base.service';
+import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
-import { authRefreshToken, getClientAuthToken } from '@/lib/utils/auth-client-apis';
+import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
 
 export interface UploadSignatureResponse {
   success: boolean;
@@ -167,7 +167,7 @@ export class MediaService extends BaseService implements IMediaService {
   }
 
   // Static factory for SSR usage (pass a token getter or headers)
-  static forSSR(serviceOptions: BaseServiceOptions) {
+  static create(serviceOptions: BaseServiceOptions) {
     return new MediaService(serviceOptions);
   }
 }

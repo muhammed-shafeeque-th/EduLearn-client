@@ -1,33 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState, useEffect, ReactNode } from 'react';
 import { QueryClient, QueryCache, MutationCache, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Provider as ReduxProvider } from 'react-redux';
-import { store } from '@/store';
+import { store } from '@/states/client';
 import {
   persistQueryClient,
   PersistQueryClientProvider,
 } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { compress, decompress } from 'lz-string';
-import { restoreCredentials } from '@/store/slices/auth-slice';
+import { restoreCredentials } from '@/states/client/slices/auth-slice';
+import { NotificationProvider } from '@/states/client/providers/notification';
 
 // Auth Plugin Interface
 export interface AuthPlugin {
-  refreshToken: () => Promise<{ token: string }>; // Returns true if refresh succeeded
+  refreshToken: () => Promise<{ token: string }>;
 }
 
 type ProvidersProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   authPlugin?: AuthPlugin;
 };
 
 const STALE_TIME = {
-  short: 30 * 1000, // 30 seconds - frequently changing data
-  medium: 5 * 60 * 1000, // 5 minutes - moderate changes
-  long: 15 * 60 * 1000, // 15 minutes - rarely changing data
-  extraLong: 30 * 60 * 1000, // 30 minutes - very stable data
+  short: 30 * 1000, // 30 seconds
+  medium: 5 * 60 * 1000, // 5 minutes
+  long: 15 * 60 * 1000, // 15 minutes
+  extraLong: 30 * 60 * 1000, // 30 minutes
 } as const;
 
 const GC_TIME = {
@@ -37,129 +39,28 @@ const GC_TIME = {
   extraLong: 60 * 60 * 1000, // 1 hour
 } as const;
 
-// Global error handler with auth refresh
-function createGlobalErrorHandler(authPlugin?: AuthPlugin) {
-  const handledQueries = new Set<string>();
-
-  return async (error: any, query?: any) => {
-    const status = error?.response?.status || error?.status;
-
-    // Log errors for monitoring
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Query/Mutation Error:', error);
-    }
-
-    // Handle auth errors globally
-    if (status === 401 && authPlugin && query) {
-      const queryKey = query.queryKey?.join('-') || 'unknown';
-
-      // Prevent multiple refresh attempts for the same query
-      if (handledQueries.has(queryKey)) {
-        return;
-      }
-
-      handledQueries.add(queryKey);
-
-      try {
-        const refreshSucceeded = await authPlugin.refreshToken();
-
-        if (refreshSucceeded) {
-          // Invalidate and refetch the failed query
-          query.fetch();
-        }
-      } catch (refreshError) {
-        console.error('Auth refresh failed:', refreshError);
-      } finally {
-        // Clean up after some time to allow future refresh attempts
-        setTimeout(() => {
-          handledQueries.delete(queryKey);
-        }, 5000);
-      }
-    }
-  };
-}
-
-let isRefreshing = false;
-
-export function StateProviders({ children, dehydratedState, authPlugin }: ProvidersProps) {
-  const [queryClient] = React.useState(() => {
-    const errorHandler = createGlobalErrorHandler(authPlugin);
-
+export function StateProviders({ children }: ProvidersProps) {
+  const [queryClient] = useState(() => {
     return new QueryClient({
-      queryCache: new QueryCache({
-        onError: (error, query) => errorHandler(error, query),
-      }),
-      mutationCache: new MutationCache({
-        onError: (error) => errorHandler(error),
-      }),
+      queryCache: new QueryCache(),
+      mutationCache: new MutationCache(),
       defaultOptions: {
         queries: {
           staleTime: STALE_TIME.medium,
           gcTime: GC_TIME.medium,
-          retry:
-            false &&
-            ((failureCount, error: any) => {
-              const status = error?.response?.status || error?.status;
-
-              // Handle 401 with auth refresh
-              if (status === 401 && authPlugin && !isRefreshing && failureCount === 0) {
-                isRefreshing = true;
-                authPlugin
-                  .refreshToken()
-                  .then((success) => {
-                    if (success) {
-                      // Invalidate all queries to refetch with new token
-                      queryClient.invalidateQueries();
-                    }
-                  })
-                  .catch(console.error)
-                  .finally(() => {
-                    isRefreshing = false;
-                  });
-                return false; // Don't retry immediately, wait for invalidation
-              }
-
-              // Don't retry client errors (4xx) except 408 (timeout)
-              if (status >= 400 && status < 500 && status !== 408) {
-                return false;
-              }
-
-              // Retry network errors and 5xx up to 2 times
-              return failureCount < 2;
-            }),
-          retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
           refetchOnWindowFocus: false,
           refetchOnReconnect: 'always',
           refetchOnMount: true,
-          // Network mode for better offline handling
           networkMode: 'online',
         },
         mutations: {
-          retry: (failureCount, error: any) => {
-            const status = error?.response?.status || error?.status;
-
-            // Handle 401 for mutations
-            if (status === 401 && authPlugin && !isRefreshing) {
-              isRefreshing = true;
-              authPlugin
-                .refreshToken()
-                .catch(console.error)
-                .finally(() => {
-                  isRefreshing = false;
-                });
-            }
-
-            return false; // Don't retry mutations by default
-          },
-          retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
           networkMode: 'online',
         },
       },
     });
   });
 
-  const localStoragePersister = React.useMemo(() => {
-    // Only create persister on client side
+  const localStoragePersister = useMemo(() => {
     if (typeof window === 'undefined') return undefined;
 
     return createSyncStoragePersister({
@@ -186,35 +87,36 @@ export function StateProviders({ children, dehydratedState, authPlugin }: Provid
   }, []);
 
   // Hydrate Redux state from localStorage (client-side only)
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       store.dispatch(restoreCredentials());
     }
   }, []);
 
   // Setup query client persistence (client-side only)
-  React.useEffect(() => {
+  useEffect(() => {
     if (!localStoragePersister) return;
 
     const persistOptions = {
       queryClient,
       persister: localStoragePersister,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      buster: 'v1', // Increment when cache structure changes
+      buster: 'v1',
       dehydrateOptions: {
         shouldDehydrateQuery: (query: any) => {
           const { state, queryKey } = query;
 
-          // Only persist successful queries
           if (state.status !== 'success') return false;
 
-          // Don't persist sensitive data
+          // Exclude sensitive and real-time data from persistence
           const sensitiveKeys = ['session', 'user', 'auth', 'token'];
-          if (sensitiveKeys.some((key) => queryKey.includes(key))) return false;
-
-          // Don't persist real-time data
           const realtimeKeys = ['notification', 'chat', 'live'];
-          if (realtimeKeys.some((key) => queryKey.includes(key))) return false;
+          if (
+            sensitiveKeys.some((key) => queryKey.includes(key)) ||
+            realtimeKeys.some((key) => queryKey.includes(key))
+          ) {
+            return false;
+          }
 
           return true;
         },
@@ -227,23 +129,23 @@ export function StateProviders({ children, dehydratedState, authPlugin }: Provid
     });
   }, [queryClient, localStoragePersister]);
 
-  const Provider = typeof window === 'undefined' ? QueryClientProvider : PersistQueryClientProvider;
+  const isServer = typeof window === 'undefined';
 
-  // For SSR compatibility
-  // Always provide QueryClient, server or client
-  const providerProps: any =
-    typeof window === 'undefined'
-      ? { client: queryClient }
-      : { client: queryClient, persistOptions: { persister: localStoragePersister! } };
+  const Provider = isServer ? QueryClientProvider : PersistQueryClientProvider;
 
-  // Client-side render with persistence
+  const providerProps: any = isServer
+    ? { client: queryClient }
+    : { client: queryClient, persistOptions: { persister: localStoragePersister! } };
+
   return (
     <Provider {...providerProps}>
       <ReduxProvider store={store}>
-        {children}
-        {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
-        )}
+        <NotificationProvider>
+          {children}
+          {process.env.NODE_ENV === 'development' && (
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+          )}
+        </NotificationProvider>
       </ReduxProvider>
     </Provider>
   );

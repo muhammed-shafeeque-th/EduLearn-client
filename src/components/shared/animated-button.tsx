@@ -1,14 +1,19 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
+/**
+ * AnimatedButton wraps children with a scale animation for hover/tap.
+ * @param children - The content to animate
+ * @param className - Optional CSS classes
+ */
 type Props = {
   children: ReactNode;
   className?: string;
 };
 
-export default function ButtonAnimated({ children, className }: Props) {
+const AnimatedButton: React.FC<Props> = ({ children, className }) => {
   return (
     <motion.div
       className={className}
@@ -21,4 +26,6 @@ export default function ButtonAnimated({ children, className }: Props) {
       {children}
     </motion.div>
   );
-}
+};
+
+export default React.memo(AnimatedButton);
