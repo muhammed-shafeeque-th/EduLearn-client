@@ -40,18 +40,31 @@ export default async function NotificationsPage() {
   const initialNotifications = await getInitialNotifications();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile-first: smaller padding, max-w-full by default, increase on larger screens */}
-      <div className="w-full max-w-full px-2 pt-4 pb-8 mx-auto sm:px-4 md:max-w-2xl lg:max-w-5xl md:py-8">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
-            Stay updated with your latest activities and announcements
+    <div className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <header className="mb-10 lg:mb-12">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="h-px w-8 bg-blue-500 hidden sm:block" />
+            <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              Notifications
+            </h1>
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 text-lg font-medium max-w-2xl pl-1 sm:pl-11">
+            Stay on top of your learning journey with real-time updates and activity logs.
           </p>
-        </div>
-        <Suspense fallback={<NotificationSkeleton />}>
-          <NotificationList initialData={initialNotifications} />
-        </Suspense>
+        </header>
+
+        <section className="relative z-10">
+          <Suspense fallback={<NotificationSkeleton />}>
+            <NotificationList initialData={initialNotifications} />
+          </Suspense>
+        </section>
+      </div>
+
+      {/* Background Decor */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden select-none -z-10">
+        <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
     </div>
   );
