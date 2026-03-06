@@ -48,7 +48,6 @@ export class DiscussionService extends BaseService {
     );
   }
 
-
   public async getMessages(
     roomId: string,
     page = 1,
