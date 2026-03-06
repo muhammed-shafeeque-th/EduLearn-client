@@ -3,8 +3,6 @@ import { Document, Page, Text, View, StyleSheet, Font, Svg, Path } from '@react-
 import type { CertificateData } from '@/types/enrollment/enrollment-certificate.type';
 import { CertificateLogoPDF } from './logo/certificate-logo.pdf';
 
-// --- FONT REGISTRATION ---
-// Only src and supported styles/weights; fontWeight and fontStyle supported values: 'normal', 'bold', 'italic' or numbers
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -43,7 +41,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0.03, // Supported
+    opacity: 0.03,
   },
   outerBorder: {
     position: 'absolute',
@@ -86,7 +84,6 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: '#ffffff',
     borderWidth: 4,
-    // boxShadow not supported in @react-pdf/renderer
   },
   logoText: {
     fontSize: 36,
@@ -94,13 +91,7 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     color: '#ffffff',
   },
-  // title: {
-  //   fontSize: 42,
-  //   fontFamily: 'Playfair Display',
-  //   fontWeight: 700,
-  //   color: '#1e293b',
-  //   textAlign: 'center',
-  // },
+
   subtitle: {
     fontSize: 16,
     fontFamily: 'Roboto',
@@ -246,12 +237,7 @@ export function CertificatePDF({ certificate }: CertificatePDFProps) {
 
   return (
     <Document>
-      <Page
-        // size="A4"
-        // orientation="landscape"
-        size={{ width: 842, height: 595 }}
-        style={styles.page}
-      >
+      <Page size={{ width: 842, height: 595 }} style={styles.page}>
         {/* Background Pattern */}
         <View style={styles.backgroundPattern}>
           <Svg width="100%" height="100%" viewBox="0 0 60 60">

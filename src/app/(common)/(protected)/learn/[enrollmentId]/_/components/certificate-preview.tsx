@@ -5,8 +5,8 @@ import { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { CertificateData } from '@/types/enrollment/enrollment-certificate.type';
-import { CertificateLogoWeb } from './certificate/logo/certificate-logo.web';
-import { BRAND } from './certificate/logo/constants';
+import { CertificateLogoWeb } from '@/lib/certificate/logo/certificate-logo.web';
+import { BRAND } from '@/lib/certificate/logo/constants';
 
 interface CertificatePreviewProps {
   certificate: CertificateData;
