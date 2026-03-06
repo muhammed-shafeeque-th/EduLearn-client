@@ -17,7 +17,7 @@ import {
   Strikethrough,
   Undo,
   Redo,
-  Save,
+  CheckCircle2,
   X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -326,36 +326,32 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const characterCount = value.length;
 
   return (
-    <div
-      className={`border border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden bg-white dark:bg-gray-800 ${className}`}
-    >
+    <div className={`border border-border rounded-xl overflow-hidden bg-card ${className}`}>
       {/* Toolbar */}
-      <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1">
+      <div className="bg-muted/30 px-3 py-2 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-y-2">
+          <div className="flex items-center flex-wrap gap-1">
             {toolbarGroups.map((group, groupIndex) => (
               <React.Fragment key={group.name}>
-                {groupIndex > 0 && <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />}
-                <div className="flex items-center space-x-1">
+                {groupIndex > 0 && <div className="w-px h-4 bg-border mx-1" />}
+                <div className="flex items-center gap-0.5">
                   {group.buttons.map((button, index) => {
                     const Icon = button.icon;
                     return (
-                      <motion.button
+                      <button
                         key={index}
                         type="button"
                         onClick={button.action}
                         disabled={button?.disabled || isPreview}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`p-2 rounded transition-colors group ${
+                        className={`p-1.5 rounded-md transition-all ${
                           button.disabled
-                            ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            ? 'text-muted-foreground/30 cursor-not-allowed'
+                            : 'text-muted-foreground hover:bg-background hover:text-foreground'
                         }`}
                         title={button.tooltip}
                       >
-                        <Icon className="w-4 h-4" />
-                      </motion.button>
+                        <Icon className="w-3.5 h-3.5" />
+                      </button>
                     );
                   })}
                 </div>
@@ -363,72 +359,63 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center space-x-4">
-            {/* Auto-save indicator */}
-            {autoSave && lastSaved && (
-              <span className="text-xs text-green-600 dark:text-green-400 flex items-center">
-                <Save className="w-3 h-3 mr-1" />
-                Saved {lastSaved.toLocaleTimeString()}
-              </span>
-            )}
-
-            {/* Stats */}
+          <div className="flex items-center gap-4">
+            {/* Stats - Hidden on mobile */}
             {showWordCount && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 space-x-3 hidden sm:flex">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50 hidden sm:flex gap-3">
                 <span>{wordCount} words</span>
                 <span>
-                  {characterCount}/{maxLength} characters
+                  {characterCount}/{maxLength}
                 </span>
               </div>
             )}
 
             {/* Preview Toggle */}
-            <motion.button
+            <button
               type="button"
               onClick={() => setIsPreview(!isPreview)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors text-sm font-medium ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all text-xs font-semibold ${
                 isPreview
-                  ? 'bg-primary/10 text-primary dark:bg-orange-900/20 dark:text-primary/70'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-background border border-border text-muted-foreground hover:text-foreground shadow-sm'
               }`}
             >
               {isPreview ? (
                 <>
-                  <Edit3 className="w-4 h-4" />
-                  <span>Edit</span>
+                  <Edit3 className="w-3 h-3" />
+                  <span>Editor</span>
                 </>
               ) : (
                 <>
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-3 h-3" />
                   <span>Preview</span>
                 </>
               )}
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Editor/Preview */}
-      <div style={{ height }} className="relative">
-        <AnimatePresence mode="wait">
+      <div style={{ height }} className="relative bg-background">
+        <AnimatePresence mode="wait" initial={false}>
           {isPreview ? (
             <motion.div
               key="preview"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               className="h-full overflow-y-auto p-6 custom-scrollbar"
             >
               {value.trim() ? (
                 <div
-                  className="prose dark:prose-invert max-w-none prose-primary leading-relaxed"
+                  className="prose dark:prose-invert max-w-none prose-sm leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 italic">
-                  Nothing to preview yet. Start typing in the editor!
+                <div className="flex items-center justify-center h-full text-muted-foreground text-sm italic">
+                  Nothing to preview yet...
                 </div>
               )}
             </motion.div>
@@ -438,6 +425,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               className="h-full"
             >
               <textarea
@@ -452,7 +440,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                 onPaste={handlePaste}
                 onBlur={() => addToHistory(value)}
                 placeholder={placeholder}
-                className="w-full h-full px-6 py-4 border-0 focus:ring-0 dark:bg-gray-800 dark:text-white resize-none font-mono text-sm leading-relaxed placeholder-gray-400 dark:placeholder-gray-500 custom-scrollbar"
+                className="w-full h-full px-6 py-4 border-0 focus:ring-0 bg-transparent text-foreground resize-none font-mono text-xs leading-relaxed placeholder-muted-foreground/40 custom-scrollbar"
                 style={{ minHeight: height }}
               />
             </motion.div>
@@ -461,28 +449,30 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       </div>
 
       {/* Status Bar */}
-      <div className="bg-gray-50 dark:bg-gray-700 px-4 py-2 border-t border-gray-300 dark:border-gray-600 flex items-center justify-between text-xs">
-        <div className="flex items-center space-x-4 text-gray-500 dark:text-gray-400">
-          <span>Markdown supported</span>
-          <span>•</span>
-          <span>Ctrl+B for bold, Ctrl+I for italic, Ctrl+S to save</span>
+      <div className="bg-muted/10 px-4 py-1.5 border-t border-border flex items-center justify-between">
+        <div className="flex items-center gap-3 text-[10px] font-medium text-muted-foreground/60">
+          <span className="flex items-center gap-1">
+            <Code className="w-3 h-3" />
+            Markdown
+          </span>
+          <span className="hidden sm:inline opacity-30">•</span>
+          <span className="hidden sm:inline">Ctrl+B (Bold)</span>
+          <span className="hidden sm:inline opacity-30">•</span>
+          <span className="hidden sm:inline">Ctrl+K (Link)</span>
         </div>
 
-        <div className="flex items-center space-x-4 text-gray-500 dark:text-gray-400">
-          {showWordCount && (
-            <>
-              <span className="sm:hidden">{wordCount}w</span>
-              <span className="hidden sm:inline">{wordCount} words</span>
-              <span>•</span>
-            </>
+        <div className="flex items-center gap-3">
+          {autoSave && lastSaved && (
+            <div className="text-[10px] font-semibold text-green-600/70 flex items-center">
+              <CheckCircle2 className="w-3 h-3 mr-1" />
+              Auto-saved
+            </div>
           )}
           <span
-            className={characterCount > maxLength * 0.9 ? 'text-amber-600 dark:text-amber-400' : ''}
+            className={`text-[10px] font-bold ${characterCount > maxLength * 0.9 ? 'text-destructive' : 'text-muted-foreground/40'}`}
           >
-            {characterCount}/{maxLength}
+            {characterCount} chars
           </span>
-          <span>•</span>
-          <span>{isPreview ? 'Preview mode' : 'Edit mode'}</span>
         </div>
       </div>
 

@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -157,7 +156,7 @@ export const ContentModal = ({
       }
 
       const newContent: Omit<Content, 'id'> = {
-        type: formState.type as any,
+        type: formState.type,
         file:
           uploadedFile && uploadState.uploadedUrl
             ? {
@@ -199,20 +198,15 @@ export const ContentModal = ({
           className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between z-10">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-foreground">
                 {existingContent ? 'Edit' : 'Add'} Content
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Upload or link your learning material
-              </p>
+              <p className="text-xs text-muted-foreground">Upload or link your learning material</p>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <X className="w-6 h-6" />
+            <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors">
+              <X className="w-5 h-5" />
             </button>
           </div>
 

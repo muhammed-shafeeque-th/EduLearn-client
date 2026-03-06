@@ -2,8 +2,9 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Eye, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Save, Eye, Loader2, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { TabId } from './tab-navigation';
+import { Button } from '@/components/ui/button';
 
 export interface ActionButtonsProps {
   activeTab: TabId;
@@ -33,7 +34,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = React.memo(
     hasUnsavedChanges = false,
     disabled = false,
   }) => {
-    // Hide action buttons when on the publish tab
     const nextButtonLabel = useMemo(() => {
       return labels[activeTab as keyof typeof labels] || 'Save & Next';
     }, [activeTab]);
@@ -45,98 +45,94 @@ export const ActionButtons: React.FC<ActionButtonsProps> = React.memo(
     const isPreviousDisabled = activeTab === 'basic';
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t-2 border-gray-200 dark:border-gray-700 gap-4"
-      >
-        {/* Previous Button */}
-        <motion.button
-          type="button"
-          whileHover={!isPreviousDisabled && !isLoading ? { scale: 1.02 } : {}}
-          whileTap={!isPreviousDisabled && !isLoading ? { scale: 0.98 } : {}}
-          onClick={onPrevious}
-          disabled={isPreviousDisabled || isLoading}
-          className={`inline-flex items-center px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-            isPreviousDisabled || isLoading
-              ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed bg-gray-100 dark:bg-gray-800'
-              : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
-          }`}
-          aria-label="Previous step"
+      <div className="sticky bottom-8 left-0 right-0 z-40 px-6 mt-12 pb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+          className="max-w-7xl mx-auto"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Previous
-        </motion.button>
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 rounded-2xl p-4 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 ring-1 ring-black/5">
+            {/* Left: Previous Button */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={onPrevious}
+                disabled={isPreviousDisabled || isLoading}
+                className="h-12 px-6 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Previous Step
+              </Button>
+            </div>
 
-        {/* Right: Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          {/* Save Draft Button */}
-          <motion.button
-            type="button"
-            whileHover={!isLoading && !disabled ? { scale: 1.02 } : {}}
-            whileTap={!isLoading && !disabled ? { scale: 0.98 } : {}}
-            onClick={onSave}
-            disabled={isLoading || disabled}
-            className="relative w-full sm:w-auto px-6 py-2.5 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center font-medium"
-            aria-label="Save draft"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            Save Draft
-            {hasUnsavedChanges && !isLoading && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
-            )}
-          </motion.button>
-
-          {/* Preview Button */}
-          <motion.button
-            type="button"
-            whileHover={!isLoading && !disabled ? { scale: 1.02 } : {}}
-            whileTap={!isLoading && !disabled ? { scale: 0.98 } : {}}
-            onClick={onSaveAndPreview}
-            disabled={isLoading || disabled}
-            className="w-full sm:w-auto px-6 py-2.5 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center font-medium"
-            aria-label="Preview course"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <Eye className="w-4 h-4 mr-2" />
-            )}
-            Preview
-          </motion.button>
-
-          {/* Primary Action: Save & Next */}
-          {nextButtonLabel && (
-            <motion.button
-              type="button"
-              whileHover={!isLoading && !disabled ? { scale: 1.02 } : {}}
-              whileTap={!isLoading && !disabled ? { scale: 0.98 } : {}}
-              onClick={onSaveAndNext}
-              disabled={isLoading || disabled}
-              className="w-full sm:w-auto px-8 py-2.5 bg-gradient-to-r from-primary/80 to-blue-600 hover:from-primary hover:to-blue-700 text-white rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold inline-flex items-center justify-center shadow-lg hover:shadow-xl"
-              aria-label={nextButtonLabel}
-            >
-              {isLoading ? (
-                <>
+            {/* Right: Action Buttons */}
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={onSave}
+                disabled={isLoading || disabled}
+                className="h-12 px-6 rounded-xl border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 relative group"
+              >
+                {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  {nextButtonLabel}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </motion.button>
-          )}
-        </div>
-      </motion.div>
+                ) : (
+                  <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                )}
+                Save Draft
+                {hasUnsavedChanges && !isLoading && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                  </span>
+                )}
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={onSaveAndPreview}
+                disabled={isLoading || disabled}
+                className="h-12 px-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-none group"
+              >
+                <Eye className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                Preview
+              </Button>
+
+              <Button
+                size="lg"
+                onClick={onSaveAndNext}
+                disabled={isLoading || disabled}
+                className="h-12 px-8 rounded-xl bg-linear-to-r from-primary via-blue-600 to-indigo-600 hover:opacity-90 transition-all shadow-lg shadow-primary/25 border-none font-bold"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    {nextButtonLabel}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Subtle info text */}
+          <div className="flex justify-center mt-3">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 font-bold flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              Progress is automatically saved to your draft
+            </p>
+          </div>
+        </motion.div>
+      </div>
     );
   }
 );
+
 ActionButtons.displayName = 'ActionButtons';
