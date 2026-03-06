@@ -21,6 +21,9 @@ import { CurriculumFormData, Section, Lesson } from '../schemas/curriculum-schem
 import { calculateTotalDuration, formatDuration } from '../utils/curriculum-utils';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 interface CourseStats {
   totalDuration: number;
@@ -53,6 +56,32 @@ interface SubmitTabProps {
     curriculum: boolean;
   };
 }
+
+// Helper Components
+const PreviewStat = ({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+}) => (
+  <div className="bg-background dark:bg-muted/50 p-2.5 rounded-xl border border-border shadow-sm">
+    <div className="flex items-center text-muted-foreground mb-1">
+      <Icon className="w-3 h-3 mr-1.5 opacity-70" />
+      <span className="text-[10px] uppercase tracking-wider font-semibold">{label}</span>
+    </div>
+    <p className="text-xs font-bold text-foreground leading-none">{value}</p>
+  </div>
+);
+
+const OptionToggle = ({ label, defaultChecked }: { label: string; defaultChecked?: boolean }) => (
+  <div className="flex items-center justify-between py-2">
+    <span className="text-xs font-medium text-foreground/80">{label}</span>
+    <Switch defaultChecked={defaultChecked} />
+  </div>
+);
 
 function computeCoursePreview(
   basicForm: UseFormReturn<BasicInfoFormData>,
@@ -239,86 +268,84 @@ export const SubmitTab = React.memo(
     return (
       <div className="max-w-6xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8"
+          className="bg-card rounded-xl shadow-sm border border-border p-8"
         >
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl mb-4">
+              <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-500" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Ready to Submit!
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">Review and Submit your course</p>
+            <h2 className="text-2xl font-semibold text-foreground">Ready to Submit!</h2>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Review and finalize your course details
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Validation Checklist */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Completion Checklist
-              </h3>
-              {validationItems.map((item, index) => (
-                <motion.div
-                  key={item.section}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`p-4 rounded-lg border-2 ${
-                    item.isValid
-                      ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
-                      : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'
-                  }`}
-                >
-                  <div className="flex items-center mb-3">
-                    {item.isValid ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
-                    )}
-                    <h4
-                      className={`font-medium ${
-                        item.isValid
-                          ? 'text-green-900 dark:text-green-100'
-                          : 'text-red-900 dark:text-red-100'
-                      }`}
-                    >
-                      {item.section}
-                    </h4>
-                  </div>
-                  <ul className="space-y-1">
-                    {item.items.map((requirement, reqIndex) => (
-                      <li
-                        key={reqIndex}
-                        className={`text-sm flex items-center ${
-                          item.isValid
-                            ? 'text-green-700 dark:text-green-300'
-                            : 'text-red-700 dark:text-red-300'
+            <section className="space-y-6">
+              <h3 className="text-lg font-semibold text-foreground">Completion Checklist</h3>
+              <div className="grid grid-cols-1 gap-4">
+                {validationItems.map((item, index) => (
+                  <motion.div
+                    key={item.section}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`p-4 rounded-xl border ${
+                      item.isValid
+                        ? 'border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10'
+                        : 'border-destructive/20 bg-destructive/5'
+                    }`}
+                  >
+                    <div className="flex items-center mb-3">
+                      {item.isValid ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-destructive mr-2" />
+                      )}
+                      <h4
+                        className={`text-sm font-semibold ${
+                          item.isValid ? 'text-green-900 dark:text-green-100' : 'text-destructive'
                         }`}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-current mr-2"></span>
-                        {requirement}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              ))}
+                        {item.section}
+                      </h4>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {item.items.map((requirement, reqIndex) => (
+                        <li
+                          key={reqIndex}
+                          className={`text-xs flex items-center ${
+                            item.isValid
+                              ? 'text-green-700 dark:text-green-300'
+                              : 'text-destructive/70'
+                          }`}
+                        >
+                          <span className="w-1 h-1 rounded-full bg-current mr-2 opacity-50"></span>
+                          {requirement}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                ))}
+              </div>
 
               {/* Pricing Section */}
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 border-2 border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
+                className="p-5 border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl"
               >
-                <h4 className="font-medium text-yellow-900 dark:text-yellow-100 mb-3 flex items-center">
-                  <DollarSign className="w-5 h-5 mr-2" />
+                <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-4 flex items-center">
+                  <DollarSign className="w-4 h-4 mr-2" />
                   Course Pricing
                 </h4>
-                <div className="space-y-3">
-                  <div>
-                    <Label className="block text-sm text-yellow-800 dark:text-yellow-200 mb-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-amber-800 dark:text-amber-300">
                       Price (₹)
                     </Label>
                     <Input
@@ -332,19 +359,19 @@ export const SubmitTab = React.memo(
                           e.target.value === '' ? undefined : parseFloat(e.target.value)
                         )
                       }
-                      className={`w-full border-yellow-300 dark:border-yellow-700  ${priceError ? 'border-red-500 focus:ring-red-500' : ''}`}
-                      placeholder="1999.99"
+                      className={`h-11 rounded-xl bg-background border-amber-200 dark:border-amber-900/50 ${priceError ? 'border-destructive ring-destructive' : ''}`}
+                      placeholder="e.g. 1999"
                     />
                     {priceError && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
+                      <p className="text-[10px] text-destructive font-medium flex items-center">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         {priceError}
                       </p>
                     )}
                   </div>
-                  <div>
-                    <Label className="block text-sm text-yellow-800 dark:text-yellow-200 mb-1">
-                      Discount Price (Optional)
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                      Discount Price
                     </Label>
                     <Input
                       type="number"
@@ -357,125 +384,105 @@ export const SubmitTab = React.memo(
                           e.target.value === '' ? undefined : parseFloat(e.target.value)
                         )
                       }
-                      className={`w-full border-yellow-300 dark:border-yellow-700  ${discountPriceError ? 'border-red-500 focus:ring-red-500' : ''}`}
-                      placeholder="1499.99"
+                      className={`h-11 rounded-xl bg-background border-amber-200 dark:border-amber-900/50 ${discountPriceError ? 'border-destructive ring-destructive' : ''}`}
+                      placeholder="e.g. 1499"
                     />
                     {discountPriceError && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
+                      <p className="text-[10px] text-destructive font-medium flex items-center">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         {discountPriceError}
                       </p>
                     )}
                   </div>
-                  {discountPercent !== undefined && (
-                    <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                      Discount: {discountPercent}%
-                    </div>
-                  )}
                 </div>
+                {discountPercent !== undefined && (
+                  <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    Calculated Discount: {discountPercent}% OFF
+                  </p>
+                )}
               </motion.div>
             </section>
 
             {/* Course Preview */}
             <section className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Course Preview
-              </h3>
+              <h3 className="text-lg font-semibold text-foreground">Course Preview</h3>
               {coursePreview ? (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 space-y-6"
+                  className="bg-muted/30 rounded-xl p-6 border border-border"
                 >
                   {/* Course Header */}
-                  <div>
+                  <div className="space-y-3 mb-6">
                     {coursePreview.title && (
-                      <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                      <h4 className="text-lg font-bold text-foreground leading-tight">
                         {coursePreview.title}
                       </h4>
                     )}
                     {coursePreview.subtitle && (
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
+                      <p className="text-muted-foreground text-sm line-clamp-2">
                         {coursePreview.subtitle}
                       </p>
                     )}
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-2">
                       {coursePreview.category && (
-                        <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded">
+                        <Badge variant="secondary" className="rounded-lg font-semibold">
                           {coursePreview.category}
-                        </span>
+                        </Badge>
                       )}
                       {coursePreview.level && (
-                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
+                        <Badge variant="outline" className="rounded-lg font-semibold capitalize">
                           {coursePreview.level}
-                        </span>
+                        </Badge>
                       )}
                       {coursePreview.language && (
-                        <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
+                        <Badge variant="outline" className="rounded-lg font-semibold">
                           {coursePreview.language}
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </div>
                   {/* Course Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                      <div className="flex items-center text-gray-600 dark:text-gray-400 mb-1">
-                        <BookOpen className="w-4 h-4 mr-1" />
-                        <span className="text-xs">Sections</span>
-                      </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {coursePreview.stats.totalSections}
-                      </p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                      <div className="flex items-center text-gray-600 dark:text-gray-400 mb-1">
-                        <PlayCircle className="w-4 h-4 mr-1" />
-                        <span className="text-xs">Lessons</span>
-                      </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {coursePreview.stats.totalLessons}
-                      </p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                      <div className="flex items-center text-gray-600 dark:text-gray-400 mb-1">
-                        <Clock className="w-4 h-4 mr-1" />
-                        <span className="text-xs">Duration</span>
-                      </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {formatDuration(coursePreview.stats.totalDuration)}
-                      </p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                      <div className="flex items-center text-gray-600 dark:text-gray-400 mb-1">
-                        <Eye className="w-4 h-4 mr-1" />
-                        <span className="text-xs">Free Content</span>
-                      </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {coursePreview.stats.previewContent}
-                      </p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <PreviewStat
+                      icon={BookOpen}
+                      label="Sections"
+                      value={coursePreview.stats.totalSections}
+                    />
+                    <PreviewStat
+                      icon={PlayCircle}
+                      label="Lessons"
+                      value={coursePreview.stats.totalLessons}
+                    />
+                    <PreviewStat
+                      icon={Clock}
+                      label="Duration"
+                      value={formatDuration(coursePreview.stats.totalDuration)}
+                    />
+                    <PreviewStat
+                      icon={Eye}
+                      label="Free Content"
+                      value={coursePreview.stats.previewContent}
+                    />
                   </div>
+
                   {/* Learning Outcomes Preview */}
                   {Array.isArray(coursePreview.learningOutcomes) &&
                     coursePreview.learningOutcomes.length > 0 && (
-                      <div>
-                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">
-                          What you&apos;ll learn:
+                      <div className="space-y-3 mb-6 pt-6 border-t border-border">
+                        <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          What you&apos;ll learn
                         </h5>
-                        <ul className="space-y-1">
+                        <ul className="space-y-2">
                           {coursePreview.learningOutcomes.slice(0, 3).map((outcome, index) => (
-                            <li
-                              key={index}
-                              className="text-sm text-gray-600 dark:text-gray-300 flex items-start"
-                            >
-                              <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                              {outcome.text}
+                            <li key={index} className="text-xs text-foreground/80 flex items-start">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-primary mr-2 mt-0.5 shrink-0" />
+                              <span className="line-clamp-2">{outcome.text}</span>
                             </li>
                           ))}
                           {coursePreview.learningOutcomes.length > 3 && (
-                            <li className="text-sm text-gray-500 dark:text-gray-400">
-                              +{coursePreview.learningOutcomes.length - 3} more...
+                            <li className="text-[10px] font-semibold text-muted-foreground pl-5 pt-1">
+                              + {coursePreview.learningOutcomes.length - 3} more outcomes
                             </li>
                           )}
                         </ul>
@@ -483,16 +490,18 @@ export const SubmitTab = React.memo(
                     )}
                   {/* Pricing Preview */}
                   {basicData.price && (
-                    <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                    <div className="border-t border-border pt-5">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Price:</span>
-                        <div className="flex items-center space-x-2">
+                        <span className="text-sm font-semibold text-muted-foreground">
+                          Investment:
+                        </span>
+                        <div className="text-right">
                           {basicData.discountPrice && (
-                            <span className="text-gray-500 dark:text-gray-400 line-through text-sm">
+                            <span className="text-xs text-muted-foreground line-through mr-2">
                               ₹{basicData.price}
                             </span>
                           )}
-                          <span className="text-xl font-bold text-gray-900 dark:text-white">
+                          <span className="text-xl font-bold text-foreground">
                             ₹{basicData.discountPrice || basicData.price}
                           </span>
                         </div>
@@ -501,91 +510,77 @@ export const SubmitTab = React.memo(
                   )}
                 </motion.div>
               ) : (
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Complete all sections to see course preview
+                <div className="bg-muted/30 rounded-xl p-10 text-center border border-dashed border-border min-h-[300px] flex flex-col items-center justify-center">
+                  <div className="bg-background p-4 rounded-xl shadow-sm border mb-4">
+                    <FileText className="w-8 h-8 text-muted-foreground/30" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground max-w-[200px]">
+                    Complete all sections to see your course preview
                   </p>
                 </div>
               )}
               {/* Submiting Options */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+              <div className="bg-primary/5 rounded-xl p-5 border border-primary/10">
+                <h5 className="text-sm font-semibold text-primary mb-4 flex items-center">
                   <Globe className="w-4 h-4 mr-2" />
-                  Submiting Options
+                  Distribution Options
                 </h5>
-                <div className="space-y-2">
-                  <Label className="flex items-center text-sm">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      className="rounded border-gray-300 text-orange-500 focus:ring-orange-500 mr-2"
-                    />
-                    <span className="text-blue-800 dark:text-blue-200">
-                      Make course discoverable in marketplace
-                    </span>
-                  </Label>
-                  <Label className="flex items-center text-sm">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      className="rounded border-gray-300 text-orange-500 focus:ring-orange-500 mr-2"
-                    />
-                    <span className="text-blue-800 dark:text-blue-200">
-                      Enable course reviews and ratings
-                    </span>
-                  </Label>
-                  <Label className="flex items-center text-sm">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-orange-500 focus:ring-orange-500 mr-2"
-                    />
-                    <span className="text-blue-800 dark:text-blue-200">
-                      Send notification to followers
-                    </span>
-                  </Label>
+                <div className="space-y-3">
+                  <OptionToggle label="Make course discoverable in marketplace" defaultChecked />
+                  <OptionToggle label="Enable course reviews and ratings" defaultChecked />
+                  <OptionToggle label="Send notification to followers" />
                 </div>
               </div>
             </section>
           </div>
           {/* Submit Actions */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-8 border-t border-gray-200 dark:border-gray-700 gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col sm:flex-row items-center justify-between mt-10 pt-8 border-t border-border gap-6"
           >
-            <div className="text-sm">
+            <div className="flex items-center gap-3">
               {allValid ? (
-                <span className="flex items-center text-green-600 dark:text-green-400">
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Ready to Submit
-                </span>
+                <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-500" />
+                </div>
               ) : (
-                <span className="flex items-center text-amber-600 dark:text-amber-400">
-                  <AlertCircle className="w-4 h-4 mr-2" />
-                  Complete all sections to Submit
-                </span>
+                <div className="bg-amber-100 dark:bg-amber-900/30 p-2 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+                </div>
               )}
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  {allValid ? 'Everything looks good!' : 'Requirements pending'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {allValid
+                    ? 'You are ready to publish your course.'
+                    : 'Please fix the issues in the checklist.'}
+                </p>
+              </div>
             </div>
-            <div className="flex space-x-4">
-              <button
-                type="button"
+
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="lg"
                 onClick={handlePreviewClick}
-                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                className="rounded-xl h-12 px-6 flex-1 sm:flex-none"
               >
-                <Eye className="w-4 h-4 mr-2 inline" />
+                <Eye className="w-4 h-4 mr-2" />
                 Preview
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                size="lg"
                 onClick={handleSubmitClick}
                 disabled={!allValid || !pricing.price || isLoading}
-                className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium inline-flex items-center"
+                className="rounded-xl h-12 px-8 flex-1 sm:flex-none shadow-lg shadow-primary/20"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submiting...
+                    Submitting...
                   </>
                 ) : isSubmitRetryable() ? (
                   <>
@@ -595,10 +590,10 @@ export const SubmitTab = React.memo(
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    Submit Course
+                    Publish Course
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
