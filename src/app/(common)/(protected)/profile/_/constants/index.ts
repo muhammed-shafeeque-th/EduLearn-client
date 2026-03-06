@@ -1,4 +1,4 @@
-import { User, BookOpen, Shield, MessageCircle } from 'lucide-react';
+import { User, BookOpen, Shield, MessageCircle, Award } from 'lucide-react';
 
 export const PROFILE_NAVIGATION = [
   {
@@ -13,12 +13,12 @@ export const PROFILE_NAVIGATION = [
     icon: BookOpen,
     description: 'View your enrolled courses',
   },
-  // {
-  //   href: '/profile/teachers',
-  //   label: 'mentors',
-  //   icon: Users,
-  //   description: 'Browse available Mentors',
-  // },
+  {
+    href: '/profile/certificates',
+    label: 'Certificates',
+    icon: Award,
+    description: 'View your course certificates',
+  },
   {
     href: '/profile/my-chats',
     label: 'My Chats',
@@ -37,10 +37,4 @@ export const PROFILE_NAVIGATION = [
     icon: Shield,
     description: 'Change password and security settings',
   },
-  // {
-  //   href: '/profile/settings',
-  //   label: 'Settings',
-  //   icon: Settings,
-  //   description: 'Account preferences and settings',
-  // },
 ] as const;

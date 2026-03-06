@@ -53,7 +53,7 @@ export function ProfileForm() {
           user?.socials?.find((social) => social.provider === 'instagram')?.profileUrl || '',
         linkedin: user?.socials?.find((social) => social.provider === 'linkedin')?.profileUrl || '',
       },
-      avatar: user?.avatar || '',
+      avatar: user?.avatar,
       country: user?.profile?.country || '',
       city: user?.profile?.city || '',
       phone: user?.profile?.phone || '',
@@ -71,162 +71,188 @@ export function ProfileForm() {
   }
 
   return (
-    <div className="p-6">
+    <div className="space-y-10 py-2">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Basic Information */}
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Basic Information
-              </h3>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-12">
+          {/* Basic Information Section */}
+          <section className="bg-white dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex flex-col xl:flex-row gap-10 xl:gap-14">
+              <div className="flex-1 min-w-0 space-y-8">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Public Profile
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    This information will be displayed on your public profile page.
+                  </p>
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-700 dark:text-slate-300">
+                          First Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="shafeeque"
+                            className="rounded-xl border-slate-200 dark:border-slate-800 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-700 dark:text-slate-300">
+                          Last Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Johnson"
+                            className="rounded-xl border-slate-200 dark:border-slate-800 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="firstName"
+                  name="gender"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel>First Name</FormLabel>
+                    <FormItem className="space-y-3">
+                      <FormLabel className="text-slate-700 dark:text-slate-300">Gender</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter your first name" />
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          className="flex flex-wrap gap-4"
+                        >
+                          {['male', 'female', 'other'].map((option) => (
+                            <FormItem
+                              key={option}
+                              className="flex items-center space-x-2 space-y-0"
+                            >
+                              <FormControl>
+                                <RadioGroupItem
+                                  value={option}
+                                  id={`gender-${option}`}
+                                  className="border-slate-300 dark:border-slate-700"
+                                />
+                              </FormControl>
+                              <FormLabel
+                                htmlFor={`gender-${option}`}
+                                className="text-sm font-medium capitalize cursor-pointer"
+                              >
+                                {option}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                        </RadioGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name="lastName"
+                  name="biography"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel>Last Name</FormLabel>
+                    <FormItem>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">Bio</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter your last name" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Gender Field */}
-              <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel>Gender</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex flex-row gap-6"
-                      >
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl>
-                            <RadioGroupItem value="male" id="gender-male" />
-                          </FormControl>
-                          <FormLabel htmlFor="gender-male" className="font-normal">
-                            Male
-                          </FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl>
-                            <RadioGroupItem value="female" id="gender-female" />
-                          </FormControl>
-                          <FormLabel htmlFor="gender-female" className="font-normal">
-                            Female
-                          </FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl>
-                            <RadioGroupItem value="other" id="gender-other" />
-                          </FormControl>
-                          <FormLabel htmlFor="gender-other" className="font-normal">
-                            Other
-                          </FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="biography"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Biography</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Textarea
-                          placeholder="Tell us a little bit about yourself"
-                          className="resize-none min-h-[120px]"
-                          maxLength={500}
-                          {...field}
-                        />
-                        <div className="text-xs text-gray-500 dark:text-gray-400 text-right mt-1">
-                          {field.value?.length || 0}/500
+                        <div className="relative">
+                          <Textarea
+                            placeholder="I'm a passionate learner and tech enthusiast..."
+                            className="resize-none min-h-[140px] rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-blue-500 p-4"
+                            maxLength={500}
+                            {...field}
+                          />
+                          <div className="absolute bottom-3 right-3 text-[10px] font-bold text-slate-400 dark:text-slate-600 bg-white/50 dark:bg-slate-900/50 px-2 py-0.5 rounded-full">
+                            {field.value?.length || 0} / 500
+                          </div>
                         </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="language"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Language</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your preferred language" />
-                        </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {LANGUAGES.map((language) => (
-                          <SelectItem key={language.value} value={language.value}>
-                            {language.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Profile Image */}
-            <div className="space-y-6">
-              {/* <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Profile Image</h3> */}
-
-              <div className="flex justify-center">
-                <ProfileUpload
-                  error={errors.avatar}
-                  currentAvatarUrl={form.watch('avatar')}
-                  onUploadSuccess={(secure_url: string) =>
-                    form.setValue('avatar', secure_url ?? '', { shouldDirty: true })
-                  }
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-700 dark:text-slate-300">
+                        Preferred Language
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-800 h-11">
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl">
+                          {LANGUAGES.map((lang) => (
+                            <SelectItem key={lang.value} value={lang.value}>
+                              {lang.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
+
+              <div className="w-full xl:w-80 shrink-0 space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Profile Photo
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Click to update your avatar.
+                  </p>
+                </div>
+                <div className="flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-800/20 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                  <ProfileUpload
+                    error={errors.avatar}
+                    currentAvatarUrl={form.watch('avatar')}
+                    onUploadSuccess={(url) =>
+                      form.setValue('avatar', url ?? '', { shouldDirty: true })
+                    }
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
 
-          {/* Contact Information */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Contact Information
-            </h3>
+          {/* Contact Information Section */}
+          <section className="bg-white dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-8">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                Contact Information
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Where should we reach you? We&apos;ll use this for platform updates.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <CountryCitySelector form={form} />
 
               <FormField
@@ -234,14 +260,15 @@ export function ProfileForm() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel className="text-slate-700 dark:text-slate-300">
+                      Phone Number
+                    </FormLabel>
                     <FormControl>
                       <PhoneNumberInput
                         control={form.control}
-                        // value={field.value}
                         onChange={field.onChange}
                         country={form.watch('country')}
-                        placeholder="Enter your phone number"
+                        placeholder="Select country first"
                       />
                     </FormControl>
                     <FormMessage />
@@ -249,21 +276,33 @@ export function ProfileForm() {
                 )}
               />
             </div>
-          </div>
+          </section>
 
-          {/* Social Links */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Social Links</h3>
+          {/* Social Links Section */}
+          <section className="bg-white dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-8">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Social Presence</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Connect your profiles to build your student or instructor brand.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="website"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Website</FormLabel>
+                    <FormLabel className="text-slate-700 dark:text-slate-300">
+                      Personal Website
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="https://..." type="url" {...field} />
+                      <Input
+                        placeholder="https://yourportfolio.com"
+                        type="url"
+                        {...field}
+                        className="rounded-xl border-slate-200 dark:border-slate-800 h-11"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -274,9 +313,14 @@ export function ProfileForm() {
                 name="socials.facebook"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Facebook</FormLabel>
+                    <FormLabel className="text-slate-700 dark:text-slate-300">Facebook</FormLabel>
                     <FormControl>
-                      <Input type="text" placeholder="https://facebook.com/username" {...field} />
+                      <Input
+                        type="text"
+                        placeholder="https://facebook.com/muhammed.shafeeque"
+                        {...field}
+                        className="rounded-xl border-slate-200 dark:border-slate-800 h-11"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -287,12 +331,13 @@ export function ProfileForm() {
                 name="socials.linkedin"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>LinkedIn</FormLabel>
+                    <FormLabel className="text-slate-700 dark:text-slate-300">LinkedIn</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="https://linkedin.com/in/username"
+                        placeholder="https://linkedin.com/in/shafeeque-j"
                         {...field}
+                        className="rounded-xl border-slate-200 dark:border-slate-800 h-11"
                       />
                     </FormControl>
                     <FormMessage />
@@ -304,12 +349,13 @@ export function ProfileForm() {
                 name="socials.instagram"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Instagram</FormLabel>
+                    <FormLabel className="text-slate-700 dark:text-slate-300">Instagram</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="@username or https://instagram.com/username"
+                        placeholder="@muhammed_shafeeque"
                         {...field}
+                        className="rounded-xl border-slate-200 dark:border-slate-800 h-11"
                       />
                     </FormControl>
                     <FormMessage />
@@ -317,7 +363,7 @@ export function ProfileForm() {
                 )}
               />
             </div>
-          </div>
+          </section>
 
           {/* Submit Button */}
           <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-800">

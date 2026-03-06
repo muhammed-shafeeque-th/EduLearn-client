@@ -107,8 +107,7 @@ const ProfileUpload: React.FC<ProfileUploadProps> = ({
       : undefined;
 
   return (
-    <div className="flex flex-col items-center space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border">
-      <h3 className="text-lg font-semibold text-gray-900">Profile Picture</h3>
+    <div className="flex flex-col items-center space-y-5 w-full">
       {/* Avatar Display */}
       <div className="relative">
         <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300">
@@ -162,10 +161,10 @@ const ProfileUpload: React.FC<ProfileUploadProps> = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors w-md max-w-xs"
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all font-semibold w-full shadow-lg shadow-blue-500/25 active:scale-95"
             aria-disabled={uploading}
           >
-            {uploading ? 'Uploading...' : 'Choose New Picture'}
+            {uploading ? 'Processing...' : 'Choose New Picture'}
           </button>
         ) : (
           <div className="flex space-x-2 w-full max-w-xs">
@@ -199,7 +198,7 @@ const ProfileUpload: React.FC<ProfileUploadProps> = ({
           aria-live="assertive"
         >
           <svg
-            className="w-4 h-4 text-red-500 mr-2 mt-1 flex-shrink-0"
+            className="w-4 h-4 text-red-500 mr-2 mt-1 shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
