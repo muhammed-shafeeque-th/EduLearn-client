@@ -7,6 +7,7 @@ import { OrderSummary } from '../../../../../../types/checkout';
 import { formatPrice } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface OrderSummaryProps {
   summary: OrderSummary;
@@ -46,15 +47,15 @@ export function OrderSummaryCard({
   }, [isProcessing]);
 
   return (
-    <Card className="sticky top-4 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-50 dark:from-primary dark:to-blue-950/20">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Receipt className="w-5 h-5 text-primary" />
+    <Card className="sticky top-4 shadow-sm border rounded-xl overflow-hidden">
+      <CardHeader className="border-b bg-muted/30">
+        <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
+          <Receipt className="w-4 h-4" />
           Order Summary
           {summary.itemCount > 0 && (
-            <span className="bg-primary/10 dark:bg-primary text-primary dark:text-white px-2 py-1 rounded-full text-xs font-medium">
+            <Badge variant="secondary" className="ml-auto text-[10px] font-bold px-2 py-0">
               {summary.itemCount} {summary.itemCount === 1 ? 'item' : 'items'}
-            </span>
+            </Badge>
           )}
         </CardTitle>
       </CardHeader>

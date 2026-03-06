@@ -11,16 +11,15 @@ export const metadata: Metadata = {
 interface CheckoutPageProps {
   searchParams: Promise<{
     orderId?: string;
-    error_code?: string;
     courseId?: string;
     type?: 'course' | 'cart';
   }>;
 }
 
-export const dynamic = 'force-dynamic';
-
 export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
   const { orderId, courseId, type } = await searchParams;
+
+  const checkoutType = type || (courseId ? 'course' : 'cart');
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,7 +27,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
         <CheckoutContent
           existingOrderId={orderId}
           courseId={courseId}
-          checkoutType={type || 'cart'}
+          checkoutType={checkoutType as 'course' | 'cart'}
         />
       </Suspense>
     </div>

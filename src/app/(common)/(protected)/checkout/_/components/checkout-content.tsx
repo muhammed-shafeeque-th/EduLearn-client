@@ -2,12 +2,11 @@
 
 import { useEffect, useMemo, useState, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSelector } from '@xstate/react';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, ShieldCheck, Star, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 import { useCourseById } from '@/states/server/course/use-courses';
@@ -19,8 +18,8 @@ import { toast } from '@/hooks/use-toast';
 import { useOrderMachine } from '@/hooks/use-order-machine';
 import type { PaymentProvider } from '@/services/payment.service';
 import { normalizeCurrencyAmount } from '@/lib/utils';
-import { StateValues } from '@/lib/machines/order-machine';
 import { OrderSummaryCard } from './order-summary';
+import { CheckoutSkeleton } from '../../loading';
 
 interface CheckoutContentProps {
   existingOrderId?: string;
@@ -30,21 +29,51 @@ interface CheckoutContentProps {
 
 const DEFAULT_PROVIDER: PaymentProvider = 'stripe';
 
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 },
+};
+
 export function CheckoutContent({ existingOrderId, courseId, checkoutType }: CheckoutContentProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const { data: courseRes } = useCourseById(courseId!, { enabled: !!courseId });
-  const { cart, removeFromCart, clearCart } = useCart({ enabled: true });
+  const { data: courseRes, isLoading: isLoadingCourse } = useCourseById(courseId!, {
+    enabled: !!courseId && checkoutType === 'course',
+  });
+  const { cart, removeFromCart, clearCart, isLoading: isLoadingCart } = useCart({ enabled: true });
 
-  const orderService = useOrderMachine();
-  const orderState = useSelector(orderService, (state) => state);
-  const { order, provider, error: machineError } = orderState.context;
+  const {
+    order,
+    provider,
+    machineError,
+    status,
+    isIdle,
+    isOrderCreated,
+    isCreatingOrder: isMachineCreatingOrder,
+    isCreatingSession: isMachineCreatingSession,
+    isFailed,
+    selectProvider,
+    createOrder,
+    hydrate: hydrateOrder,
+  } = useOrderMachine();
 
   const [selectedProvider, setSelectedProvider] = useState<PaymentProvider>(DEFAULT_PROVIDER);
-
+  const [isInitializing, setIsInitializing] = useState(true);
+  const hasInitializedRef = useRef(false);
   const hasRedirectedRef = useRef(false);
-
   const hasClearedCartRef = useRef(false);
 
   const computeOrderFigures = (items: CourseInfo[]) => {
@@ -58,11 +87,7 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
       total += discountPrice;
       discount += price - discountPrice;
     }
-    return {
-      subtotal,
-      discount,
-      total,
-    };
+    return { subtotal, discount, total };
   };
 
   const [orderData, setOrderData] = useState({
@@ -75,59 +100,73 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
     currency: 'INR',
   });
 
-  // const [couponForm, setCouponForm] = useState({
-  //   code: '',
-  //   applied: false,
-  //   discount: 0,
-  // });
-
+  // Sync provider with selectedProvider
   useEffect(() => {
-    if (
-      !['idle', 'orderCreated', 'failure'].some((state) => orderState.matches(state as StateValues))
-    ) {
+    if (!['idle', 'orderCreated', 'failure'].includes(status)) {
       return;
     }
 
     if (selectedProvider && selectedProvider !== provider) {
-      orderService.send({ type: 'SELECT_PROVIDER', provider: selectedProvider });
+      selectProvider(selectedProvider);
     }
-  }, [selectedProvider, provider, orderService, orderState]);
+  }, [selectedProvider, provider, selectProvider, status]);
 
+  // Handle successful order creation and redirect
   useEffect(() => {
-    if (orderState.matches('orderCreated') && order?.id && !hasRedirectedRef.current) {
-      setOrderData((prev) => ({
-        ...prev,
-        orderId: order.id,
-        subtotal: normalizeCurrencyAmount(order.subTotal),
-        total: normalizeCurrencyAmount(order.totalAmount),
-        discount: normalizeCurrencyAmount(order.discount),
-        tax: normalizeCurrencyAmount(order.salesTax),
-        currency: order.currency,
-      }));
-
+    if (isOrderCreated && order?.id && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
+
+      setOrderData((prev) => {
+        if (prev.orderId === order.id) return prev;
+        return {
+          ...prev,
+          orderId: order.id,
+          subtotal: normalizeCurrencyAmount(order.subTotal),
+          total: normalizeCurrencyAmount(order.totalAmount),
+          discount: normalizeCurrencyAmount(order.discount),
+          tax: normalizeCurrencyAmount(order.salesTax),
+          currency: order.currency,
+        };
+      });
 
       if (checkoutType === 'cart' && cart?.id && !hasClearedCartRef.current) {
         clearCart().catch(console.error);
         hasClearedCartRef.current = true;
       }
 
-      setTimeout(() => router.push(`/payment?orderId=${order.id}`), 0);
+      setTimeout(() => {
+        router.push(`/payment?orderId=${order.id}`);
+      }, 0);
     }
 
-    if (!orderState.matches('orderCreated')) {
+    if (!isOrderCreated && hasRedirectedRef.current) {
       hasRedirectedRef.current = false;
       hasClearedCartRef.current = false;
     }
-  }, [orderState.value, order, orderState, router, checkoutType, cart?.id, clearCart]);
+  }, [
+    isOrderCreated,
+    order?.id,
+    order?.subTotal,
+    order?.totalAmount,
+    order?.discount,
+    order?.salesTax,
+    order?.currency,
+    router,
+    checkoutType,
+    cart?.id,
+    clearCart,
+  ]);
 
+  // Toast for machine errors
   useEffect(() => {
-    if (orderState.matches('failure') && machineError) {
+    if (isFailed && machineError) {
       toast.error({ title: machineError });
     }
-  }, [orderState, machineError]);
+  }, [isFailed, machineError]);
 
+  // Initialization logic
   useEffect(() => {
+    if (hasInitializedRef.current) return;
     let ignore = false;
 
     if (existingOrderId) {
@@ -139,84 +178,78 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
             ...prev,
             currency: result.data.currency,
             discount: normalizeCurrencyAmount(result.data.discount),
-            items: result.data.items.map((item) => item.course as CourseInfo),
+            items: result.data.items.map((item: { course: CourseInfo }) => item.course),
             orderId: result.data.id,
             subtotal: normalizeCurrencyAmount(result.data.subTotal),
             total: normalizeCurrencyAmount(result.data.totalAmount),
           }));
 
-          orderService.send({
-            type: 'HYDRATE_ORDER',
-            order: result.data,
-            provider:
-              (result.data.paymentDetails?.provider as PaymentProvider | undefined) ??
-              DEFAULT_PROVIDER,
-          });
+          hydrateOrder(
+            result.data,
+            (result.data.paymentDetails?.provider as PaymentProvider | undefined) ??
+              DEFAULT_PROVIDER
+          );
 
           if (result.data.paymentDetails?.provider) {
             setSelectedProvider(result.data.paymentDetails.provider as PaymentProvider);
           }
         }
+        setIsInitializing(false);
+        hasInitializedRef.current = true;
       });
     } else {
-      let items: CourseInfo[] = [];
-      if (checkoutType === 'course' && courseRes) {
-        items = [courseRes];
-      } else if (cart?.items) {
-        items = cart.items.map((item) => item.course);
+      // For "Buy Now" (single course) or "Cart Checkout"
+      if (checkoutType === 'course') {
+        if (!isLoadingCourse) {
+          if (courseRes) {
+            const items = [courseRes as CourseInfo];
+            const figures = computeOrderFigures(items);
+            setOrderData((prev) => ({
+              ...prev,
+              items,
+              subtotal: figures.subtotal,
+              total: figures.total,
+              discount: figures.discount,
+            }));
+            setIsInitializing(false);
+            hasInitializedRef.current = true;
+          }
+        }
+      } else {
+        // Cart type
+        if (!isLoadingCart) {
+          const items = cart?.items.map((item) => item.course as CourseInfo) || [];
+          const figures = computeOrderFigures(items);
+          setOrderData((prev) => ({
+            ...prev,
+            items,
+            subtotal: figures.subtotal,
+            total: figures.total,
+            discount: figures.discount,
+          }));
+          setIsInitializing(false);
+          hasInitializedRef.current = true;
+        }
       }
-
-      const figures = computeOrderFigures(items);
-
-      setOrderData((prev) => ({
-        ...prev,
-        items,
-        subtotal: figures.subtotal,
-        total: figures.total,
-        discount: figures.discount,
-      }));
     }
     return () => {
       ignore = true;
     };
-  }, [existingOrderId, courseRes, cart?.items, checkoutType, orderService]);
-
-  // const handleApplyCoupon = async () => {
-  //   if (!couponForm.code.trim()) {
-  //     toast.error({ title: 'Please enter a coupon code' });
-  //     return;
-  //   }
-
-  //   if (!orderData.orderId) {
-  //     toast.error({ title: 'Please create order first' });
-  //     return;
-  //   }
-
-  //   startTransition(async () => {
-  //     const result = await applyCouponCode(orderData.orderId, couponForm.code);
-
-  //     if (result.success) {
-  //       const discount = result.data?.discount || 0;
-  //       setCouponForm((prev) => ({ ...prev, applied: true, discount }));
-  //       setOrderData((prev) => ({
-  //         ...prev,
-  //         discount,
-  //         total: prev.subtotal - discount, // discounted total in cents
-  //       }));
-  //       toast.success({
-  //         title: `Coupon applied! You saved ₹${discount.toFixed(2)}`,
-  //       });
-  //     } else {
-  //       toast.error({ title: result.error || 'Invalid coupon code' });
-  //     }
-  //   });
-  // };
+  }, [
+    existingOrderId,
+    courseRes,
+    cart?.items,
+    checkoutType,
+    hydrateOrder,
+    isLoadingCourse,
+    isLoadingCart,
+  ]);
 
   const handleRemoveItem = async (itemId: string) => {
-    const newItems = orderData.items.filter((item) => item.id !== itemId);
+    const newItems = orderData.items.filter((item: CourseInfo) => item.id !== itemId);
     const figures = computeOrderFigures(newItems);
 
-    setOrderData((prev) => ({
+    setOrderData((prev: typeof orderData) => ({
       ...prev,
       items: newItems,
       subtotal: figures.subtotal,
@@ -230,11 +263,7 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
     }
   };
 
-  const isCreatingOrder =
-    isPending ||
-    orderState.matches('creatingOrder') ||
-    orderState.matches('creatingProviderSession');
-
+  const isCreatingOrder = isPending || isMachineCreatingOrder || isMachineCreatingSession;
   const courseIds = useMemo(() => orderData.items.map((item) => item.id), [orderData.items]);
 
   const handleProceedToPayment = () => {
@@ -243,7 +272,6 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
       return;
     }
 
-    // If the order is already created, just redirect and prevent duplicate creation
     if (
       existingOrderId &&
       orderData.orderId === existingOrderId &&
@@ -254,7 +282,7 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
       return;
     }
 
-    if (!orderState.matches('idle') && !orderState.matches('failure')) {
+    if (!isIdle && !isFailed) {
       return;
     }
 
@@ -263,266 +291,212 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
       return;
     }
 
-    orderService.send({ type: 'SELECT_PROVIDER', provider: selectedProvider });
-    orderService.send({
-      type: 'CREATE_ORDER',
-      payload: {
-        courseIds,
-      },
-    });
+    selectProvider(selectedProvider);
+    createOrder({ courseIds });
   };
 
   const canCheckout = orderData.items.length > 0 && !isCreatingOrder;
 
-  if (orderData.items.length === 0 && !isPending) {
+  // Show skeleton during initial load
+  if (isInitializing) {
+    return <CheckoutSkeleton />;
+  }
+
+  // Show empty state if no items
+  if (orderData.items.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
-          <p className="text-muted-foreground mb-4">Add some courses to get started</p>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={() => router.push('/courses')}>Browse Courses</Button>
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md w-full"
+        >
+          <div className="w-24 h-24 mx-auto bg-primary/5 rounded-full flex items-center justify-center mb-6">
+            <ShoppingCart className="w-12 h-12 text-primary/40" />
+          </div>
+          <h2 className="text-3xl font-bold mb-3 tracking-tight">Your cart is empty</h2>
+          <p className="text-muted-foreground mb-8 text-lg">
+            Looks like you haven&apos;t added any courses yet. Explore our catalog to find your next
+            learning adventure!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button size="lg" className="px-8 shadow-md" onClick={() => router.push('/courses')}>
+              Browse Courses
+            </Button>
             {checkoutType === 'course' && (
-              <Button variant="outline" onClick={() => router.back()}>
+              <Button variant="ghost" size="lg" onClick={() => router.back()}>
                 Go Back
               </Button>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="sm" onClick={() => router.back()} disabled={isPending}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Checkout</h1>
-          <p className="text-muted-foreground">
-            {checkoutType === 'course'
-              ? 'Complete your course purchase'
-              : 'Review your cart and proceed to payment'}
-          </p>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8"
+      >
+        {/* Header section */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-6">
+          <div className="space-y-2">
+            <button
+              className="flex items-center gap-2 text-primary font-medium text-sm hover:underline cursor-pointer"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Continue Shopping</span>
+            </button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Review Order</h1>
+            <p className="text-muted-foreground text-sm max-w-xl">
+              {checkoutType === 'course'
+                ? 'Check the details of your course purchase before proceeding.'
+                : 'Confirm your items and amount to finalize your purchase.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-muted-foreground">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span className="text-xs font-semibold">Secure Checkout</span>
+          </div>
         </div>
-        <div className="ml-auto">
-          <Badge variant="outline">
-            {orderData.items.length} {orderData.items.length === 1 ? 'item' : 'items'}
-          </Badge>
-        </div>
-      </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          {orderData.items.map((course) => (
-            <Card key={course.id}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5" />
-                    {course.title}
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-accent hover:bg-primary/50 hover:text-white text-accent-foreground"
+        <div className="grid lg:grid-cols-3 gap-10">
+          {/* Item list */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Badge className="bg-primary/10 text-primary border-none hover:bg-primary/20 transition-colors">
+                {orderData.items.length} {orderData.items.length === 1 ? 'Course' : 'Courses'}
+              </Badge>
+              <div className="h-px flex-1 bg-border/40" />
+            </div>
+
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {orderData.items.map((course) => (
+                  <motion.div
+                    key={course.id}
+                    layout
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                   >
-                    {course.level || 'All levels'}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={course.thumbnail || '/placeholder-course.jpg'}
-                    alt={course.title}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold">{course.title}</h3>
-                    <p className="text-sm text-muted-foreground">{course.instructor?.name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-bold">₹{course.discountPrice?.toFixed(2)}</p>
-                    {course.discountPrice && course.discountPrice < course.price && (
-                      <p className="text-xs text-green-600">
-                        Save ₹{(course.price - course.discountPrice).toFixed(2)}
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveItem(course.id)}
-                    disabled={isPending}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <Card className="overflow-hidden border border-border rounded-xl hover:shadow-md transition-all duration-300">
+                      <CardContent className="p-0">
+                        <div className="flex flex-col sm:flex-row">
+                          {/* Course image */}
+                          <div className="relative w-full sm:w-40 h-32 sm:h-auto shrink-0 overflow-hidden bg-muted">
+                            <Image
+                              src={course.thumbnail || '/placeholder-course.jpg'}
+                              alt={course.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
 
-          {/* <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tag className="w-5 h-5" />
-                Coupon Code
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Enter coupon code"
-                  value={couponForm.code}
-                  onChange={(e) => setCouponForm((prev) => ({ ...prev, code: e.target.value }))}
-                  disabled={isPending || couponForm.applied}
-                />
-                <Button
-                  onClick={handleApplyCoupon}
-                  disabled={isPending || !couponForm.code.trim() || couponForm.applied}
-                  variant="outline"
-                >
-                  {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
-                </Button>
-              </div>
-              {couponForm.applied && (
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-green-600 mt-2 flex items-center gap-1"
-                >
-                  <Tag className="w-4 h-4" />
-                  Coupon applied successfully! You saved ${couponForm.discount.toFixed(2)}
-                </motion.p>
-              )}
-            </CardContent>
-          </Card> */}
-        </div>
+                          {/* Details */}
+                          <div className="p-4 flex-1 flex flex-col justify-between">
+                            <div className="flex justify-between items-start gap-4">
+                              <div className="space-y-1">
+                                <h3 className="text-base font-bold text-foreground line-clamp-2 leading-tight">
+                                  {course.title}
+                                </h3>
+                                <p className="text-xs text-muted-foreground font-medium">
+                                  By {course.instructor?.name}
+                                </p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-destructive h-8 w-8 rounded-lg"
+                                onClick={() => handleRemoveItem(course.id)}
+                                disabled={isPending}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <OrderSummaryCard
-            isProcessing={isCreatingOrder}
-            onCheckout={handleProceedToPayment}
-            showCheckoutButton={canCheckout}
-            summary={{
-              currency: orderData.currency,
-              discount: orderData.discount,
-              subtotal: orderData.subtotal,
-              tax: orderData.tax,
-              total: orderData.total,
-              itemCount: orderData.items.length,
-            }}
-          />
-        </div>
+                            <div className="mt-4 flex items-end justify-between">
+                              <div className="flex items-center gap-1">
+                                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                                <span className="text-xs font-bold">
+                                  {course.rating.toFixed(1)}
+                                </span>
+                              </div>
 
-        {/* <div className="lg:col-span-1">
-          <Card className="sticky top-4">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₹{orderData.subtotal.toFixed(2)}</span>
-                </div>
-                {orderData.discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>-₹{orderData.discount.toFixed(2)}</span>
-                  </div>
-                )}
-                <hr />
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>₹{orderData.total.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Card className="border-dashed">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Payment Method</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={selectedProvider}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="w-4 h-4" />
-                          <span className="font-medium capitalize">{selectedProvider}</span>
+                              <div className="text-right">
+                                <div className="flex items-center gap-2 justify-end">
+                                  {course.discountPrice < course.price && (
+                                    <span className="text-xs text-muted-foreground line-through">
+                                      ₹{course.price.toFixed(0)}
+                                    </span>
+                                  )}
+                                  <span className="text-lg font-bold text-primary">
+                                    ₹{course.discountPrice.toFixed(0)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="px-0"
-                          onClick={() =>
-                            setSelectedProvider((prev) =>
-                              prev === 'stripe' ? 'razorpay' : 'stripe'
-                            )
-                          }
-                        >
-                          Switch
-                        </Button>
-                      </motion.div>
-                    </AnimatePresence>
-                  </CardContent>
-                </Card>
-              </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
 
-              <Button
-                onClick={handleProceedToPayment}
-                className="w-full"
-                size="lg"
-                disabled={!canCheckout}
-              >
-                {isCreatingOrder ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Creating secure order...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Proceed to Payment
-                  </>
-                )}
-              </Button>
-
-              <div className="text-xs text-muted-foreground text-center">
-                By continuing, you agree to our Terms of Service and Privacy Policy
+            {/* Loyalty/Coupon Info placeholder */}
+            {/* <motion.div
+              variants={itemVariants}
+              className="bg-primary/5 rounded-xl p-6 border flex items-start gap-4"
+            >
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <Tag className="w-5 h-5" />
               </div>
-
-              <div className="pt-4 border-t">
-                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    <span>Secure Checkout</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    <span>Instant Access</span>
-                  </div>
-                </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-base text-foreground mb-1">Applying Promo Codes</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Promo codes can be applied in the next step during payment resolution. Valid
+                  discounts will be automatically subtracted from your final total.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div> */}
-      </div>
+            </motion.div> */}
+          </div>
+
+          {/* Sidebar / Summary */}
+          <motion.div variants={itemVariants} className="lg:col-span-1">
+            <OrderSummaryCard
+              isProcessing={isCreatingOrder}
+              onCheckout={handleProceedToPayment}
+              showCheckoutButton={canCheckout}
+              summary={{
+                currency: orderData.currency,
+                discount: orderData.discount,
+                subtotal: orderData.subtotal,
+                tax: orderData.tax,
+                total: orderData.total,
+                itemCount: orderData.items.length,
+              }}
+            />
+
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/20 border border-border/40 text-xs text-muted-foreground">
+                <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
+                <p>
+                  Every course comes with a <strong>30-day money-back guarantee</strong>. No
+                  questions asked if you&apos;re not satisfied.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   );
 }
