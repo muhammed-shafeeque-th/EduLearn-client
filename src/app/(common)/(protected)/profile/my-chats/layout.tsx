@@ -1,5 +1,5 @@
 import React, { Suspense, ReactNode } from 'react';
-import { MyChatsPageSkeleton } from './_/components/skeletons/my-chats-page-skeleton';
+import { MyChatsPageSkeleton } from '@/components/chat/skeletons/my-chats-page-skeleton';
 // import { requireAuth } from '@/lib/auth/require-auth';
 // import { redirect } from 'next/navigation';
 
@@ -21,7 +21,7 @@ export default async function MessagesLayout({ children }: MessagesLayoutProps) 
   // });
 
   return (
-    <main className="min-h-screen flex flex-col bg-background text-foreground relative">
+    <main className="h-screen flex flex-col bg-background text-foreground relative overflow-hidden">
       <Suspense fallback={<MyChatsPageSkeleton />}>{children}</Suspense>
     </main>
   );
