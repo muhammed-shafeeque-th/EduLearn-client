@@ -9,9 +9,7 @@ export function getCertificatePublicUrl(certificateId: string, baseUrl?: string)
   return `${base}/certificates/${certificateId}`;
 }
 
-// ============================================================================
 // LINKEDIN SHARING
-// ============================================================================
 
 /**
  * Share certificate to LinkedIn Profile
@@ -45,9 +43,7 @@ export function shareToLinkedInFeed(certificate: CertificateData): void {
   window.open(linkedInUrl.toString(), '_blank', 'width=600,height=600');
 }
 
-// ============================================================================
 // TWITTER (X) SHARING
-// ============================================================================
 
 /**
  * Share certificate to Twitter/X
@@ -64,9 +60,7 @@ export function shareToTwitter(certificate: CertificateData): void {
   window.open(twitterUrl.toString(), '_blank', 'width=600,height=600');
 }
 
-// ============================================================================
 // FACEBOOK SHARING
-// ============================================================================
 
 /**
  * Share certificate to Facebook
@@ -80,9 +74,7 @@ export function shareToFacebook(certificate: CertificateData): void {
   window.open(facebookUrl.toString(), '_blank', 'width=600,height=600');
 }
 
-// ============================================================================
 // EMAIL SHARING
-// ============================================================================
 
 /**
  * Share certificate via email
@@ -97,9 +89,7 @@ export function shareViaEmail(certificate: CertificateData): void {
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }
 
-// ============================================================================
 // WHATSAPP SHARING
-// ============================================================================
 
 /**
  * Share certificate to WhatsApp
@@ -114,9 +104,7 @@ export function shareToWhatsApp(certificate: CertificateData): void {
   window.open(whatsappUrl, '_blank', 'width=600,height=600');
 }
 
-// ============================================================================
 // NATIVE WEB SHARE API
-// ============================================================================
 
 /**
  * Share using native Web Share API (mobile-friendly)
@@ -147,9 +135,7 @@ export async function shareViaWebShare(
   }
 }
 
-// ============================================================================
 // COPY TO CLIPBOARD
-// ============================================================================
 
 /**
  * Copy certificate link to clipboard
@@ -167,9 +153,7 @@ export async function copyVerificationLink(certificate: CertificateData): Promis
   await navigator.clipboard.writeText(publicUrl);
 }
 
-// ============================================================================
 // DOWNLOAD AS IMAGE
-// ============================================================================
 
 /**
  * Download certificate as PNG image
@@ -217,9 +201,7 @@ export async function downloadCertificateAsImage(
   }
 }
 
-// ============================================================================
 // EMBED CODE (REMOVED - Not needed without QR)
-// ============================================================================
 
 /**
  * Generate HTML embed code for certificate
@@ -245,9 +227,7 @@ export async function copyEmbedCode(certificate: CertificateData): Promise<void>
   await navigator.clipboard.writeText(embedCode);
 }
 
-// ============================================================================
 // ANALYTICS TRACKING
-// ============================================================================
 
 interface ShareEvent {
   certificateId: string;
