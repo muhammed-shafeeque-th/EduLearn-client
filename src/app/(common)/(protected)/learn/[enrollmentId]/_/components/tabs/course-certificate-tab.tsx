@@ -33,12 +33,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn, getErrorMessage } from '@/lib/utils';
-import { useCertificate } from '../../hooks/use-certificate';
 import { CertificatePreview } from '../certificate-preview';
 import type { EnrollmentDetail } from '@/types/enrollment/enrollment.type';
 
 // Import utilities
-import { downloadCertificatePDF, printCertificate } from '../certificate/utils';
+import { downloadCertificatePDF, printCertificate } from '@/lib/certificate/utils';
 
 import {
   shareToLinkedInProfile,
@@ -53,8 +52,9 @@ import {
   // downloadCertificateAsImage,
   copyEmbedCode,
   trackCertificateShare,
-} from '../certificate/utils/share-utils';
+} from '@/lib/certificate/utils/share-utils';
 import { toast } from '@/hooks/use-toast';
+import { useEnrollmentCertificate } from '@/states/server/certificate/use-certificate';
 
 interface CourseCertificateTabProps {
   enrollmentId: string;
@@ -70,7 +70,7 @@ export function CourseCertificateTab({
   userName,
 }: CourseCertificateTabProps) {
   const { certificate, hasCertificate, isLoading, isGenerating, generateCertificate } =
-    useCertificate(enrollmentId);
+    useEnrollmentCertificate(enrollmentId);
 
   const [showNameForm, setShowNameForm] = useState(false);
   const [studentName, setStudentName] = useState(userName || '');
@@ -79,10 +79,6 @@ export function CourseCertificateTab({
 
   const isCompleted = enrollment.status === 'COMPLETED' || overallProgress === 100;
   const isEligible = isCompleted;
-
-  // ============================================================================
-  // GENERATION HANDLERS
-  // ============================================================================
 
   const handleGenerateClick = () => {
     setShowNameForm(true);
@@ -128,9 +124,7 @@ export function CourseCertificateTab({
     }
   };
 
-  // ============================================================================
   // DOWNLOAD HANDLERS
-  // ============================================================================
 
   const handleDownloadPDF = async () => {
     if (!certificate) return;
@@ -183,9 +177,7 @@ export function CourseCertificateTab({
     }
   };
 
-  // ============================================================================
   // SHARING HANDLERS
-  // ============================================================================
 
   // const handleShareNative = async () => {
   //   if (!certificate) return;
@@ -245,9 +237,7 @@ export function CourseCertificateTab({
   //   toast.success({ title: 'Opening WhatsApp...' });
   // };
 
-  // ============================================================================
   // COPY HANDLERS
-  // ============================================================================
 
   const handleCopyLink = async () => {
     if (!certificate) return;
@@ -288,9 +278,7 @@ export function CourseCertificateTab({
     }
   };
 
-  // ============================================================================
   // RENDER
-  // ============================================================================
 
   if (isLoading) {
     return (
