@@ -1,9 +1,9 @@
 'use client';
 
-import { StripeCheckout } from './__providers/stripe-checkout';
-import { RazorpayCheckout } from './__providers/razorpay-checkout';
-import { PayPalCheckout } from './__providers/paypal-checkout';
-import { PaymentHandlers, PaymentProvider, PaymentSessionData } from '../__types';
+import { StripeCheckout } from './providers/stripe-payment-provider';
+import { RazorpayCheckout } from './providers/rozorpay-payment-provider';
+import { PayPalButtons } from './providers/paypal-payment-provider';
+import { PaymentProvider } from '@/services/payment.service';
 
 interface UnifiedCheckoutProps {
   provider: PaymentProvider;
@@ -38,7 +38,7 @@ export function UnifiedCheckout({ provider, session, handlers }: UnifiedCheckout
   }
 
   if (provider === 'paypal') {
-    return <PayPalCheckout orderID={session.orderId!} amount={session.amount} {...handlers} />;
+    return <PayPalButtons orderID={session.orderId!} amount={session.amount} {...handlers} />;
   }
 
   return null;

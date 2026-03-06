@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useSelector } from '@xstate/react';
 import { ArrowLeft, Shield, CreditCard, Loader2, CheckCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+// import { Badge } from '@/components/ui/badge';
 
 import { StripeCheckout } from './providers/stripe-payment-provider';
 import { PayPalButtons } from './providers/paypal-payment-provider';
@@ -23,7 +22,8 @@ import type {
   StripeSession,
 } from '@/lib/machines/order-machine';
 import type { Order } from '@/types/order';
-import { normalizeCurrencyAmount } from '@/lib/utils';
+import { getErrorMessage, normalizeCurrencyAmount } from '@/lib/utils';
+import { ERROR_CODES } from '@/lib/errors/error-codes';
 
 const SESSION_MESSAGES = [
   'Creating payment session...',
@@ -157,14 +157,42 @@ const isAfterOrderCreated = (orderStateValue: string | object) => {
   return false;
 };
 
-export function PaymentContent({ courseId, orderId, order: serverOrder }: PaymentContentProps) {
+export function PaymentContent({
+  courseId,
+  orderId,
+  order: serverOrder,
+  paymentId,
+}: PaymentContentProps) {
   const router = useRouter();
-  const orderService = useOrderMachine();
-  const orderState = useSelector(orderService, (state) => state);
-  const { order, providerSession, provider, error } = orderState.context;
+  const {
+    order,
+    provider,
+    providerSession,
+    machineError: error,
+    status,
+    isOrderCreated,
+    isCreatingPayment,
+    isCreatingSession,
+    isAwaitingProvider,
+    isProviderUI,
+    isResolving,
+    isPolling,
+    isSucceeded,
+    isCancelled,
+    isFailed,
+    selectProvider,
+    setPaymentId,
+    createSession,
+    confirmPayment,
+    triggerUI,
+    cancel,
+    hydrate: hydrateOrder,
+    paymentId: machinePaymentId,
+  } = useOrderMachine();
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentProvider>('stripe');
   const [loadingOrder, setLoadingOrder] = useState(true);
+  const hasHydratedRef = useRef(false);
   const hasRedirectedRef = useRef(false);
   const hasTriggeredUIRef = useRef(false);
   const lastErrorRef = useRef<string | null>(null);
@@ -172,24 +200,25 @@ export function PaymentContent({ courseId, orderId, order: serverOrder }: Paymen
   const applyProviderSelection = useCallback(
     (nextProvider: PaymentProvider) => {
       if (provider !== nextProvider) {
-        orderService.send({ type: 'SELECT_PROVIDER', provider: nextProvider });
+        selectProvider(nextProvider);
       }
     },
-    [orderService, provider]
+    [selectProvider, provider]
   );
 
   const handleSelectProvider = useCallback(
-    (provider: PaymentProvider) => {
-      if (isAfterOrderCreated(orderState.value)) {
+    (nextProvider: PaymentProvider) => {
+      if (isAfterOrderCreated(status)) {
         toast.error({
           title:
             'Cannot change payment method after payment has begun. Please refresh if you want to restart payment.',
         });
         return;
       }
-      setSelectedMethod(provider);
+      setSelectedMethod(nextProvider);
+      applyProviderSelection(nextProvider);
     },
-    [orderState, setSelectedMethod]
+    [status, applyProviderSelection]
   );
 
   // useEffect(() => {
@@ -204,94 +233,109 @@ export function PaymentContent({ courseId, orderId, order: serverOrder }: Paymen
   // }, [selectedMethod]);
 
   useEffect(() => {
-    async function hydrateExistingOrder() {
-      orderService.send({
-        type: 'HYDRATE_ORDER',
-        order: serverOrder,
-        provider: (serverOrder.paymentDetails?.provider as PaymentProvider | undefined) ?? null,
-      });
+    if (hasHydratedRef.current) return;
 
+    async function hydrateExistingOrder() {
+      if (serverOrder.status === 'failed' || serverOrder.status === 'cancelled') {
+        const params = new URLSearchParams({ orderId: serverOrder.id });
+        router.replace(`/payment/failure?${params.toString()}`);
+        return;
+      }
+
+      const rawProvider = serverOrder.paymentDetails?.provider as PaymentProvider | undefined;
       const inferredProvider =
-        (serverOrder.paymentDetails?.provider as PaymentProvider | undefined) ?? provider;
+        rawProvider && ['stripe', 'paypal', 'razorpay'].includes(rawProvider)
+          ? rawProvider
+          : provider;
+
+      hydrateOrder(serverOrder, inferredProvider ?? stripeFallback);
+
       if (inferredProvider) {
         setSelectedMethod(inferredProvider);
         applyProviderSelection(inferredProvider);
+      } else {
+        setSelectedMethod(stripeFallback);
+        applyProviderSelection(stripeFallback);
       }
 
       setLoadingOrder(false);
+      hasHydratedRef.current = true;
     }
+    const stripeFallback = 'stripe';
     hydrateExistingOrder();
-    return () => {};
-  }, [orderId, courseId, router, serverOrder, provider, orderService, applyProviderSelection]);
+  }, [orderId, courseId, router, serverOrder, provider, hydrateOrder, applyProviderSelection]);
 
   useEffect(() => {
-    applyProviderSelection(selectedMethod);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMethod]);
+    if (isOrderCreated && machinePaymentId === null && paymentId) setPaymentId(paymentId);
+  }, [isOrderCreated, paymentId, setPaymentId, machinePaymentId]);
 
   useEffect(() => {
-    if (provider && provider !== selectedMethod) {
-      setSelectedMethod(provider);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider]);
-
-  useEffect(() => {
-    if (orderState.matches('awaitingProvider') && providerSession && !hasTriggeredUIRef.current) {
-      orderService.send({ type: 'TRIGGER_PROVIDER_UI' });
+    if (isAwaitingProvider && providerSession && !hasTriggeredUIRef.current) {
+      triggerUI();
       hasTriggeredUIRef.current = true;
     }
 
-    if (orderState.matches('providerUI')) {
+    if (isProviderUI) {
       hasTriggeredUIRef.current = true;
     }
 
-    if (orderState.matches('orderCreated') || orderState.matches('failure')) {
+    if (isOrderCreated || isFailed) {
       hasTriggeredUIRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderState.value, providerSession, orderService]);
+  }, [
+    status,
+    providerSession,
+    isAwaitingProvider,
+    isProviderUI,
+    isOrderCreated,
+    isFailed,
+    triggerUI,
+  ]);
 
   useEffect(() => {
     if (!order) return;
 
-    if (orderState.matches('succeeded') && !hasRedirectedRef.current) {
+    if (isSucceeded && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
       router.replace(`/payment/success?orderId=${order.id}`);
       return;
     }
 
-    if (
-      (orderState.matches('failure') || orderState.matches('cancelled')) &&
-      !hasRedirectedRef.current
-    ) {
+    if ((isFailed || isCancelled) && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
       const params = new URLSearchParams({ orderId: order.id });
-      if (error) params.set('err', error);
+      if (error) params.set('error_code', getErrorMessage(error, ERROR_CODES.UNKNOWN_ERROR));
       router.replace(`/payment/failure?${params.toString()}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderState.value, order, router, error]);
+  }, [status, order, router, error, isSucceeded, isFailed, isCancelled]);
 
   useEffect(() => {
-    if (orderState.matches('failure') && error && error !== lastErrorRef.current) {
+    if (isFailed && error && error !== lastErrorRef.current) {
       toast.error({ title: error });
       lastErrorRef.current = error;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderState.value, error]);
+  }, [isFailed, error]);
 
   const phase: FlowPhase = useMemo(() => {
     if (loadingOrder) return 'loading';
-    if (orderState.matches('succeeded')) return 'completed';
-    if (orderState.matches('polling')) return 'polling';
-    if (orderState.matches('resolvingPayment')) return 'resolving';
-    if (orderState.matches('providerUI')) return 'provider';
-    if (orderState.matches('creatingProviderSession') || orderState.matches('awaitingProvider')) {
+    if (isSucceeded) return 'completed';
+    if (isPolling) return 'polling';
+    if (isResolving) return 'resolving';
+    if (isProviderUI) return 'provider';
+    if (isCreatingPayment || isCreatingSession || isAwaitingProvider) {
       return 'creatingSession';
     }
     return 'selecting';
-  }, [orderState, loadingOrder]);
+  }, [
+    loadingOrder,
+    isSucceeded,
+    isPolling,
+    isResolving,
+    isProviderUI,
+    isCreatingPayment,
+    isCreatingSession,
+    isAwaitingProvider,
+  ]);
 
   const isActionDisabled =
     phase === 'loading' ||
@@ -321,28 +365,25 @@ export function PaymentContent({ courseId, orderId, order: serverOrder }: Paymen
     }
 
     const urlsAvailable = typeof window !== 'undefined';
-    orderService.send({
-      type: 'CREATE_PROVIDER_SESSION',
-      payload: {
-        successUrl: urlsAvailable ? `${window.location.origin}/payment/return` : undefined,
-        cancelUrl: urlsAvailable ? `${window.location.origin}/payment/failure` : undefined,
-      },
+    createSession({
+      successUrl: urlsAvailable ? `${window.location.origin}/payment/return` : undefined,
+      cancelUrl: urlsAvailable ? `${window.location.origin}/payment/failure` : undefined,
     });
-  }, [order, orderService]);
+  }, [order, createSession]);
 
   const handlePaymentConfirmation = useCallback(
     (proof: PaymentProof) => {
-      orderService.send({ type: 'PAYMENT_CONFIRMED_CLIENT', proof });
+      confirmPayment(proof);
     },
-    [orderService]
+    [confirmPayment]
   );
 
   const handleProviderError = useCallback(
     (message: string) => {
       toast.error({ title: message });
-      orderService.send({ type: 'CANCEL' });
+      cancel();
     },
-    [orderService]
+    [cancel]
   );
 
   const orderSummary = (order ?? null) as Order | null;
@@ -361,7 +402,7 @@ export function PaymentContent({ courseId, orderId, order: serverOrder }: Paymen
             animate={{ opacity: 1, backdropFilter: 'blur(4px)' }}
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ type: 'spring', duration: 0.35 }}
-            className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-auto"
+            className="fixed inset-0 z-10000 flex items-center justify-center pointer-events-auto"
             style={{
               minHeight: '100vh',
               minWidth: '100vw',
@@ -507,9 +548,9 @@ export function PaymentContent({ courseId, orderId, order: serverOrder }: Paymen
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
+                            {/* <Badge variant="outline" className="text-xs">
                               {method.fee}
-                            </Badge>
+                            </Badge> */}
                             <div
                               className={`h-4 w-4 rounded-full border-2 ${
                                 selectedMethod === method.id
@@ -574,6 +615,7 @@ export function PaymentContent({ courseId, orderId, order: serverOrder }: Paymen
                 {paymentSession.provider === 'stripe' && stripeSession?.sessionId && (
                   <StripeCheckout
                     sessionId={stripeSession.sessionId}
+                    publicKey={stripeSession.publicKey}
                     amount={stripeSession?.amount ?? order?.subTotal ?? 0}
                     currency={stripeSession?.currency || 'USD'}
                     onSuccess={(sessionId) =>

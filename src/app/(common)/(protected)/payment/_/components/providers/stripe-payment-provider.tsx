@@ -10,18 +10,16 @@ export const stripePromise = loadStripe(config.stripePublishableKey!);
 
 interface StripeCheckoutProps {
   sessionId: string;
+  publicKey: string;
   amount: number;
   currency: string;
   onSuccess: (id: string) => void;
   onError: (err: string) => void;
 }
 
-/**
- * StripeCheckout runs redirectToCheckout immediately on mount and handles loading/feedback.
- * No UI or button is shown to user, except a loading spinner while redirecting.
- */
 export function StripeCheckout({
   sessionId,
+  publicKey,
   // amount,
   // currency,
   onSuccess,
@@ -34,7 +32,7 @@ export function StripeCheckout({
     async function redirect() {
       try {
         setLoading(true);
-        const stripe = await stripePromise;
+        const stripe = await loadStripe(publicKey);
 
         if (!stripe) throw new Error('Stripe failed to initialize');
 
@@ -59,7 +57,7 @@ export function StripeCheckout({
       isMounted = false;
     };
     // Only run on mount or if sessionId changes.
-  }, [sessionId, onSuccess, onError]);
+  }, [sessionId, publicKey, onSuccess, onError]);
 
   // Show a minimal loading spinner while redirecting.
   return (
