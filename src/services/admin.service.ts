@@ -26,10 +26,19 @@ export interface SystemOverview {
   totalCourses: number;
   monthlyRevenue: number;
 }
-export interface RevenueStats {
-  stats: {
-    date: number;
-    revenue: number;
+export type RevenueStats = {
+  month: number;
+  revenue: number;
+}[];
+
+export type EnrollmentTrend = {
+  month: number;
+  enrollments: number;
+}[];
+export interface GrowthTrend {
+  trend: {
+    month: number;
+    count: number;
   }[];
 }
 
@@ -91,6 +100,15 @@ export interface IAdminService {
 
   getSystemOverview(options?: RequestOptions): Promise<ApiResponse<SystemOverview>>;
   getRevenueStats(year?: string, options?: RequestOptions): Promise<ApiResponse<RevenueStats>>;
+  getEnrollmentTrend(
+    year?: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<EnrollmentTrend>>;
+  getUserGrowthTrend(year?: string, options?: RequestOptions): Promise<ApiResponse<GrowthTrend>>;
+  getInstructorGrowthTrend(
+    year?: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<GrowthTrend>>;
   getInstructorStats(
     instructorId: string,
     options?: RequestOptions
@@ -215,8 +233,15 @@ export class AdminService extends BaseService implements IAdminService {
     year?: string,
     options?: RequestOptions
   ): Promise<ApiResponse<RevenueStats>> {
-    const url = `/admin/revenue-stats` + year ? `?year=${year}` : '';
+    const url = `/admin/revenue-stats` + (year ? `?year=${year}` : '');
     return this.get<ApiResponse<RevenueStats>>(url, options);
+  }
+  public async getEnrollmentTrend(
+    year?: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<EnrollmentTrend>> {
+    const url = `/admin/enrollment-trend` + (year ? `?year=${year}` : '');
+    return this.get<ApiResponse<EnrollmentTrend>>(url, options);
   }
 
   async getInstructorCoursesStats(
@@ -248,6 +273,21 @@ export class AdminService extends BaseService implements IAdminService {
       `/users/instructors/${instructorId}/courses/${courseId}/stats`,
       options
     );
+  }
+
+  public async getUserGrowthTrend(
+    year?: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<GrowthTrend>> {
+    const url = `/admin/user-growth-trend` + (year ? `?year=${year}` : '');
+    return this.get<ApiResponse<GrowthTrend>>(url, options);
+  }
+  public async getInstructorGrowthTrend(
+    year?: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<GrowthTrend>> {
+    const url = `/admin/instructor-growth-trend` + (year ? `?year=${year}` : '');
+    return this.get<ApiResponse<GrowthTrend>>(url, options);
   }
 
   public async getInstructorStats(
