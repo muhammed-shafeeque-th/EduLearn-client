@@ -8,7 +8,6 @@ import {
   MoreVertical,
   MessageSquarePlus,
   BellOff,
-  Trash2,
   Archive,
   X,
   SlidersHorizontal,
@@ -28,7 +27,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
@@ -53,6 +51,7 @@ interface ChatListProps {
   onMute: (chatId: string) => void;
   onArchive: (chatId: string) => void;
   onDelete: (chatId: string) => void;
+  onNewMessage?: () => void;
   isLoading?: boolean;
 }
 
@@ -66,6 +65,7 @@ export function ChatList({
   onMute,
   onArchive,
   onDelete,
+  onNewMessage,
   isLoading = false,
 }: ChatListProps) {
   const [search, setSearch] = useState('');
@@ -210,6 +210,18 @@ export function ChatList({
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {onNewMessage && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9"
+                onClick={onNewMessage}
+                aria-label="New message"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -351,7 +363,7 @@ const ChatItem = memo(function ChatItem({
   onPin,
   onMute,
   onArchive,
-  onDelete,
+  onDelete: _onDelete,
 }: {
   chat: Chat;
   isSelected: boolean;
@@ -517,19 +529,6 @@ const ChatItem = memo(function ChatItem({
             >
               <Archive className="w-4 h-4 mr-2" />
               Archive Chat
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive focus:bg-destructive/10"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Conversation
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

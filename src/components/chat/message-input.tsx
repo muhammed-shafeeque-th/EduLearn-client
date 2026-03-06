@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void;
@@ -29,6 +29,12 @@ interface MessageInputProps {
   replyingTo?: any;
   onCancelReply?: () => void;
   disabled?: boolean;
+  /** Pre-fill textarea for editing an existing message */
+  initialValue?: string;
+  /** Whether we're in edit mode */
+  isEditing?: boolean;
+  /** Cancel editing callback */
+  onCancelEdit?: () => void;
 }
 
 // Emoji categories
@@ -133,8 +139,11 @@ export function MessageInput({
   replyingTo,
   onCancelReply,
   disabled = false,
+  initialValue,
+  isEditing = false,
+  onCancelEdit,
 }: MessageInputProps) {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(initialValue ?? '');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -149,10 +158,20 @@ export function MessageInput({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // Auto-focus on mount
+  // Sync message state when initialValue changes (entering/exiting edit mode)
+  useEffect(() => {
+    if (initialValue !== undefined) {
+      setMessage(initialValue);
+    } else if (!isEditing) {
+      // Exited edit mode — clear the input
+      setMessage('');
+    }
+  }, [initialValue, isEditing]);
+
+  // Auto-focus on mount and when entering edit mode
   useEffect(() => {
     textareaRef.current?.focus();
-  }, []);
+  }, [isEditing]);
 
   // Recording timer
   useEffect(() => {
@@ -205,7 +224,7 @@ export function MessageInput({
     if (!trimmed && selectedFiles.length === 0) return;
 
     if (selectedFiles.length > 0) {
-      toast.success(`Sending ${selectedFiles.length} file(s)...`);
+      toast.success({ title: `Sending ${selectedFiles.length} file(s)...` });
       // TODO: Handle file upload
       setSelectedFiles([]);
     }
@@ -238,22 +257,32 @@ export function MessageInput({
         handleSend();
       }
 
+      // Escape to cancel edit
+      if (e.key === 'Escape' && isEditing && onCancelEdit) {
+        e.preventDefault();
+        onCancelEdit();
+      }
+
       // Ctrl/Cmd + B for bold (future feature)
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
-        // TODO: Add bold formatting
       }
 
       // Ctrl/Cmd + I for italic (future feature)
       if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
         e.preventDefault();
-        // TODO: Add italic formatting
       }
     },
-    [handleSend]
+    [handleSend, isEditing, onCancelEdit]
   );
 
+  const displayComingSoonMessage = () => toast.info({ title: 'Feature coming soon!' });
+
   const handleVoiceRecord = useCallback(async () => {
+    displayComingSoonMessage();
+
+    return;
+
     if (!isRecording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -266,9 +295,9 @@ export function MessageInput({
         };
 
         mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const _audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           // TODO: Send audio blob
-          toast.success('Voice message recorded');
+          toast.success({ title: 'Voice message recorded' });
           stream.getTracks().forEach((track) => track.stop());
         };
 
@@ -277,11 +306,11 @@ export function MessageInput({
         setRecordingTime(0);
       } catch (error) {
         console.error('Error starting recording:', error);
-        toast.error('Failed to access microphone');
+        toast.error({ title: 'Failed to access microphone' });
       }
     } else {
       if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current?.stop();
         setIsRecording(false);
         setIsPaused(false);
       }
@@ -306,7 +335,7 @@ export function MessageInput({
       setIsPaused(false);
       setRecordingTime(0);
       audioChunksRef.current = [];
-      toast.info('Recording cancelled');
+      toast.info({ title: 'Recording cancelled' });
     }
   }, []);
 
@@ -314,7 +343,7 @@ export function MessageInput({
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
       setSelectedFiles((prev) => [...prev, ...files]);
-      toast.success(`${files.length} file(s) selected`);
+      toast.success({ title: `${files.length} file(s) selected` });
     }
     e.target.value = '';
   }, []);
@@ -363,6 +392,24 @@ export function MessageInput({
               <p className="text-sm text-muted-foreground truncate">{replyingTo.content}</p>
             </div>
             <Button variant="ghost" size="icon" onClick={onCancelReply} className="h-6 w-6">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Mode Banner */}
+      {isEditing && (
+        <div className="px-4 pt-3 pb-2 border-b border-border/50">
+          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2">
+            <div className="w-1 h-8 bg-amber-500 rounded-full" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                Editing message
+              </p>
+              <p className="text-sm text-muted-foreground truncate">{initialValue}</p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={onCancelEdit} className="h-6 w-6">
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -468,7 +515,11 @@ export function MessageInput({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => imageInputRef.current?.click()}
+                      onClick={() => {
+                        displayComingSoonMessage();
+                        return;
+                        imageInputRef.current?.click();
+                      }}
                     >
                       <ImageIcon className="w-4 h-4 mr-2 text-blue-500" />
                       Photos
@@ -476,16 +527,34 @@ export function MessageInput({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => {
+                        displayComingSoonMessage();
+                        return;
+                        fileInputRef.current?.click();
+                      }}
                     >
                       <File className="w-4 h-4 mr-2 text-gray-500" />
                       Documents
                     </Button>
-                    <Button variant="ghost" className="justify-start">
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => {
+                        displayComingSoonMessage();
+                        return;
+                      }}
+                    >
                       <Camera className="w-4 h-4 mr-2 text-green-500" />
                       Camera
                     </Button>
-                    <Button variant="ghost" className="justify-start">
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => {
+                        displayComingSoonMessage();
+                        return;
+                      }}
+                    >
                       <Video className="w-4 h-4 mr-2 text-red-500" />
                       Video
                     </Button>

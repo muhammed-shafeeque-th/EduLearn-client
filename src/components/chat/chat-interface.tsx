@@ -21,7 +21,6 @@ import {
   ChevronDown,
   Archive,
   Bell,
-  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MessageBubble } from './message-bubble';
@@ -30,14 +29,7 @@ import { VideoCall } from './video-call';
 import { cn } from '@/lib/utils';
 import type { Chat, Message } from '@/types/chat';
 import type { UserInfo } from '@/types/user';
-import {
-  format,
-  isToday,
-  isYesterday,
-  startOfDay,
-  isThisWeek,
-  isThisYear,
-} from 'date-fns';
+import { format, isToday, isYesterday, startOfDay, isThisWeek, isThisYear } from 'date-fns';
 import { getOtherUser, getUserDisplayName, TypingIndicator } from '@/lib/chat/chat-utils';
 import {
   DropdownMenu,
@@ -78,10 +70,12 @@ interface ChatInterfaceProps {
   onSendMessage: (content: string) => void;
   onAddReaction: (messageId: string, emoji: string) => void;
   onRemoveReaction: (messageId: string, reactionId: string) => void;
+  onEditMessage?: (messageId: string, content: string) => Promise<Message | null>;
+  onDeleteMessage?: (messageId: string, forEveryone?: boolean) => Promise<boolean>;
   onStartTyping: () => void;
   onStopTyping: () => void;
   onBack?: () => void;
-  onlineUsers: Set<string>;
+  onlineUsers: ReadonlySet<string>;
   className?: string;
   isLoading?: boolean;
   hasMoreMessages?: boolean;
@@ -166,6 +160,8 @@ export function ChatInterface({
   messages,
   onAddReaction,
   onRemoveReaction,
+  onEditMessage,
+  onDeleteMessage,
   currentUser,
   typingUsers,
   onSendMessage,
@@ -182,7 +178,8 @@ export function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
-  const prevCount = useRef(0);
+  const prevMessageCountRef = useRef(0);
+  const isInitialLoadRef = useRef(true);
 
   // States
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -193,6 +190,7 @@ export function ChatInterface({
   const [showSearch, setShowSearch] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
 
   // Derived
   const { otherUser, otherUserId } = useMemo(
@@ -207,20 +205,43 @@ export function ChatInterface({
     messagesContainerRef.current?.focus();
   }, [otherUserId]);
 
-  // Auto scroll on new messages, only if user is at or near bottom.
-
+  // Scroll to bottom on initial load and when new messages arrive
   useEffect(() => {
-    const diff = messages.length - prevCount.current;
+    const currentCount = messages.length;
+    const prevCount = prevMessageCountRef.current;
+    prevMessageCountRef.current = currentCount;
 
-    prevCount.current = messages.length;
+    // Initial load — scroll to bottom immediately
+    if (isInitialLoadRef.current && currentCount > 0) {
+      isInitialLoadRef.current = false;
+      // Use requestAnimationFrame to ensure DOM is rendered
+      requestAnimationFrame(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+      return;
+    }
 
-    // Only scroll on NEW messages at bottom
-    if (diff > 0 && shouldAutoScroll) {
-      messagesEndRef.current?.scrollIntoView({
-        behavior: 'smooth',
+    // New messages added at the bottom — scroll if user was near bottom
+    if (currentCount > prevCount && shouldAutoScroll) {
+      requestAnimationFrame(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }
       });
     }
   }, [messages, shouldAutoScroll]);
+
+  // Reset initial load flag when chat changes
+  useEffect(() => {
+    isInitialLoadRef.current = true;
+    prevMessageCountRef.current = 0;
+    setShouldAutoScroll(true);
+  }, [chat.id]);
+
   // Handle scroll position, infinite scroll, and auto-scroll toggle
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
@@ -256,8 +277,10 @@ export function ChatInterface({
   // Utility to scroll to bottom and enable auto-scroll
   const scrollToBottom = useCallback(() => {
     setShouldAutoScroll(true);
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    messagesContainerRef.current?.focus();
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
   }, []);
 
   const orderedMessages = useMemo(() => {
@@ -276,7 +299,7 @@ export function ChatInterface({
     return groupMessagesByDate(filteredMessages);
   }, [filteredMessages]);
 
-  // Optionally show avatar for last in group not sent by user (still appears at the bottom per group)
+  // Optionally show avatar for last in group not sent by user
   const shouldShowAvatar = (message: Message, index: number, groupMessages: Message[]) => {
     if (message.senderId === currentUser.id) return false;
     return index === groupMessages.length - 1;
@@ -302,6 +325,33 @@ export function ChatInterface({
     setSelectedMessages(new Set());
     setIsSelectionMode(false);
   };
+
+  // Edit message handler
+  const handleEditMessage = useCallback((message: Message) => {
+    setEditingMessage(message);
+  }, []);
+
+  // Save edited message
+  const handleSaveEdit = useCallback(
+    async (content: string) => {
+      if (!editingMessage || !onEditMessage) return;
+      await onEditMessage(editingMessage.id, content);
+      setEditingMessage(null);
+    },
+    [editingMessage, onEditMessage]
+  );
+
+  // Delete message handler
+  const handleDeleteMessage = useCallback(
+    async (messageId: string) => {
+      if (!onDeleteMessage) return;
+      const success = await onDeleteMessage(messageId, true);
+      if (success) {
+        toast.success('Message deleted');
+      }
+    },
+    [onDeleteMessage]
+  );
 
   // Lock body scroll if video call modal open
   useLockBodyScroll(showVideoCall);
@@ -428,7 +478,7 @@ export function ChatInterface({
                   <FileText className="w-4 h-4 mr-2" />
                   {isSelectionMode ? 'Cancel Selection' : 'Select Messages'}
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowSearch(!showSearch)}>
                   <Search className="w-4 h-4 mr-2" />
                   Search in Conversation
                 </DropdownMenuItem>
@@ -440,11 +490,6 @@ export function ChatInterface({
                 <DropdownMenuItem>
                   <Archive className="w-4 h-4 mr-2" />
                   Archive Chat
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Chat
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -477,7 +522,6 @@ export function ChatInterface({
             </span>
             <div className="flex gap-2">
               <Button size="sm" variant="destructive" onClick={handleDeleteSelected}>
-                <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                 Delete
               </Button>
               <Button
@@ -558,7 +602,6 @@ export function ChatInterface({
                   {/* Message Group */}
                   <div className="space-y-1">
                     {group.messages.map((message, index) => {
-                      // Messages in each group are already ordered oldest (index 0) to newest (index last)
                       const isOwn = message.senderId === currentUser.id;
                       const showAvatar = shouldShowAvatar(message, index, group.messages);
                       const showTime = shouldShowTimestamp(message, index, group.messages);
@@ -566,6 +609,7 @@ export function ChatInterface({
                         <MessageBubble
                           key={message.id}
                           message={message}
+                          currentUserId={currentUser.id}
                           onAddReaction={onAddReaction}
                           onRemoveReaction={onRemoveReaction}
                           isOwn={isOwn}
@@ -573,6 +617,8 @@ export function ChatInterface({
                           showTimestamp={showTime}
                           sender={isOwn ? currentUser : (otherUser as UserInfo)}
                           onReply={setReplyingTo}
+                          onEdit={onEditMessage ? handleEditMessage : undefined}
+                          onDelete={onDeleteMessage ? handleDeleteMessage : undefined}
                           isSelected={selectedMessages.has(message.id)}
                           isSelectionMode={isSelectionMode}
                           onSelect={() => handleMessageSelect(message.id)}
@@ -645,12 +691,17 @@ export function ChatInterface({
       {/* Message Input - sticky bottom */}
       <div className="sticky bottom-0 left-0 right-0 z-10 bg-background border-t border-border">
         <MessageInput
-          onSendMessage={onSendMessage}
+          onSendMessage={editingMessage ? handleSaveEdit : onSendMessage}
           onStartTyping={onStartTyping}
           onStopTyping={onStopTyping}
-          placeholder={`Message ${otherUser?.name ?? displayName}...`}
+          placeholder={
+            editingMessage ? 'Edit your message...' : `Message ${otherUser?.name ?? displayName}...`
+          }
           replyingTo={replyingTo}
           onCancelReply={() => setReplyingTo(null)}
+          initialValue={editingMessage?.content}
+          isEditing={!!editingMessage}
+          onCancelEdit={() => setEditingMessage(null)}
         />
       </div>
       {/* Video Call Modal */}

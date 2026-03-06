@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, Sparkles, Search } from 'lucide-react';
+import { MessageSquare, Sparkles, MessageSquarePlus, Send, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -26,26 +26,22 @@ export function EmptyMessagesState({ onNewMessage }: EmptyMessagesStateProps) {
 
         {/* Content */}
         <div className="space-y-2">
-          <h3 className="text-xl sm:text-2xl font-semibold text-foreground">
-            No Conversations Yet
-          </h3>
+          <h3 className="text-xl sm:text-2xl font-semibold text-foreground">Welcome to Messages</h3>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Start a conversation with your instructor or student.
-            <br className="hidden sm:inline" />
-            Direct messaging lets you ask course questions, request feedback, or discuss assignments
-            privately.
+            Connect with your course instructors. Start meaningful conversations and collaborate on
+            your learning journey.
           </p>
         </div>
 
-        {/* Action */}
+        {/* CTA */}
         <div className="space-y-3">
           <Button
             onClick={onNewMessage}
             size="lg"
-            className="w-full flex items-center justify-center text-base sm:text-lg"
-            aria-label="Start new direct chat"
+            className="w-full flex items-center justify-center text-base sm:text-lg bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+            aria-label="Start new conversation"
           >
-            <MessageSquare className="w-4 h-4 mr-2" />
+            <MessageSquarePlus className="w-5 h-5 mr-2" />
             Start New Conversation
           </Button>
         </div>
@@ -53,31 +49,31 @@ export function EmptyMessagesState({ onNewMessage }: EmptyMessagesStateProps) {
         {/* Features */}
         <div className="grid grid-cols-1 gap-3 sm:gap-4 pt-4 sm:pt-6">
           <Card>
-            <CardContent className="p-3 sm:p-4 flex items-start gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <CardContent className="p-3 sm:p-4 flex items-start gap-3 text-left">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <div className="text-left">
+              <div>
                 <h4 className="font-medium text-foreground text-xs sm:text-sm mb-1">
-                  Direct Instructor/Student Chat
+                  Connect with Instructors
                 </h4>
                 <p className="text-xs text-muted-foreground">
-                  Exchange messages directly with your course instructor
+                  Ask questions, request feedback, or discuss assignments privately.
                 </p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-3 sm:p-4 flex items-start gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Search className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <CardContent className="p-3 sm:p-4 flex items-start gap-3 text-left">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-50 dark:bg-purple-900/20 rounded-lg flex items-center justify-center shrink-0">
+                <Send className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="text-left">
+              <div>
                 <h4 className="font-medium text-foreground text-xs sm:text-sm mb-1">
-                  Find Contacts
+                  Real-time Messaging
                 </h4>
                 <p className="text-xs text-muted-foreground">
-                  Search for your assigned instructor or student with ease
+                  Experience instant delivery and real-time updates for all your chats.
                 </p>
               </div>
             </CardContent>
@@ -87,8 +83,11 @@ export function EmptyMessagesState({ onNewMessage }: EmptyMessagesStateProps) {
         {/* Tips */}
         <div className="pt-3 sm:pt-4 border-t">
           <p className="text-xs text-muted-foreground text-left sm:text-center">
-            💡 <strong>Tip:</strong> You can also start a 1-on-1 chat from the course page by
-            clicking the instructor&apos;s profile.
+            💡 <strong>Tip:</strong> Press{' '}
+            <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd> to
+            send messages quickly and{' '}
+            <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Shift+Enter</kbd>{' '}
+            for new lines.
           </p>
         </div>
       </div>

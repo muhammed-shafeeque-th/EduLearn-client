@@ -26,18 +26,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
-// ------------ Types/interfaces -----------------
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   showAvatar: boolean;
   showTimestamp?: boolean;
   sender: UserInfo;
+  currentUserId: string;
   onReply?: (message: Message) => void;
   onEdit?: (message: Message) => void;
   onAddReaction: (messageId: string, emoji: string) => void;
@@ -49,16 +48,15 @@ interface MessageBubbleProps {
   onSelect?: () => void;
 }
 
-// ----------------- Helper constants ---------------
 const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
-// -------- Main Component --------------
 export const MessageBubble = memo(function MessageBubble({
   message,
   isOwn,
   showAvatar,
   showTimestamp = true,
   sender,
+  currentUserId,
   onReply,
   onAddReaction,
   onRemoveReaction,
@@ -70,20 +68,12 @@ export const MessageBubble = memo(function MessageBubble({
   onSelect,
 }: MessageBubbleProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // -------- Get currentUserId safely ---------
-  // For demo: get current user from message object or fallback (Replace to your logic)
-  // In best practice, current user's id should be provided by context or hook.
-  const currentUserId =
-    typeof window !== 'undefined' && window.localStorage
-      ? window.localStorage.getItem('currentUserId') || 'current-user'
-      : 'current-user';
-
-  // ---------- Group reactions by emoji and track if currentUser reacted ---------
   const reactionGroups = React.useMemo(() => {
     if (!message.reactions) return {};
     return message.reactions.reduce<
@@ -101,7 +91,6 @@ export const MessageBubble = memo(function MessageBubble({
     }, {});
   }, [message.reactions, currentUserId]);
 
-  // ----------- Audio/Voice message handlers ---------------
   const handlePlayVoice = useCallback(async () => {
     if (!message.fileUrl) return;
 
@@ -143,14 +132,14 @@ export const MessageBubble = memo(function MessageBubble({
     }
   }, [message.fileUrl, isPlaying]);
 
-  // -------------- Copy handlers ---------------
+  // - Copy handlers --
   const handleCopyMessage = useCallback(() => {
     if (!message.content) return;
     navigator.clipboard.writeText(message.content);
     toast.success('Message copied');
   }, [message.content]);
 
-  // -------------- Download handler ---------------
+  // - Download handler --
   const handleDownload = useCallback(() => {
     if (!message.fileUrl) return;
 
@@ -163,7 +152,7 @@ export const MessageBubble = memo(function MessageBubble({
     toast.success('Download started');
   }, [message.fileUrl, message.fileName]);
 
-  // -------------- Reaction handler -----------------
+  // - Reaction handler ----
   const handleReaction = useCallback(
     (emoji: string) => {
       // Check if current user already reacted with this emoji
@@ -183,7 +172,7 @@ export const MessageBubble = memo(function MessageBubble({
     [message.reactions, currentUserId, message.id, onRemoveReaction, onAddReaction]
   );
 
-  // -------------- Long press for selection ---------------
+  // - Long press for selection --
   const handleLongPress = useCallback(() => {
     longPressTimerRef.current = setTimeout(() => {
       if (onSelect) {
@@ -199,7 +188,7 @@ export const MessageBubble = memo(function MessageBubble({
     }
   }, []);
 
-  // ------------------ Render message content -------------
+  // ----- Render message content
   const renderMessageContent = useCallback(() => {
     switch (message.type) {
       case 'voice':
@@ -317,7 +306,7 @@ export const MessageBubble = memo(function MessageBubble({
     }
   }, [message, isPlaying, handlePlayVoice, audioProgress, handleDownload]);
 
-  // ------------- Message status -------------
+  //  Message status
   const MessageStatus = useCallback(() => {
     if (!isOwn) return null;
 
@@ -333,7 +322,7 @@ export const MessageBubble = memo(function MessageBubble({
     );
   }, [isOwn, message.status]);
 
-  // ------------- Render -------------
+  // Render
   return (
     <div
       className={cn(
@@ -387,6 +376,7 @@ export const MessageBubble = memo(function MessageBubble({
                 ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md'
                 : 'bg-card border border-border text-foreground rounded-bl-md hover:shadow-md',
               isHovered && !isSelectionMode && 'shadow-lg',
+              message.deletedAt ? 'opacity-50' : '',
               message.status === 'sending' && 'opacity-70',
               isSelected && 'ring-2 ring-blue-500'
             )}
@@ -441,14 +431,14 @@ export const MessageBubble = memo(function MessageBubble({
               {format(new Date(message.createdAt), 'h:mm a')}
             </span>
             <MessageStatus />
-            {message.updatedAt > message.createdAt && (
+            {message.editedAt && (
               <span className="text-[10px] text-muted-foreground italic">(edited)</span>
             )}
           </div>
         )}
 
-        {/* Quick Reactions (on hover) */}
-        {isHovered && !isSelectionMode && (
+        {/* Quick Reactions (on hover or when menu is open) */}
+        {(isHovered || menuOpen) && !isSelectionMode && (
           <div
             className={cn(
               'absolute top-0 flex items-center gap-1 bg-background/95 backdrop-blur-md border border-border rounded-full shadow-xl p-1 animate-in fade-in slide-in-from-bottom-2 z-10',
@@ -475,7 +465,7 @@ export const MessageBubble = memo(function MessageBubble({
             })}
 
             {/* More Options Dropdown */}
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={setMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -487,17 +477,17 @@ export const MessageBubble = memo(function MessageBubble({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align={isOwn ? 'end' : 'start'} className="w-48">
-                {onReply && (
+                {/* {onReply && (
                   <DropdownMenuItem onClick={() => onReply(message)}>
                     <Reply className="w-4 h-4 mr-2" />
                     Reply
                   </DropdownMenuItem>
-                )}
+                )} */}
                 <DropdownMenuItem onClick={handleCopyMessage}>
                   <Copy className="w-4 h-4 mr-2" />
                   Copy Text
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info('Forward feature')}>
+                {/*<DropdownMenuItem onClick={() => toast.info('Forward feature')}>
                   <Forward className="w-4 h-4 mr-2" />
                   Forward
                 </DropdownMenuItem>
@@ -506,6 +496,7 @@ export const MessageBubble = memo(function MessageBubble({
                   Pin Message
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                */}
                 {isOwn && onEdit && (
                   <DropdownMenuItem onClick={() => onEdit(message)}>
                     <Edit2 className="w-4 h-4 mr-2" />
