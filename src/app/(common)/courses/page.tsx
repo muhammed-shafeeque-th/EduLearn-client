@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { CoursesPageContainer } from './_/components/course-page-container';
 import { CoursesPageSkeleton } from './_/components/skeletons';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+// import { notFound } from 'next/navigation';
 import { fetchServerCourses } from '@/lib/server-apis';
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ interface SearchParams {
   sortBy?: string;
 }
 
-async function getInitialCourses(searchParams: SearchParams) {
+export async function getInitialCourses(searchParams: SearchParams) {
   const coursesResult = await fetchServerCourses(searchParams, {
     next: { revalidate: 60 }, // Revalidate every minute
   });
@@ -38,18 +38,18 @@ interface PageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export default async function CoursesPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const data = await getInitialCourses(params);
+export default async function CoursesPage({}: PageProps) {
+  // const params = await searchParams;
+  // const data = await getInitialCourses(params);
 
-  if (!data) {
-    return notFound();
-  }
+  // if (!data) {
+  //   return notFound();
+  // }
 
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={<CoursesPageSkeleton />}>
-        <CoursesPageContainer initialCourses={data.courses} initialPagination={data!} />
+        <CoursesPageContainer />
       </Suspense>
     </div>
   );
