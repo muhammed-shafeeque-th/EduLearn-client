@@ -4,13 +4,7 @@ import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
 import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
 
-interface CreatePaymentPayload {
-  orderId: string;
-  provider: string;
-  successUrl?: string;
-  cancelUrl?: string;
-}
-
+export type PaymentProvider = 'stripe' | 'razorpay' | 'paypal';
 export interface PaypalSession {
   orderId: string;
   /** PayPal redirect URL */
@@ -28,64 +22,28 @@ export interface StripeSession {
   sessionId: string;
   publicKey: string;
   clientSecret: string;
-  /** Stripe hosted checkout URL (optional) */
   url: string;
 }
 
-// Response type after creating payment session
-type PaymentResponse = {
+export interface PaymentResponse {
+  paymentId: string;
+  status: string;
+  orderId: string;
+}
+
+
+type ProviderSessionResponse = {
   userDetails?: {
     email: string;
     name: string;
   };
-  paymentId: string;
-  status: string;
   userId: string;
-  orderId: string;
+  paymentId: string;
+  provider: PaymentProvider;
   stripe?: StripeSession;
   paypal?: PaypalSession;
   razorpay?: RazorpaySession;
 };
-
-// type Money = {
-//   amount: number;
-//   currency: string;
-// };
-
-// type PaymentResponse =
-//   | {
-//       paypal: {
-//         paymentId: string;
-//         userId: string;
-//         orderId: string;
-//         providerOrderId: string;
-//         amount: Money | undefined;
-//         status: string;
-//         approvalUrl: string;
-//       };
-//     }
-//   | {
-//       razorpay: {
-//         paymentId: string;
-//         userId: string;
-//         orderId: string;
-//         providerOrderId: string;
-//         amount: Money | undefined;
-//         status: string;
-//         keyId: string;
-//       };
-//     }
-//   | {
-//       stripe: {
-//         paymentId?: string | undefined;
-//         userId?: string | undefined;
-//         orderId?: string | undefined;
-//         clientSecret?: string | undefined;
-//         amount?: Money | undefined;
-//         status?: string | undefined;
-//         transactionId?: string | undefined;
-//       };
-//   azorpayResolvePayload
 
 export interface RazorpayResolvePayload {
   razorpayPaymentId: string;
@@ -112,18 +70,20 @@ export interface ResolvePaymentResponse {
   provider: PaymentProvider;
 }
 
-export type PaymentProvider = 'stripe' | 'razorpay' | 'paypal';
-
-// interface ResolvePaymentPayload {
-//   provider: PaymentProvider;
-//   paymentId: string;
-//   providerSessionId: string;
-//   providerPaymentId?: string;
-//   providerSignature?: string;
-// }
 interface CancelPaymentPayload {
   providerOrderId: string;
   provider: PaymentProvider;
+}
+
+export interface CreatePaymentPayload {
+  orderId: string;
+}
+
+export interface CreateProviderSessionPayload {
+  paymentId: string;
+  provider: string;
+  successUrl?: string;
+  cancelUrl?: string;
 }
 
 export interface IPaymentService {
@@ -131,6 +91,10 @@ export interface IPaymentService {
     payload: CreatePaymentPayload,
     options?: RequestOptions
   ): Promise<ApiResponse<PaymentResponse>>;
+  createProviderSession(
+    payload: CreateProviderSessionPayload,
+    options?: RequestOptions
+  ): Promise<ApiResponse<ProviderSessionResponse>>;
   resolvePayment(
     payload: ResolvePaymentPayload,
     options?: RequestOptions
@@ -156,7 +120,18 @@ export class PaymentService extends BaseService implements IPaymentService {
     payload: CreatePaymentPayload,
     options?: RequestOptions
   ): Promise<ApiResponse<PaymentResponse>> {
-    return this.post<ApiResponse<PaymentResponse>>(`/${payload.provider}/create`, payload, options);
+    return this.post<ApiResponse<PaymentResponse>>(`/create`, payload, options);
+  }
+
+  public async createProviderSession(
+    payload: CreateProviderSessionPayload,
+    options?: RequestOptions
+  ): Promise<ApiResponse<ProviderSessionResponse>> {
+    return this.post<ApiResponse<ProviderSessionResponse>>(
+      `/${payload.paymentId}/session`,
+      payload,
+      options
+    );
   }
 
   public async cancelPayment(
@@ -172,15 +147,14 @@ export class PaymentService extends BaseService implements IPaymentService {
   ): Promise<ApiResponse<ResolvePaymentResponse>> {
     return this.patch<ApiResponse<any>>(`/${payload.provider}/resolve`, payload, options);
   }
+
   public async getPayment(paymentId: string, options?: RequestOptions): Promise<ApiResponse<any>> {
     return this.get<ApiResponse<any>>(`/${paymentId}`, options);
   }
 
-  // Static factory for SSR usage (pass a token getter or headers)
   static create(serviceOptions: BaseServiceOptions = {}) {
     return new PaymentService(serviceOptions);
   }
 }
 
-// Singleton for client-side usage
 export const paymentService: IPaymentService = new PaymentService();
