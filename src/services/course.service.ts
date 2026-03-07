@@ -37,19 +37,14 @@ export interface CourseAnalytics {
   totalStudents: number;
   completionRate: number;
   averageProgress: number;
-  monthlyRevenue: number;
-  engagementRate: number;
+  averageRating: number;
+  totalRatings: number;
   revenueThisMonth: number;
+  revenueLastMonth: number;
   revenueTotal: number;
-  ratingsBreakdown: {
-    5: number;
-    4: number;
-    3: number;
-    2: number;
-    1: number;
-  };
+  ratingsBreakdown: Record<1 | 2 | 3 | 4 | 5, number>;
   enrollmentTrend: {
-    date: string;
+    month: number;
     enrollments: number;
   }[];
 }
