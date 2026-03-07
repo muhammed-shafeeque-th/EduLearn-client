@@ -120,7 +120,7 @@ export function truncateMessage(message: string, maxLength: number = 50): string
   return message.substring(0, maxLength) + '...';
 }
 
-export function formatPrice(price: number, currency = 'USD', locale = 'en-US') {
+export function formatPrice(price: number, currency = 'INR', locale = 'en-US') {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
