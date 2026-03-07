@@ -737,6 +737,13 @@ export class CourseController {
     return this.queue.getResults();
   }
 
+  /**
+   * Subscribe to operation queue changes
+   */
+  subscribe(listener: (size: number) => void): () => void {
+    return this.queue.subscribe(listener);
+  }
+
   private updatePendingCreate(
     type: 'SECTION_CREATE' | 'LESSON_CREATE' | 'QUIZ_CREATE',
     tempId: string,
