@@ -1,70 +1,42 @@
-import { getInstructorCourseStats } from '@/app/admin/(protected)/instructors/_/libs/apis';
+'use client';
+
+import { StatsSkeleton } from '@/app/admin/(protected)/(dashboard)/@stats/_/stats-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { DollarSign, Star, Clock, MessageSquare, Award, Activity, TrendingUp } from 'lucide-react';
+import { useInstructorCourseStats } from '@/states/server/admin/use-admin-stats';
+import { DollarSign, Star, Award, TrendingUp } from 'lucide-react';
 
 interface CourseStatsProps {
   courseId: string;
   instructorId: string;
 }
 
-function calculateRevenueGrowth(revenueTrend?: Array<{ date: string; revenue: number }>) {
-  if (!revenueTrend || revenueTrend.length < 2) {
-    return null;
-  }
-  // Assume revenueTrend is sorted oldest -> newest
-  const lastMonth = revenueTrend[revenueTrend.length - 2].revenue;
-  const thisMonth = revenueTrend[revenueTrend.length - 1].revenue;
-  if (lastMonth === 0) {
-    // Avoid division by zero; if no revenue last month, show full increase
-    return thisMonth > 0 ? 100 : 0;
-  }
-  return ((thisMonth - lastMonth) / lastMonth) * 100;
-}
+export default function CourseStats({ courseId, instructorId }: CourseStatsProps) {
+  const { stats, isLoading } = useInstructorCourseStats(instructorId, courseId);
 
-export async function CourseStats({ courseId, instructorId }: CourseStatsProps) {
-  const stats = await getInstructorCourseStats(instructorId, courseId);
-
-  // Revenue info & trends (from context, revenueTrend = [{date, revenue}, ...])
   const totalRevenue = stats?.revenueTotal ?? 0;
-  const monthlyRevenue = stats?.monthlyRevenue ?? 0;
-
-  const revenueGrowth = calculateRevenueGrowth(stats?.enrollmentTrend);
-  const revenueGrowthDisplay =
-    revenueGrowth === null ? 'N/A' : `${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}%`;
-
-  // Enrollment trend (legacy fallback, kept as previously, but may need logic)
-  const enrollmentGrowth =
-    (typeof stats?.enrollmentTrend === 'number' ? stats.enrollmentTrend : 0) ?? 0;
-
-  // Compute average rating from ratingsBreakdown which is an object like {1: 40, 2: 55, ...}
-  const avgRating = (() => {
-    if (!stats?.ratingsBreakdown || typeof stats.ratingsBreakdown !== 'object') return null;
-    let totalRatings = 0;
-    let sum = 0;
-    for (let rating = 1; rating <= 5; rating++) {
-      const count = stats.ratingsBreakdown[rating] ?? 0;
-      sum += rating * count;
-      totalRatings += count;
-    }
-    return totalRatings ? (sum / totalRatings).toFixed(2) : null;
-  })();
-
-  // Other stat fields (some may be undefined if not in CourseAnalytics shape)
+  const revenueGrowth =
+    ((stats?.revenueThisMonth ?? 0) - (stats?.revenueLastMonth ?? 0)) /
+    (stats?.revenueLastMonth ?? 1);
+  const monthlyRevenue = stats?.revenueThisMonth ?? 0;
   const completionRate = stats?.completionRate ?? 0;
-  const averageRating = avgRating ?? null;
-  const totalReviews = stats?.totalReviews ?? null;
+  const averageRating = stats?.averageRating ?? 0;
+  const totalReviews = stats?.totalRatings ?? 0;
   const engagementRate = stats?.engagementRate ?? 0;
-  const averageTimePerLesson = stats?.averageTimePerLesson ?? 0;
-  const discussionPosts = stats?.discussionPosts ?? 0;
-  const questionsAnswered = stats?.questionsAnswered ?? 0;
-  const certificatesIssued = stats?.certificatesIssued ?? 0;
+  // const averageTimePerLesson = stats?.averageTimePerLesson ?? 0;
+  // const discussionPosts = stats?.discussionPosts ?? 0;
+  // const questionsAnswered = stats?.questionsAnswered ?? 0;
+  const certificatesIssued = stats?.totalStudents ?? 0;
+
+  if (isLoading) {
+    return <StatsSkeleton />;
+  }
 
   const statCards = [
     {
       title: 'Total Revenue',
-      value: `₹${Number(totalRevenue).toLocaleString()}`,
-      change: revenueGrowthDisplay,
+      value: `₹${totalRevenue.toLocaleString()}`,
+      change: revenueGrowth > 0 ? revenueGrowth : 0,
       changeLabel: 'vs last month',
       icon: DollarSign,
       color: 'text-green-600',
@@ -72,9 +44,9 @@ export async function CourseStats({ courseId, instructorId }: CourseStatsProps) 
     },
     {
       title: 'Monthly Revenue',
-      value: `₹${Number(monthlyRevenue).toLocaleString()}`,
-      change: `${enrollmentGrowth >= 0 ? '+' : ''}${enrollmentGrowth}%`,
-      changeLabel: 'enrollment growth',
+      value: `₹${monthlyRevenue.toLocaleString()}`,
+      change: `${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth}%`,
+      changeLabel: 'vs last month',
       icon: TrendingUp,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
@@ -141,29 +113,29 @@ export async function CourseStats({ courseId, instructorId }: CourseStatsProps) 
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            {/* <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Avg Time/Lesson</span>
               </div>
               <span className="font-semibold">{averageTimePerLesson}min</span>
-            </div>
+            </div> */}
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            {/* <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center space-x-2">
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Discussion Posts</span>
               </div>
               <span className="font-semibold">{discussionPosts}</span>
-            </div>
+            </div> */}
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            {/* <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center space-x-2">
                 <Activity className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Questions Answered</span>
               </div>
               <span className="font-semibold">{questionsAnswered}</span>
-            </div>
+            </div> */}
 
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center space-x-2">
@@ -177,7 +149,7 @@ export async function CourseStats({ courseId, instructorId }: CourseStatsProps) 
       </Card>
 
       {/* Performance Trends */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-lg">Performance Trends</CardTitle>
         </CardHeader>
@@ -192,7 +164,7 @@ export async function CourseStats({ courseId, instructorId }: CourseStatsProps) 
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
