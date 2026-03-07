@@ -139,7 +139,7 @@ export interface LessonPayload {
   id: string;
   title: string;
   description?: string;
-  contentType: ContentType;
+  contentType?: ContentType | string;
   contentUrl: string;
   isPreview: boolean;
   estimatedDuration?: number;
