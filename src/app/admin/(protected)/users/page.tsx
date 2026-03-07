@@ -1,17 +1,17 @@
 import { Suspense } from 'react';
 import { StatsCardsSkeleton } from './_/components/skeletons/course-card-skeleton';
-import { TableSkeleton } from '../_components/__table/table-skeleton';
 
 import { UsersStats } from './_/components/user-stats';
 import { UsersHeader } from './_/components/user-header';
-import dynamicImport from 'next/dynamic';
+import dynamic from 'next/dynamic';
+import { TableSkeleton } from './_/components/skeletons/table-skeleton';
 
 export const metadata = {
   title: 'Users Management | EduLearn Admin',
   description: 'Manage and monitor instructor accounts, courses, and performance',
 };
 
-const UsersTable = dynamicImport(
+const UsersTable = dynamic(
   () => import('./_/components/users-table').then((mod) => mod.UsersTable),
   {
     loading: () => <TableSkeleton />,
@@ -33,5 +33,3 @@ export default function UsersPage() {
     </div>
   );
 }
-
-export const dynamic = 'force-dynamic';

@@ -1,16 +1,29 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   ColumnDef,
   flexRender,
+  useReactTable,
+  ColumnFiltersState,
   getCoreRowModel,
   getSortedRowModel,
-  useReactTable,
+  PaginationState,
   SortingState,
+  Updater,
 } from '@tanstack/react-table';
 import { motion } from 'framer-motion';
-import { Search, Filter, ChevronDown, ArrowUpDown } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  RotateCcw,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +34,13 @@ import {
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -30,106 +50,105 @@ import {
 } from '@/components/ui/table';
 import { UserRow } from './user-row';
 import { UserActions } from './user-action';
-import { TableSkeleton } from '../../../_components/__table/table-skeleton';
+import { TableSkeleton } from './skeletons/table-skeleton';
 import { UserMeta } from '@/types/user';
+import { truncateText } from '@/lib/utils';
 
-interface UsersTableClientProps {
-  users: UserMeta[];
-  totalPages: number;
-  totalItems: number;
-  currentPage: number;
-  isLoading: boolean;
-  searchParams: {
-    search?: string;
-    status?: string;
-    page?: string;
-    searchField?: 'username' | 'email';
-  };
-  onUpdateSearchParams: (updates: Record<string, string | undefined>) => void;
+function capitalize(str: string) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'active', label: 'Active' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'inactive', label: 'Inactive' },
-];
+type UsersTableClientProps = {
+  users: UserMeta[];
+  isLoading: boolean;
+  pageCount: number;
+  pagination: PaginationState;
+  sorting: SortingState;
+  columnFilters: ColumnFiltersState;
+  onPaginationChange: (updater: Updater<PaginationState>) => void;
+  onSortingChange: (updater: Updater<SortingState>) => void;
+  onColumnFiltersChange: (updater: Updater<ColumnFiltersState>) => void;
+  searchField: 'username' | 'email';
+  onSearchFieldChange: (field: 'username' | 'email') => void;
+  onRefresh: () => Promise<void>;
+};
 
 const SEARCH_FIELD_OPTIONS = [
   { value: 'username', label: 'Username' },
   { value: 'email', label: 'Email' },
 ];
 
-const capitalize = (str: string) =>
-  typeof str === 'string' && str.length ? str.charAt(0).toUpperCase() + str.slice(1) : str;
-
-const truncateText = (str: string, length: number) => {
-  if (typeof str !== 'string') return str;
-  return str.length > length ? str.slice(0, length) + '...' : str;
-};
-
-function getPaginationRange(totalPages: number, currentPage: number): number[] {
-  const delta = 2;
-  let start = Math.max(currentPage - delta, 1);
-  let end = Math.min(currentPage + delta, totalPages);
-
-  if (currentPage <= delta) {
-    end = Math.min(1 + 2 * delta, totalPages);
-  }
-  if (currentPage + delta > totalPages) {
-    start = Math.max(totalPages - 2 * delta, 1);
-  }
-
-  return Array.from({ length: end - start + 1 }, (_v, k) => start + k);
-}
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All Status' },
+  { value: 'active', label: 'Active' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'rejected', label: 'Rejected' },
+];
 
 export function UsersTableClient({
   users,
-  totalPages,
-  totalItems,
-  currentPage,
   isLoading,
-  searchParams,
-  onUpdateSearchParams,
+  pageCount,
+  pagination,
+  sorting,
+  columnFilters,
+  onPaginationChange,
+  onSortingChange,
+  onColumnFiltersChange,
+  searchField,
+  onSearchFieldChange,
+  onRefresh,
 }: UsersTableClientProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  const [searchValue, setSearchValue] = useState('');
 
-  const [searchField, setSearchField] = useState<'username' | 'email'>(
-    searchParams.searchField || 'username'
-  );
+  // Sync searchValue with columnFilters if needed, but since we control it externally,
+  // we just need to update the parent's filter when input changes.
 
-  const handleSearch = useCallback(
-    (value: string) => {
-      onUpdateSearchParams({
-        search: value || undefined,
-        page: undefined,
-        searchField,
+  // Helper to get current search value from columnFilters
+  const currentSearchValue = useMemo(() => {
+    return (columnFilters.find((f) => f.id === searchField)?.value as string) || '';
+  }, [columnFilters, searchField]);
+
+  // Update local state when prop changes (ONLY when prop changes, not when local state changes)
+  const [prevPropSearchValue, setPrevPropSearchValue] = useState(currentSearchValue);
+  if (currentSearchValue !== prevPropSearchValue) {
+    setSearchValue(currentSearchValue);
+    setPrevPropSearchValue(currentSearchValue);
+  }
+
+  // Debounce search update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onColumnFiltersChange((prev: ColumnFiltersState) => {
+        const newer = prev.filter(
+          (f) => f.id !== searchField && f.id !== 'email' && f.id !== 'username'
+        );
+        if (searchValue) {
+          newer.push({ id: searchField, value: searchValue });
+        }
+        return newer;
       });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue, searchField, onColumnFiltersChange]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchValue(value);
+  }, []);
+
+  const handleSearchFieldChange = useCallback(
+    (field: 'username' | 'email') => {
+      // Notify parent about field change
+      onSearchFieldChange(field);
+      // Determine if we should clear or keep search value
+      // Keeping it is usually better UX
     },
-    [onUpdateSearchParams, searchField]
+    [onSearchFieldChange]
   );
-
-  const handleStatusFilter = useCallback(
-    (status: string) => {
-      onUpdateSearchParams({
-        status: status === 'all' ? undefined : status,
-        page: undefined,
-      });
-    },
-    [onUpdateSearchParams]
-  );
-
-  const handleSearchFieldChange = (field: 'username' | 'email') => {
-    setSearchField(field);
-
-    onUpdateSearchParams({
-      searchField: field,
-      page: undefined,
-
-      search: searchParams.search,
-    });
-  };
 
   const columns: ColumnDef<UserMeta>[] = useMemo(
     () => [
@@ -260,21 +279,27 @@ export function UsersTableClient({
   const table = useReactTable({
     data: users,
     columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
     state: {
+      pagination,
       sorting,
+      columnFilters,
       rowSelection,
     },
+    pageCount,
+    manualPagination: true,
+    manualSorting: false, // Client-side sorting
+    manualFiltering: true,
+    onPaginationChange,
+    onSortingChange,
+    onColumnFiltersChange,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   if (isLoading) {
     return <TableSkeleton />;
   }
-
-  const paginationRange = getPaginationRange(totalPages, currentPage);
 
   return (
     <motion.div
@@ -291,7 +316,7 @@ export function UsersTableClient({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={`Search users by ${searchField}...`}
-                  defaultValue={searchParams.search || ''}
+                  value={searchValue}
                   onChange={(e) => handleSearch(e.target.value)}
                   className="pl-10"
                   aria-label="Search users"
@@ -328,6 +353,10 @@ export function UsersTableClient({
               </DropdownMenu>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => onRefresh()} title="Refresh">
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Refresh
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" aria-haspopup="listbox">
@@ -342,10 +371,14 @@ export function UsersTableClient({
                       key={option.value}
                       checked={
                         option.value === 'all'
-                          ? !searchParams.status
-                          : searchParams.status === option.value
+                          ? !columnFilters.find((f) => f.id === 'status')
+                          : columnFilters.find((f) => f.id === 'status')?.value === option.value
                       }
-                      onCheckedChange={() => handleStatusFilter(option.value)}
+                      onCheckedChange={() =>
+                        table
+                          .getColumn('status')
+                          ?.setFilterValue(option.value === 'all' ? undefined : option.value)
+                      }
                     >
                       {option.label}
                     </DropdownMenuCheckboxItem>
@@ -393,52 +426,89 @@ export function UsersTableClient({
             </Table>
           </div>
           {/* Pagination */}
-          <nav className="flex items-center justify-between space-x-2 py-4" aria-label="pagination">
-            <div className="text-sm text-muted-foreground">
-              Showing {users.length} of {totalItems} users
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+              {table.getFilteredRowModel().rows.length > 0 ? (
+                <>
+                  Showing{' '}
+                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{' '}
+                  to{' '}
+                  {Math.min(
+                    (table.getState().pagination.pageIndex + 1) *
+                      table.getState().pagination.pageSize,
+                    table.getFilteredRowModel().rows.length
+                  )}{' '}
+                  of {table.getFilteredRowModel().rows.length} users
+                </>
+              ) : (
+                'No users found'
+              )}
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  onUpdateSearchParams({
-                    page: Math.max(1, currentPage - 1).toString(),
-                  })
-                }
-                disabled={currentPage <= 1}
-                aria-label="Previous page"
-              >
-                Previous
-              </Button>
-              <div className="flex items-center space-x-1">
-                {paginationRange.map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => onUpdateSearchParams({ page: page.toString() })}
-                    aria-current={currentPage === page ? 'page' : undefined}
-                  >
-                    {page}
-                  </Button>
-                ))}
+            <div className="flex items-center space-x-6 lg:space-x-8">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium">Rows per page</p>
+                <Select
+                  value={`${table.getState().pagination.pageSize}`}
+                  onValueChange={(value) => {
+                    table.setPageSize(Number(value));
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                      <SelectItem key={pageSize} value={`${pageSize}`}>
+                        {pageSize}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  onUpdateSearchParams({
-                    page: Math.min(totalPages, currentPage + 1).toString(),
-                  })
-                }
-                disabled={currentPage >= totalPages}
-                aria-label="Next page"
-              >
-                Next
-              </Button>
+              <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span className="sr-only">Go to first page</span>
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span className="sr-only">Go to previous page</span>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span className="sr-only">Go to next page</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span className="sr-only">Go to last page</span>
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </nav>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
