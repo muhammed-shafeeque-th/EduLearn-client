@@ -9,17 +9,14 @@ import {
   InstructorStats,
   userService,
 } from '@/services/user.service';
+import { CourseAnalytics } from '@/services/course.service';
 
-/**
- * Extract valid data from ApiResponse, or return null if not successful.
- */
 function getApiDataOrNull<T>(data: ApiResponse<T> | undefined | null): T | null {
   return !!data && data.success ? data.data : null;
 }
 
 /**
  * Hook to fetch analytics for a specific instructor.
- * Exposes loading, error, and refetch states.
  *
  * @param instructorId - The ID of the instructor.
  * @param options - Optional react-query options.
@@ -63,13 +60,6 @@ export function useInstructorStats(
   });
 }
 
-/**
- * Hook to fetch overall statistics about all instructors.
- * Suitable for dashboard system overview.
- * Exposes loading, error, and refetch states.
- *
- * @param options - Optional react-query options.
- */
 export function useInstructorsStats(
   options?: Omit<
     UseQueryOptions<
@@ -83,7 +73,7 @@ export function useInstructorsStats(
     enabled: boolean;
   }
 ) {
-  return useQuery<
+  const query = useQuery<
     ApiResponse<InstructorsStats>,
     Error,
     InstructorsStats | null,
@@ -99,11 +89,19 @@ export function useInstructorsStats(
     ...options,
     select: options?.select ?? getApiDataOrNull,
   });
+
+  return {
+    stats: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    query,
+  };
 }
 
 /**
  * Hook to fetch statistics about all courses of a specific instructor.
- * Exposes loading, error, and refetch states.
  *
  * @param instructorId - The ID of the instructor.
  * @param options - Optional react-query options.
@@ -124,7 +122,7 @@ export function useInstructorCoursesStats(
 ) {
   const enabled = (options?.enabled ?? true) && Boolean(instructorId);
 
-  return useQuery<
+  const query = useQuery<
     ApiResponse<InstructorCoursesStats>,
     Error,
     InstructorCoursesStats | null,
@@ -145,15 +143,24 @@ export function useInstructorCoursesStats(
     ...options,
     select: options?.select ?? getApiDataOrNull,
   });
+
+  return {
+    stats: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    query,
+  };
 }
 export function useInstructorCourseStats(
   instructorId: string,
   courseId: string,
   options?: Omit<
     UseQueryOptions<
-      ApiResponse<InstructorCoursesStats>,
+      ApiResponse<CourseAnalytics>,
       Error,
-      InstructorCoursesStats | null,
+      CourseAnalytics | null,
       ReturnType<typeof QUERY_KEYS.users.instructorCourseStats>
     >,
     'queryKey' | 'queryFn' | 'enabled'
@@ -163,11 +170,11 @@ export function useInstructorCourseStats(
 ) {
   const enabled = (options?.enabled ?? true) && Boolean(instructorId) && Boolean(courseId);
 
-  return useQuery<
-    ApiResponse<InstructorCoursesStats>,
+  const query = useQuery<
+    ApiResponse<CourseAnalytics>,
     Error,
-    InstructorCoursesStats | null,
-    ReturnType<typeof QUERY_KEYS.users.instructorCoursesStats>
+    CourseAnalytics | null,
+    ReturnType<typeof QUERY_KEYS.users.instructorCourseStats>
   >({
     queryKey: QUERY_KEYS.users.instructorCourseStats(instructorId!, courseId!),
     queryFn: async ({ signal }) => {
@@ -184,4 +191,13 @@ export function useInstructorCourseStats(
     ...options,
     select: options?.select ?? getApiDataOrNull,
   });
+
+  return {
+    stats: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    query,
+  };
 }

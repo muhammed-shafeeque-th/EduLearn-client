@@ -4,16 +4,19 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { InstructorMeta } from '@/types/user';
 import { ApiResponse } from '@/types/api-response';
-import { PaginationParams } from '@/services/admin.service';
-import { userService } from '@/services/user.service';
+import { userService, type UsersParams } from '@/services/user.service';
 
 /**
  * Parameters for querying instructors.
  */
-export interface UseInstructorsParams extends Partial<Omit<PaginationParams, 'page' | 'pageSize'>> {
+export interface UseInstructorsParams {
   page?: number;
   pageSize?: number;
+  name?: string;
+  email?: string;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
   role?: 'student' | 'instructor' | 'admin';
   status?: 'active' | 'inactive';
 }
@@ -28,8 +31,7 @@ type UseInstructorsOptions = {
  * Hook providing instructor list, states, and status flags for consumers.
  */
 export function useInstructors(params: UseInstructorsParams = {}, options?: UseInstructorsOptions) {
-  const effectiveParams: Required<Pick<UseInstructorsParams, 'page' | 'pageSize'>> &
-    UseInstructorsParams = {
+  const effectiveParams: UsersParams = {
     page: params.page ?? 1,
     pageSize: params.pageSize ?? 12,
     ...params,
@@ -37,9 +39,8 @@ export function useInstructors(params: UseInstructorsParams = {}, options?: UseI
 
   // UseQuery
   const query = useQuery<ApiResponse<InstructorMeta[]>, Error>({
-    queryKey: QUERY_KEYS.users.instructors(),
-    queryFn: ({ signal }) =>
-      userService.getInstructors(effectiveParams as PaginationParams, { signal }),
+    queryKey: QUERY_KEYS.users.instructors(effectiveParams),
+    queryFn: ({ signal }) => userService.getInstructors(effectiveParams, { signal }),
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled: options?.enabled ?? true,
     placeholderData: options?.placeholderData ?? keepPreviousData,
@@ -62,7 +63,6 @@ export function useInstructors(params: UseInstructorsParams = {}, options?: UseI
     totalCount,
     currentPage,
     data,
-    // Core query helpers and states
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     isError: query.isError,
@@ -70,7 +70,6 @@ export function useInstructors(params: UseInstructorsParams = {}, options?: UseI
     refetch: query.refetch,
     isSuccess: query.isSuccess,
     isFetched: query.isFetched,
-    // For advanced needs
     query,
   };
 }

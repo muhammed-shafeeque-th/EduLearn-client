@@ -14,7 +14,7 @@ export function useUsers(
   options: Partial<Parameters<typeof useQuery>[1] & { enabled: boolean }> = {}
 ) {
   const { data, isLoading, isError, error, isFetching, isSuccess, refetch } = useQuery({
-    queryKey: QUERY_KEYS.users.list({}),
+    queryKey: QUERY_KEYS.users.list(params),
     queryFn: ({ signal }) => userService.getUsers(params, { signal }),
     enabled: options.enabled ?? true,
     placeholderData: keepPreviousData,
@@ -32,7 +32,6 @@ export function useUsers(
     ...options,
   });
 
-  // Ensure fallback values for users and pagination if data is undefined
   const users = data?.data ?? [];
   const pagination = data?.pagination;
 
@@ -103,10 +102,13 @@ export function useUsersInfinite(
  * Fetch list of all instructors.
  * @param options useQuery options (optional).
  */
-export function useInstructors(options: Partial<Parameters<typeof useQuery>[1]> = {}) {
+export function useInstructors(
+  params: Partial<UsersParams> = {},
+  options: Partial<Parameters<typeof useQuery>[1]> = {}
+) {
   return useQuery({
-    queryKey: QUERY_KEYS.users.instructors(),
-    queryFn: ({ signal }) => userService.getUsers({ role: 'instructor' }, { signal }),
+    queryKey: QUERY_KEYS.users.instructors(params),
+    queryFn: ({ signal }) => userService.getUsers({ ...params, role: 'instructor' }, { signal }),
     staleTime: 10 * 60 * 1000,
     select: (data) =>
       data.success
