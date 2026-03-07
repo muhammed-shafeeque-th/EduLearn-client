@@ -193,12 +193,9 @@ export class OperationExecutor {
     op: Extract<CurriculumOp, { type: string & `${string}_CREATE` }>,
     queue: OperationQueue
   ): Promise<void> {
-    if (op.type === 'SECTION_CREATE') {
-      const sectionId = resolveId(op.tempId, this.idMapping.sections);
-      const snapshot = this.snapshotFactory();
-      const section = snapshot.getSection(sectionId);
-      if (!section) throw new Error(`Data for section ${op.tempId} not found in form snapshot`);
+    const snapshot = this.snapshotFactory();
 
+    if (op.type === 'SECTION_CREATE') {
       const payload = buildSectionPayload(op.data);
       const result = await this.courseService.createSection(this.courseId, payload);
 
@@ -209,15 +206,16 @@ export class OperationExecutor {
         queue.addResult({ success: false, op, error: result.message });
       }
     } else if (op.type === 'LESSON_CREATE') {
-      const sectionId = resolveId(op.sectionId, this.idMapping.sections);
-      const snapshot = this.snapshotFactory();
-      const lesson = snapshot.getLesson(sectionId, op.tempId);
+      const sectionServerId = resolveId(op.sectionId, this.idMapping.sections);
+      const lesson = snapshot.getLesson(op.sectionId, op.tempId);
 
-      if (!lesson) return;
+      if (!lesson) {
+        console.warn(`Lesson ${op.tempId} not found in section ${op.sectionId} snapshot`);
+        return;
+      }
 
       const payload = buildLessonPayload(lesson);
-
-      const result = await this.courseService.createLesson(this.courseId, sectionId, payload);
+      const result = await this.courseService.createLesson(this.courseId, sectionServerId, payload);
 
       if (result.success && result.data?.id) {
         this.idMapping.lessons.set(op.tempId, result.data.id);
@@ -226,9 +224,16 @@ export class OperationExecutor {
         queue.addResult({ success: false, op, error: result.message });
       }
     } else if (op.type === 'QUIZ_CREATE') {
-      const sectionId = resolveId(op.sectionId, this.idMapping.sections);
-      const payload = mapToQuizPayload(op.data);
-      const result = await this.courseService.createQuiz(this.courseId, sectionId, payload);
+      const sectionServerId = resolveId(op.sectionId, this.idMapping.sections);
+      const quiz = snapshot.getQuiz(op.sectionId);
+
+      if (!quiz) {
+        console.warn(`Quiz not found in section ${op.sectionId} snapshot`);
+        return;
+      }
+
+      const payload = mapToQuizPayload(quiz);
+      const result = await this.courseService.createQuiz(this.courseId, sectionServerId, payload);
 
       if (result.success && result.data?.id) {
         this.idMapping.quizzes.set(op.tempId, result.data.id);

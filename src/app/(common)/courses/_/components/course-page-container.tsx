@@ -1,27 +1,27 @@
 'use client';
 
 import { useState, useCallback, useMemo, useDeferredValue, useEffect } from 'react';
-import { usePathname, useSearchParams, useRouter } from 'next/navigation';
-import { Search, SlidersHorizontal, Grid3X3, List, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { CoursesSidebar } from './courses-sidebar';
 import { CourseGrid } from './course-grid';
-import CourseList from './course-list';
+// import CourseList from './course-list';
 import { useDebounce } from '@/hooks/use-debounce';
-import type { Course } from '@/types/course';
+// import type { Course } from '@/types/course';
 import { CourseFilters } from '../types';
 import { useInfiniteCoursesLoader } from '../hooks/use-infinite-course';
 import { CourseSortBy } from '@/services/course.service';
 import { CoursesGridSkeleton } from './skeletons';
 
-interface CoursesPageContainerProps {
-  initialCourses: Course[];
-  initialPagination: {
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
-  };
-}
+// interface CoursesPageContainerProps {
+//   initialCourses: Course[];
+//   initialPagination: {
+//     page: number;
+//     pageSize: number;
+//     total: number;
+//     totalPages: number;
+//   };
+// }
 
 const mockSuggestions = ['React', 'Python', 'Web Development', 'Data Science'];
 
@@ -34,12 +34,11 @@ function parseQueryArray(value: string | null): string[] {
     .filter(Boolean);
 }
 
-export function CoursesPageContainer({}: CoursesPageContainerProps) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function CoursesPageContainer() {
+  // const router = useRouter();
+  // const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const initialPage = parseInt(searchParams.get('page') ?? '1', 10);
   const initialPageSize = parseInt(searchParams.get('pageSize') ?? '12', 10);
   const initialCategories = parseQueryArray(searchParams.get('category'));
   const initialSearch = searchParams.get('q') ?? '';
@@ -48,7 +47,6 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState(initialSortBy);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [filters, setFilters] = useState<CourseFilters>({
@@ -59,12 +57,10 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
   });
 
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const [page, setPage] = useState(initialPage);
 
   useEffect(() => {
     setSearchQuery(searchParams.get('q') ?? '');
     setSortBy(searchParams.get('sort') ?? 'trending');
-    setPage(parseInt(searchParams.get('page') ?? '1', 10));
     setPageSize(parseInt(searchParams.get('pageSize') ?? '12', 10));
 
     setFilters((prev) => ({
@@ -74,25 +70,25 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
     }));
   }, [searchParams]);
 
-  const updateQuery = useCallback(
-    (updates: Record<string, any>, resetPage = true) => {
-      const currentParams = new URLSearchParams(searchParams.toString());
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
-          currentParams.delete(key);
-        } else {
-          if (Array.isArray(value)) {
-            currentParams.set(key, value.map(String).join(','));
-          } else {
-            currentParams.set(key, String(value));
-          }
-        }
-      });
-      if (resetPage) currentParams.set('page', '1');
-      router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
-    },
-    [router, pathname, searchParams]
-  );
+  // const updateQuery = useCallback(
+  //   (updates: Record<string, string | number | string[] | null | undefined>, resetPage = true) => {
+  //     const currentParams = new URLSearchParams(searchParams.toString());
+  //     Object.entries(updates).forEach(([key, value]) => {
+  //       if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
+  //         currentParams.delete(key);
+  //       } else {
+  //         if (Array.isArray(value)) {
+  //           currentParams.set(key, value.map(String).join(','));
+  //         } else {
+  //           currentParams.set(key, String(value));
+  //         }
+  //       }
+  //     });
+  //     if (resetPage) currentParams.set('page', '1');
+  //     router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
+  //   },
+  //   [router, pathname, searchParams]
+  // );
 
   const debouncedSearch = useDebounce(searchQuery, 500);
   const deferredFilters = useDeferredValue(filters);
@@ -119,19 +115,19 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
     (newFilters: Partial<CourseFilters>) => {
       setFilters((prev) => {
         const updated = { ...prev, ...newFilters };
-        if (JSON.stringify(prev) !== JSON.stringify(updated)) {
-          updateQuery(
-            {
-              category: updated.categories,
-              rating: updated.rating,
-            },
-            true
-          );
-        }
+        // if (JSON.stringify(prev) !== JSON.stringify(updated)) {
+        //   updateQuery(
+        //     {
+        //       category: updated.categories,
+        //       rating: updated.rating,
+        //     },
+        //     true
+        //   );
+        // }
         return updated;
       });
     },
-    [updateQuery]
+    [setFilters]
   );
 
   const clearAllFilters = useCallback(() => {
@@ -142,36 +138,36 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
       price: { min: 0, max: 500, free: false, paid: false },
     });
     setSearchQuery('');
-    updateQuery(
-      {
-        q: null,
-        category: [],
-        rating: [],
-        page: 1,
-      },
-      false
-    );
-  }, [updateQuery]);
+    // updateQuery(
+    //   {
+    //     q: null,
+    //     category: [],
+    //     rating: [],
+    //     page: 1,
+    //   },
+    //   false
+    // );
+  }, [setSearchQuery]);
 
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchQuery(value);
-      updateQuery({ q: value }, true);
+      // updateQuery({ q: value }, true);
     },
-    [updateQuery]
+    [setSearchQuery]
   );
 
   const handleSortChange = useCallback(
     (value: string) => {
       setSortBy(value);
-      updateQuery({ sort: value });
+      // updateQuery({ sort: value });
     },
-    [updateQuery]
+    [setSortBy]
   );
 
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
-    updateQuery({ q: suggestion }, true);
+    // updateQuery({ q: suggestion }, true);
   };
 
   const activeFiltersCount = useMemo(() => {
@@ -188,8 +184,8 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Desktop Sidebar - Hidden on mobile */}
-      <div className="hidden lg:block sticky top-0 h-screen overflow-y-auto">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block sticky top-0 h-screen overflow-y-auto border-r border-border/50">
         <CoursesSidebar
           filters={filters}
           onFiltersChange={handleFiltersChange}
@@ -201,27 +197,29 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
       <main className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Search Section */}
-          <section className="mb-6" aria-label="Search courses">
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+          <section className="mb-8" aria-label="Search courses">
+            <div className="relative mb-4 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5 group-focus-within:text-primary transition-colors" />
               <input
                 type="search"
                 placeholder="What do you want to learn..."
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full pl-12 pr-4 py-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 bg-card text-card-foreground shadow-sm transition-all"
                 aria-label="Search courses"
               />
             </div>
 
             {/* Search Suggestions */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-muted-foreground">Suggestions:</span>
+            <div className="flex items-center gap-2 flex-wrap px-1">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground opacity-70">
+                Popular:
+              </span>
               {mockSuggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="px-3 py-1 text-xs border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
+                  className="px-4 py-1.5 text-xs font-medium border border-border rounded-full hover:bg-muted hover:border-primary/30 transition-all active:scale-95"
                 >
                   {suggestion}
                 </button>
@@ -230,47 +228,50 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
           </section>
 
           {/* Controls Bar */}
-          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+          <div className="flex items-center justify-between mb-8 gap-4 flex-wrap bg-card p-4 rounded-xl border border-border shadow-sm">
             <div className="flex items-center gap-4">
               {/* Mobile Filter Button */}
               <button
                 onClick={() => setShowMobileFilters(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 Filters
                 {activeFiltersCount > 0 && (
-                  <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                  <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {activeFiltersCount}
                   </span>
                 )}
               </button>
 
               {/* Results Count */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">
-                    {totalResults.toLocaleString()}
-                  </span>{' '}
-                  results
-                  {debouncedSearch && ` for "${debouncedSearch}"`}
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium">
+                  <span className="text-primary font-bold">{totalResults.toLocaleString()}</span>{' '}
+                  <span className="text-muted-foreground">results</span>
+                  {debouncedSearch && (
+                    <span className="text-muted-foreground italic ml-1">
+                      for &quot;{debouncedSearch}&quot;
+                    </span>
+                  )}
                 </span>
                 {(isLoading || isFetchingNextPage) && (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-6">
               {/* Sort Dropdown */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground hidden sm:inline">Sort by:</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-muted-foreground hidden sm:inline uppercase tracking-tight">
+                  Sort by:
+                </span>
                 <select
                   value={sortBy}
                   onChange={(e) => handleSortChange(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-background text-sm font-medium cursor-pointer"
                 >
-                  {/* <option value="trending">Trending</option> */}
                   <option value="latest">Latest</option>
                   <option value="popular">Most Popular</option>
                   <option value="rating">Highest Rated</option>
@@ -278,41 +279,19 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
                   <option value="price-high">Price: High to Low</option>
                 </select>
               </div>
-
-              {/* View Toggle */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded transition-all ${
-                    viewMode === 'grid' ? 'bg-white shadow' : 'hover:bg-gray-200'
-                  }`}
-                  aria-label="Grid view"
-                  aria-pressed={viewMode === 'grid'}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded transition-all ${
-                    viewMode === 'list' ? 'bg-white shadow' : 'hover:bg-gray-200'
-                  }`}
-                  aria-label="List view"
-                  aria-pressed={viewMode === 'list'}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
             </div>
           </div>
 
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
-            <div className="flex items-center gap-2 mb-6 flex-wrap">
-              <span className="text-sm text-muted-foreground">Active filters:</span>
+            <div className="flex items-center gap-2 mb-8 flex-wrap px-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-2">
+                Filters:
+              </span>
               {filters.categories.map((category) => (
                 <span
                   key={category}
-                  className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full flex items-center gap-1"
+                  className="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20"
                 >
                   {category}
                   <button
@@ -321,7 +300,7 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
                         categories: filters.categories.filter((c) => c !== category),
                       })
                     }
-                    className="hover:text-red-600 ml-1"
+                    className="hover:text-destructive transition-colors text-lg leading-none"
                     aria-label={`Remove ${category} filter`}
                   >
                     ×
@@ -329,11 +308,11 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
                 </span>
               ))}
               {filters.rating && filters.rating.length > 0 && (
-                <span className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+                <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20">
                   Rating: {minRating}+
                   <button
                     onClick={() => handleFiltersChange({ rating: [] })}
-                    className="hover:text-red-600 ml-1"
+                    className="hover:text-destructive transition-colors text-lg leading-none"
                     aria-label="Remove rating filter"
                   >
                     ×
@@ -341,14 +320,14 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
                 </span>
               )}
               {debouncedSearch && (
-                <span className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+                <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20">
                   Search: &quot;{debouncedSearch}&quot;
                   <button
                     onClick={() => {
                       setSearchQuery('');
-                      updateQuery({ q: null });
+                      // updateQuery({ q: null });
                     }}
-                    className="hover:text-red-600 ml-1"
+                    className="hover:text-destructive transition-colors text-lg leading-none"
                     aria-label="Clear search"
                   >
                     ×
@@ -357,7 +336,7 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
               )}
               <button
                 onClick={clearAllFilters}
-                className="text-sm text-gray-600 hover:text-gray-900 underline"
+                className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors ml-2 underline underline-offset-4"
               >
                 Clear all
               </button>
@@ -366,11 +345,14 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
 
           {/* Error State */}
           {isError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-red-800">Error loading courses: {error.message}</p>
+            <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 mb-8 flex items-center justify-between">
+              <div>
+                <p className="text-destructive font-bold">Error loading courses</p>
+                <p className="text-destructive/80 text-sm">{error.message}</p>
+              </div>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-2 text-sm text-red-600 underline"
+                className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-bold hover:bg-destructive/90 transition-colors"
               >
                 Try again
               </button>
@@ -378,43 +360,47 @@ export function CoursesPageContainer({}: CoursesPageContainerProps) {
           )}
 
           {/* Courses Display */}
-
           {isLoading && !isError && <CoursesGridSkeleton />}
 
           {courses.length === 0 || isError ? (
-            <div className="text-center py-16">
-              <div className="text-gray-400 mb-4">
-                <Search className="h-16 w-16 mx-auto" />
+            <div className="text-center py-24 bg-card rounded-2xl border border-dashed border-border mt-4">
+              <div className="bg-muted w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="h-10 w-10 text-muted-foreground opacity-50" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No courses found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
+              <h3 className="text-2xl font-bold mb-2">No results found</h3>
+              <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+                We couldn&apos;t find any courses matching your current search or filters.
+              </p>
               <button
                 onClick={clearAllFilters}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
               >
                 Clear all filters
               </button>
             </div>
           ) : (
             <>
-              {viewMode === 'grid' ? (
-                <CourseGrid courses={courses} />
-              ) : (
-                <CourseList courses={courses} />
-              )}
+              <CourseGrid courses={courses} />
 
               {/* Infinite Scroll Trigger */}
               {hasNextPage && (
-                <div ref={lastElementRef} className="h-20 flex items-center justify-center">
-                  {hasNextPage && <Loader2 className="h-8 w-8 animate-spin text-blue-600" />}
+                <div ref={lastElementRef} className="h-40 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-10 w-10 animate-spin text-primary opacity-50" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      Loading more courses
+                    </p>
+                  </div>
                 </div>
               )}
 
               {/* End of Results */}
               {!hasNextPage && courses.length > 0 && (
-                <div className="text-center py-8 text-gray-600">
-                  <p>You&apos;ve reached the end</p>
-                  <p className="text-sm mt-1">Showing all {totalResults} results</p>
+                <div className="text-center py-16 mt-8 border-t border-border/50">
+                  <p className="font-bold text-lg mb-1">That&apos;s all for now!</p>
+                  <p className="text-sm text-muted-foreground">
+                    Showing all {totalResults} available courses
+                  </p>
                 </div>
               )}
             </>

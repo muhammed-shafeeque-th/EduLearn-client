@@ -1,6 +1,7 @@
+/* eslint-disable jsx-a11y/aria-role */
 import { Suspense } from 'react';
-import { MyChatsPageContent } from '../_/components/chats-page-content';
-import { MyChatsPageSkeleton } from '../_/components/skeletons/my-chats-page-skeleton';
+import { ChatsPageContent } from '@/components/chat/chats-page-content';
+import { MyChatsPageSkeleton } from '@/components/chat/skeletons/my-chats-page-skeleton';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -13,13 +14,13 @@ interface ChatsPageProps {
   params: Promise<{ chatId?: string[] }>;
 }
 
-export default async function MyChats({ params }: ChatsPageProps) {
+export default async function InstructorChats({ params }: ChatsPageProps) {
   const { chatId } = await params;
   const normalizedChatId = Array.isArray(chatId) ? chatId[0] : chatId;
   return (
-    <div className="h-screen bg-background">
+    <div className="h-screen bg-background overflow-hidden">
       <Suspense fallback={<MyChatsPageSkeleton />}>
-        <MyChatsPageContent chatId={normalizedChatId} />
+        <ChatsPageContent chatId={normalizedChatId} role={'instructor'} />
       </Suspense>
     </div>
   );

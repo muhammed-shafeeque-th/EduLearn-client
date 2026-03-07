@@ -1,7 +1,6 @@
 import { config } from '@/lib/config';
 import { store } from '@/states/client';
 import { refreshToken } from '@/states/client/slices/auth-slice';
-import { logout as logoutAction } from '@/states/client/slices/auth-slice';
 
 import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
 
@@ -19,7 +18,6 @@ import {
   ResendOTPRequest,
   VerifyOTPRequest,
 } from '@/types/auth';
-import { AxiosResponse } from 'axios';
 
 export interface IAuthService {
   login(
@@ -73,12 +71,6 @@ const authClientRefresh = async () => {
   return { token: (response.payload as { data: { token: string } })?.data?.token };
 };
 
-const onResponseHook = (response: AxiosResponse) => {
-  if (response.status === 403) {
-    store.dispatch(logoutAction());
-  }
-};
-
 export class AuthService extends BaseService implements IAuthService {
   constructor({
     getToken = getClientToken,
@@ -90,15 +82,7 @@ export class AuthService extends BaseService implements IAuthService {
       ...options,
       getToken,
       authRefresh,
-      hooks: {
-        ...(hooks || {}),
-        onResponse: (response: AxiosResponse) => {
-          onResponseHook(response);
-          if (hooks && typeof hooks.onResponse === 'function') {
-            hooks.onResponse(response);
-          }
-        },
-      },
+      hooks,
     });
   }
 

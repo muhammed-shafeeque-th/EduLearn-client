@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation';
 import { getCourse, getInstructor } from '../../../_/libs/apis';
 import { CourseHeader } from './_/components/course-header';
 import { CourseContent } from './_/components/course-content';
-import { CourseStudents } from './_/components/course-students';
-import { CourseStats } from './_/components/course-stats';
+// import { CourseStudents } from  './_/components/course-students';
+import CourseStats from './_/components/course-stats';
+import { StatsCardsSkeleton } from '../../../_/components/skeletons/course-card-skeleton';
 
 interface CourseDetailPageProps {
   params: Promise<{ instructorId: string; courseId: string }>;
@@ -50,13 +51,13 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
             <CourseContent courseId={courseId} />
           </Suspense>
 
-          <Suspense fallback={<div>Loading students...</div>}>
+          {/* <Suspense fallback={<div>Loading students...</div>}>
             <CourseStudents courseId={courseId} />
-          </Suspense>
+          </Suspense> */}
         </div>
 
         <div>
-          <Suspense fallback={<div>Loading stats...</div>}>
+          <Suspense fallback={<StatsCardsSkeleton />}>
             <CourseStats instructorId={instructorId} courseId={courseId} />
           </Suspense>
         </div>

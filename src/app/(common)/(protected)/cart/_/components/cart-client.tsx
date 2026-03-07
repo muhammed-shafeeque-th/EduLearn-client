@@ -20,42 +20,34 @@ export function CartClient() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-8 md:py-12 bg-background">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        className="space-y-10"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <ShoppingCart className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">
-              Shopping Cart ({cart.items.length})
-            </h1>
+        <header className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-primary rounded-full" />
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground">Shopping Cart</h1>
           </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <ShoppingCart className="w-4 h-4" />
+            <p className="text-base">
+              You have {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'} in your
+              cart.
+            </p>
+          </div>
+        </header>
 
-          {/* {cart.items.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => clearCart()}
-              className="text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear Cart
-            </Button>
-          )} */}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-8 space-y-6">
             {cart.items.map((item, index) => (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <CartItem
@@ -68,7 +60,7 @@ export function CartClient() {
           </div>
 
           {/* Cart Summary */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-4 lg:sticky lg:top-24">
             <CartSummary cart={cart} />
           </div>
         </div>

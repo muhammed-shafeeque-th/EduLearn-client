@@ -4,6 +4,7 @@ export const QUERY_KEYS = {
   users: {
     all: ['users'] as const,
     stats: ['users', 'stats'] as const,
+    usersStats: () => [...QUERY_KEYS.users.stats, 'users'] as const,
     instructorsStats: () => [...QUERY_KEYS.users.stats, 'instructors'] as const,
     instructorStats: (instructorId: string) =>
       [...QUERY_KEYS.users.stats, 'instructor', instructorId] as const,
@@ -17,7 +18,7 @@ export const QUERY_KEYS = {
     detail: (id: string) => [...QUERY_KEYS.users.details(), id] as const,
     current: () => [...QUERY_KEYS.users.all, 'current'] as const,
     profile: (id: string) => [...QUERY_KEYS.users.details(), id, 'profile'] as const,
-    instructors: () => [...QUERY_KEYS.users.all, 'instructors'] as const,
+    instructors: (filters?: any) => [...QUERY_KEYS.users.all, 'instructors', filters] as const,
   },
   // wallet queries
   wallet: {
@@ -56,9 +57,10 @@ export const QUERY_KEYS = {
   },
   certificates: {
     all: ['certificates'] as const,
-    list: (userId: string) => [...QUERY_KEYS.certificates.all, 'enrollment', userId] as const,
-    enrollment: (enrollmentId: string) =>
+    byUser: (userId: string) => [...QUERY_KEYS.certificates.all, 'user', userId] as const,
+    byEnrollment: (enrollmentId: string) =>
       [...QUERY_KEYS.certificates.all, 'enrollment', enrollmentId] as const,
+    byId: (id: string) => [...QUERY_KEYS.certificates.all, 'id', id] as const,
   },
   review: {
     all: ['review'] as const,
@@ -102,15 +104,21 @@ export const QUERY_KEYS = {
   // Chat queries
   chat: {
     all: ['chat'] as const,
-    instructorChats: (filters?: any) =>
-      [...QUERY_KEYS.chat.all, 'instructor', 'chats', filters] as const,
-    studentChats: (filters?: any) => [...QUERY_KEYS.chat.all, 'student', 'chats', filters] as const,
+    chats: (role: 'instructor' | 'student', filters?: any) =>
+      [...QUERY_KEYS.chat.all, 'chats', role, filters] as const,
+    // Convenience shortcuts
+    instructorChats: (filters?: any) => QUERY_KEYS.chat.chats('instructor', filters),
+    studentChats: (filters?: any) => QUERY_KEYS.chat.chats('student', filters),
     chat: (id: string) => [...QUERY_KEYS.chat.all, id] as const,
-    instructorMessages: (chatId: string) =>
-      [...QUERY_KEYS.chat.chat(chatId), 'instructor', 'messages'] as const,
+    messages: (chatId: string) => [...QUERY_KEYS.chat.chat(chatId), 'messages'] as const,
     studentMessages: (chatId: string) =>
-      [...QUERY_KEYS.chat.chat(chatId), 'student', 'messages'] as const,
+      [...QUERY_KEYS.chat.chat(chatId), 'student-messages'] as const,
     unreadCount: () => [...QUERY_KEYS.chat.all, 'unreadCount'] as const,
+  },
+  discussion: {
+    all: ['discussion-room'] as const,
+    byCourse: (courseId: string) => [QUERY_KEYS.discussion.all, courseId] as const,
+    messages: (roomId: string) => [QUERY_KEYS.discussion.all, 'messages', roomId] as const,
   },
 
   // Admin queries
@@ -118,7 +126,14 @@ export const QUERY_KEYS = {
     all: ['admin'] as const,
     stats: ['admin', 'stats'] as const,
     systemOverview: () => [...QUERY_KEYS.admin.stats, 'overview'],
-    revenueStats: () => [...QUERY_KEYS.admin.stats, 'revenue'],
+    revenueStats: (year?: string) => [...QUERY_KEYS.admin.stats, 'revenue', year],
+    enrollmentTrend: (year?: string) => [...QUERY_KEYS.admin.stats, 'enrollment-trend', year],
+    userGrowthTrend: (year?: string) => [...QUERY_KEYS.admin.stats, 'user-growth-trend', year],
+    instructorGrowthTrend: (year?: string) => [
+      ...QUERY_KEYS.admin.stats,
+      'instructor-growth-trend',
+      year,
+    ],
     dashboard: () => [...QUERY_KEYS.admin.all, 'dashboard'] as const,
     analytics: () => [...QUERY_KEYS.admin.all, 'analytics'] as const,
     reports: (type: string, filters?: any) =>

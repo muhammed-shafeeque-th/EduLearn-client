@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import React, { useCallback, useState } from 'react';
@@ -16,19 +15,24 @@ import {
   GripVertical,
   BookOpen,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
-import { Section, Lesson, CurriculumFormData } from '../../schemas/curriculum-schema';
+import { CurriculumFormData } from '../../schemas/curriculum-schema';
 import { LessonEditor } from './lesson-editor';
 import { QuizBuilder } from '../quiz/quiz-builder';
 import { formatDuration } from '../../utils/curriculum-utils';
 import { Input } from '@/components/ui/input';
-import { UseFormTrigger } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+
+import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 
 interface SectionEditorProps {
-  section: Section;
   sectionIndex: number;
   courseId: string;
-  onUpdate: (updates: Partial<Section>) => void;
   onRemove: () => void;
   onMove: (direction: 'up' | 'down') => void;
   canMoveUp: boolean;
@@ -36,479 +40,466 @@ interface SectionEditorProps {
   className?: string;
   isActive?: boolean;
   onToggleActive?: () => void;
-  sectionError?: any;
-  triggerValidation: UseFormTrigger<CurriculumFormData>;
 }
 
 export const SectionEditor: React.FC<SectionEditorProps> = ({
-  section,
   sectionIndex,
   courseId,
-  onUpdate,
   onRemove,
   onMove,
   canMoveUp,
   canMoveDown,
-  sectionError,
 }) => {
+  const {
+    control,
+    register,
+    setValue,
+    trigger,
+    formState: { errors },
+  } = useFormContext<CurriculumFormData>();
+
+  const {
+    fields: lessons,
+    append: appendLesson,
+    remove: removeLesson,
+    move: moveLesson,
+  } = useFieldArray({
+    control,
+    name: `sections.${sectionIndex}.lessons`,
+  });
+
+  const sectionWatch = useWatch({
+    control,
+    name: `sections.${sectionIndex}`,
+  });
+
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showQuizBuilder, setShowQuizBuilder] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
-  const totalDuration = section.lessons.reduce((sum, lesson) => {
-    const lessonDuration = lesson?.estimatedDuration || 0;
-    return sum + lessonDuration;
+  const lessonsData = sectionWatch?.lessons || [];
+  const totalDuration = lessonsData.reduce((sum: number, lesson: any) => {
+    return sum + (lesson?.estimatedDuration || 0);
   }, 0);
 
-  const totalContent = section.lessons.reduce((sum, lesson) => sum + (lesson.content ? 1 : 0), 0);
-  const lessonCount = section.lessons.length;
-  const hasQuiz = !!section.quiz;
+  const totalContent = lessonsData.reduce(
+    (sum: number, lesson: any) => sum + (lesson.content ? 1 : 0),
+    0
+  );
+  const lessonCount = lessonsData.length;
+  const hasQuiz = !!sectionWatch?.quiz;
 
+  const sectionError: any = errors.sections?.[sectionIndex];
   const titleError = sectionError?.title?.message;
   const descriptionError = sectionError?.description?.message;
   const lessonsError = sectionError?.lessons;
-  const quizError = sectionError?.quiz;
 
-  const getLessonError = useCallback(
-    (lessonIndex: number) => {
-      return lessonsError?.[lessonIndex];
-    },
-    [lessonsError]
-  );
-  const handleAddLesson = useCallback(async () => {
-    const newLesson: Lesson = {
+  const handleAddLesson = useCallback(() => {
+    appendLesson({
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      title: `Lesson ${section.lessons.length + 1}`,
+      title: `Lesson ${lessonCount + 1}`,
       description: '',
-      content: undefined as any,
+      content: undefined,
       estimatedDuration: 0,
       isPublished: true,
-      order: section.lessons.length,
-    };
+      order: lessonCount,
+    } as any);
+  }, [appendLesson, lessonCount]);
 
-    onUpdate({
-      lessons: [...section.lessons, newLesson],
-    });
-  }, [onUpdate, sectionIndex, section.lessons]);
-
-  const handleRemoveQuiz = useCallback(async () => {
-    onUpdate({ quiz: undefined });
+  const handleRemoveQuiz = useCallback(() => {
+    setValue(`sections.${sectionIndex}.quiz`, undefined as any);
     setShowQuizBuilder(false);
-  }, [onUpdate, sectionIndex]);
-
-  const handleUpdateQuiz = useCallback(
-    async (quiz: any) => {
-      onUpdate({ quiz });
-    },
-    [onUpdate, sectionIndex]
-  );
-
-  const handleUpdateLesson = useCallback(
-    async (lessonId: string, updates: Partial<Lesson>) => {
-      const lessonIndex = section.lessons?.findIndex((l) => l.id === lessonId);
-      if (lessonIndex === undefined || lessonIndex === -1) return;
-
-      const updatedLessons = section.lessons?.map((l) =>
-        l.id === lessonId ? { ...l, ...updates } : l
-      );
-      onUpdate({ lessons: updatedLessons });
-    },
-    [section.lessons, onUpdate, sectionIndex]
-  );
-
-  const handleRemoveLesson = useCallback(
-    async (lessonId: string) => {
-      onUpdate({
-        lessons: section.lessons.filter((l) => l.id !== lessonId),
-      });
-    },
-    [section.lessons, onUpdate, sectionIndex]
-  );
-
-  const handleMoveLesson = useCallback(
-    (lessonId: string, direction: 'up' | 'down') => {
-      const currentIndex = section.lessons.findIndex((l) => l.id === lessonId);
-      if (currentIndex === -1) return;
-
-      const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-      if (newIndex < 0 || newIndex >= section.lessons.length) return;
-
-      const newLessons = [...section.lessons];
-      [newLessons[currentIndex], newLessons[newIndex]] = [
-        newLessons[newIndex],
-        newLessons[currentIndex],
-      ];
-
-      onUpdate({ lessons: newLessons });
-    },
-    [section.lessons, onUpdate]
-  );
+  }, [sectionIndex, setValue]);
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 border-2 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ${
-        titleError || descriptionError
-          ? 'border-red-300 dark:border-red-700'
-          : 'border-gray-200 dark:border-gray-700'
-      }`}
+      className={`group/section bg-card border rounded-xl overflow-hidden transition-all duration-300 ${
+        isExpanded ? 'shadow-md border-primary/20 ring-1 ring-primary/5' : 'shadow-sm border-border'
+      } ${titleError || descriptionError ? 'border-destructive/50' : 'hover:border-primary/20'}`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      {/* Section Header */}
-      <div className="bg-linear-to-r from-primary/5 to-blue-50 dark:from-orange-900/30 dark:to-pink-900/30 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center flex-1 min-w-0">
-            <div className="flex items-center justify-center w-10 h-10 bg-linear-to-br from-primary to-blue-500 text-white rounded-full text-lg font-bold mr-4">
-              {sectionIndex + 1}
+      {/* Premium Section Header */}
+      <div
+        className={`px-8 py-6 transition-colors ${
+          isExpanded
+            ? 'bg-linear-to-r from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800'
+            : 'bg-white dark:bg-gray-800'
+        }`}
+      >
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center flex-1 min-w-0 gap-4">
+            {/* Section Number Badge */}
+            <div
+              className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center font-semibold transition-all duration-300 ${
+                isExpanded
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              {String(sectionIndex + 1).padStart(2, '0')}
             </div>
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-lg transition-colors mr-3"
+              className="flex-1 text-left min-w-0 group/title"
             >
-              {isExpanded ? (
-                <ChevronDown className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+              {isEditing ? (
+                <div
+                  className="space-y-4 py-2"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setIsEditing(false);
+                  }}
+                  role="presentation"
+                >
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      {...register(`sections.${sectionIndex}.title`)}
+                      onChange={(e) => {
+                        register(`sections.${sectionIndex}.title`).onChange(e);
+                        trigger(`sections.${sectionIndex}.title`);
+                      }}
+                      className={`text-lg font-semibold h-11 bg-background border border-border focus-visible:ring-primary ${
+                        titleError ? 'border-destructive' : ''
+                      }`}
+                      onBlur={() => setIsEditing(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') setIsEditing(false);
+                        if (e.key === 'Escape') setIsEditing(false);
+                      }}
+                    />
+                    {titleError && (
+                      <p className="text-xs text-destructive font-semibold mt-1.5 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {titleError}
+                      </p>
+                    )}
+                  </div>
+                  <Textarea
+                    {...register(`sections.${sectionIndex}.description`)}
+                    rows={2}
+                    placeholder="Add a brief description of what this section covers..."
+                    className="bg-white dark:bg-gray-900 resize-none rounded-xl"
+                  />
+                </div>
               ) : (
-                <ChevronRight className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white truncate decoration-primary/30 group-hover/title:underline underline-offset-4">
+                      {sectionWatch?.title || 'Untitled Section'}
+                    </h2>
+                    {hasQuiz && (
+                      <Badge
+                        variant="outline"
+                        className="bg-amber-50 dark:bg-amber-900/10 text-amber-600 border-amber-200 dark:border-amber-800 text-[10px] font-black uppercase tracking-tighter"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" /> Quiz
+                      </Badge>
+                    )}
+                  </div>
+
+                  {isExpanded && sectionWatch?.description && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 max-w-2xl">
+                      {sectionWatch?.description}
+                    </p>
+                  )}
+
+                  {!isExpanded && (
+                    <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="w-3 h-3" /> {lessonCount} Lessons
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {formatDuration(totalDuration)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               )}
             </button>
-
-            <div className="flex-1 min-w-0">
-              {isEditing ? (
-                <div className="space-y-3">
-                  <Input
-                    type="text"
-                    value={section.title}
-                    onChange={(e) => onUpdate({ title: e.target.value })}
-                    className={`w-full text-lg font-bold ${
-                      titleError ? 'border-red-500 focus:ring-red-500' : ''
-                    }`}
-                    onBlur={() => setIsEditing(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') setIsEditing(false);
-                      if (e.key === 'Escape') setIsEditing(false);
-                    }}
-                  />
-                  {titleError && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {titleError}
-                    </p>
-                  )}
-                  <textarea
-                    value={section.description || ''}
-                    onChange={(e) => onUpdate({ description: e.target.value })}
-                    rows={2}
-                    className={`w-full resize-none ${
-                      descriptionError ? 'border-red-500 focus:ring-red-500' : ''
-                    }`}
-                    placeholder="Section description..."
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') setIsEditing(false);
-                      if (e.key === 'Escape') setIsEditing(false);
-                    }}
-                  />
-                  {descriptionError && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {descriptionError}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <div className="flex items-center">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
-                      {section.title}
-                    </h2>
-                    {titleError && (
-                      <div>
-                        <AlertCircle
-                          className="w-4 h-4 text-red-500 ml-2 shrink-0"
-                          aria-label={titleError}
-                        />
-                        {titleError}
-                      </div>
-                    )}
-                  </div>
-                  {section.description && (
-                    <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-                      {section.description}
-                    </p>
-                  )}
-                  <div className="flex items-center mt-2 space-x-6 text-sm text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center">
-                      <BookOpen className="w-4 h-4 mr-1" />
-                      {lessonCount} lesson{lessonCount !== 1 ? 's' : ''}
-                    </div>
-                    <div className="flex items-center">
-                      <PlayCircle className="w-4 h-4 mr-1" />
-                      {totalContent} content{totalContent !== 1 ? 's' : ''}
-                    </div>
-                    {totalDuration > 0 && (
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {formatDuration(totalDuration)}
-                      </div>
-                    )}
-                    {hasQuiz && (
-                      <div className="flex items-center">
-                        <HelpCircle className="w-4 h-4 mr-1" />
-                        Assessments
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Section Actions */}
-          <AnimatePresence>
-            {showActions && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex items-center space-x-2"
-              >
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50"
-                  title="Edit section"
+          <div className="flex items-center gap-2">
+            <AnimatePresence>
+              {showActions && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, x: 10 }}
+                  className="flex items-center gap-1 bg-background/80 backdrop-blur-xs p-1 rounded-lg border border-border shadow-xs"
                 >
-                  <Edit2 className="w-5 h-5" />
-                </button>
-
-                {canMoveUp && (
-                  <button
-                    onClick={() => onMove('up')}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50"
-                    title="Move section up"
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="h-9 w-9 rounded-lg hover:bg-white dark:hover:bg-gray-700 shadow-sm border border-transparent hover:border-gray-200"
                   >
-                    <ChevronDown className="w-5 h-5 rotate-180" />
-                  </button>
-                )}
-
-                {canMoveDown && (
-                  <button
-                    onClick={() => onMove('down')}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50"
-                    title="Move section down"
+                    <Edit2 className="w-4 h-4 text-gray-500" />
+                  </Button>
+                  <div className="flex flex-col gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={!canMoveUp}
+                      onClick={() => onMove('up')}
+                      className="h-5 w-8 rounded-t-md hover:bg-primary/10 hover:text-primary disabled:opacity-30"
+                    >
+                      <ChevronDown className="w-3 h-3 rotate-180" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={!canMoveDown}
+                      onClick={() => onMove('down')}
+                      className="h-5 w-8 rounded-b-md hover:bg-primary/10 hover:text-primary disabled:opacity-30"
+                    >
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onRemove}
+                    className="h-9 w-9 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500/70 hover:text-red-600 transition-colors"
                   >
-                    <ChevronDown className="w-5 h-5" />
-                  </button>
-                )}
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                  <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1" />
+                  <div className="p-2 cursor-grab active:cursor-grabbing text-gray-400">
+                    <GripVertical className="w-5 h-5" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                <button
-                  onClick={onRemove}
-                  className="p-2 text-red-400 hover:text-red-600 transition-colors rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50"
-                  title="Delete section"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-
-                <div className="cursor-move p-2 text-gray-400">
-                  <GripVertical className="w-5 h-5" />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`h-10 w-10 rounded-full transition-all duration-300 ${isExpanded ? 'bg-primary/10 text-primary rotate-0' : 'rotate-0'}`}
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-6 h-6" />
+              ) : (
+                <ChevronRight className="w-6 h-6" />
+              )}
+            </Button>
+          </div>
         </div>
 
-        {/* Section-level error message */}
-        {(titleError || descriptionError) && !isEditing && (
-          <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-sm text-red-700 dark:text-red-300 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2 shrink-0" />
-              Please fix the errors in this section before continuing
-            </p>
+        {/* Section Errors */}
+        {!isExpanded && (titleError || descriptionError) && (
+          <div className="mt-4 flex items-center gap-2 bg-red-50 dark:bg-red-900/10 p-2 px-3 rounded-xl border border-red-100 dark:border-red-900/20">
+            <AlertCircle className="w-4 h-4 text-red-500" />
+            <span className="text-xs font-bold text-red-600 dark:text-red-400">
+              This section has validation errors. Expand to fix.
+            </span>
           </div>
         )}
       </div>
 
-      {/* Section Content */}
+      {/* Expanded Content */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="p-6 space-y-6">
-              {/* Lessons */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Lessons ({lessonCount})
-                  </h3>
-                  {lessonsError?.message && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {lessonsError.message}
-                    </p>
-                  )}
-                  <button
+            <div className="px-8 pb-8 space-y-10">
+              {/* Lessons Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <PlayCircle className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                      Lessons <span className="text-gray-400 ml-1">({lessonCount})</span>
+                    </h3>
+                  </div>
+                  <Button
                     onClick={handleAddLesson}
-                    className="inline-flex items-center px-4 py-2 bg-primary/90 text-white rounded-lg hover:bg-primary transition-colors text-sm font-medium"
+                    variant="outline"
+                    className="rounded-xl h-10 border-primary/20 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Lesson
-                  </button>
+                  </Button>
                 </div>
 
-                {section.lessons.length === 0 ? (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                    <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400 mb-4">
-                      No lessons in this section yet
+                {lessons.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50/50 dark:bg-gray-900/20 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl group/empty">
+                    <BookOpen className="w-10 h-10 text-gray-300 mx-auto mb-3 group-hover/empty:scale-110 transition-transform" />
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      No lessons here yet.
                     </p>
                     <button
                       onClick={handleAddLesson}
-                      className="text-blue-600 dark:text-blue-400 hover:underline"
+                      className="text-primary text-xs font-bold mt-2 hover:underline"
                     >
-                      Add your first lesson
+                      Create your first lesson →
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {section.lessons.map((lesson, index) => (
+                  <div className="grid grid-cols-1 gap-4 relative">
+                    {lessons.map((lesson, index) => (
                       <LessonEditor
                         key={lesson.id}
-                        lesson={lesson}
                         lessonIndex={index}
                         sectionIndex={sectionIndex}
                         courseId={courseId}
-                        onUpdate={(updates) => handleUpdateLesson(lesson.id, updates)}
-                        onRemove={() => handleRemoveLesson(lesson.id)}
-                        onMove={(direction) => handleMoveLesson(lesson.id, direction)}
+                        onRemove={() => removeLesson(index)}
+                        onMove={(direction) =>
+                          moveLesson(index, direction === 'up' ? index - 1 : index + 1)
+                        }
                         canMoveUp={index > 0}
-                        canMoveDown={index < section.lessons.length - 1}
-                        lessonError={getLessonError(index)}
+                        canMoveDown={index < lessons.length - 1}
+                        lessonError={lessonsError?.[index]}
                       />
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Section Quiz */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Assessments
+              {/* Assessments Section */}
+              <div className="space-y-4 pt-6 border-t border-gray-100 dark:border-gray-800/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <HelpCircle className="w-5 h-5 text-amber-500" />
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                      Assessment Quiz
                     </h3>
-                    {quizError?.message && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
-                        <AlertCircle className="w-3 h-3 mr-1" />
-                        {quizError.message}
-                      </p>
-                    )}
                   </div>
+
                   {!hasQuiz ? (
-                    <button
-                      onClick={() => setShowQuizBuilder(true)}
-                      className="inline-flex items-center px-4 py-2 bg-primary/90 text-white rounded-lg hover:bg-primary transition-colors text-sm font-medium"
+                    <Button
+                      onClick={() => {
+                        const newQuiz = {
+                          id: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                          title: '',
+                          questions: [],
+                          passingScore: 70,
+                          maxAttempts: 3,
+                          timeLimit: 60,
+                          randomizeQuestions: false,
+                          showResults: true,
+                          isRequired: false,
+                        };
+                        setValue(`sections.${sectionIndex}.quiz`, newQuiz as any);
+                        setShowQuizBuilder(true);
+                      }}
+                      variant="outline"
+                      className="rounded-xl border-amber-200/50 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/10 font-bold"
                     >
-                      <HelpCircle className="w-4 h-4 mr-2" />
-                      Add Section Quiz
-                    </button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Quiz
+                    </Button>
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <button
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setShowQuizBuilder(!showQuizBuilder)}
-                        className="inline-flex items-center px-4 py-2 bg-primary/90 text-white rounded-lg hover:bg-primary transition-colors text-sm font-medium"
+                        className="rounded-lg text-amber-600 hover:bg-amber-50"
                       >
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        Edit Quiz
-                      </button>
-                      <button
+                        {showQuizBuilder ? 'Hide Builder' : 'Customize Quiz'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={handleRemoveQuiz}
-                        className="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
+                        className="rounded-lg text-red-500 hover:bg-red-50"
                       >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Remove Quiz
-                      </button>
+                        Remove
+                      </Button>
                     </div>
                   )}
                 </div>
 
                 {hasQuiz && !showQuizBuilder && (
-                  <div className="bg-primary/5 dark:bg-yellow-900/20 border border-primary/20 dark:border-primary rounded-lg p-4">
-                    <div className="flex items-center justify-between">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 p-6 rounded-3xl flex items-center justify-between group/quiz"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-2xl">
+                        <HelpCircle className="w-6 h-6 text-amber-600" />
+                      </div>
                       <div>
-                        <h4 className="font-medium text-primary dark:text-primary/20">
-                          {section.quiz!.title}
+                        <h4 className="font-black text-amber-900 dark:text-amber-200">
+                          {sectionWatch?.quiz?.title || 'Untitled Quiz'}
                         </h4>
-                        <p className="text-sm text-primary dark:text-primary-foreground">
-                          {section.quiz!.questions.length} question
-                          {section.quiz!.questions.length !== 1 ? 's' : ''} • Passing score:{' '}
-                          {section.quiz!.passingScore}%
+                        <p className="text-xs font-bold text-amber-700/60 dark:text-amber-400/60 flex items-center gap-2">
+                          <span>{sectionWatch?.quiz?.questions?.length || 0} Questions</span>
+                          <span className="w-1 h-1 bg-amber-300 rounded-full" />
+                          <span>Passing Score: {sectionWatch?.quiz?.passingScore || 70}%</span>
                         </p>
                       </div>
-                      <button
-                        onClick={() => setShowQuizBuilder(true)}
-                        className="text-primary dark:text-primary-foreground hover:text-primary dark:hover:text-primary/20"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
                     </div>
-                  </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowQuizBuilder(true)}
+                      className="rounded-xl opacity-0 group-hover/quiz:opacity-100 transition-opacity"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                  </motion.div>
                 )}
 
                 <AnimatePresence>
                   {showQuizBuilder && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="bg-muted/30 rounded-xl border border-amber-200/50 dark:border-amber-900/30 p-2"
                     >
-                      <QuizBuilder
-                        quiz={
-                          section.quiz || {
-                            id: Date.now().toString(),
-                            title: '',
-                            description: '',
-                            timeLimit: 0,
-                            questions: [],
-                            passingScore: 70,
-                            maxAttempts: 3,
-                            randomizeQuestions: false,
-                            showResults: true,
-                            isRequired: false,
-                          }
-                        }
-                        onChange={handleUpdateQuiz}
-                        quizError={quizError}
-                      />
+                      <QuizBuilder sectionIndex={sectionIndex} courseId={courseId} />
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Section Settings */}
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Section Settings</h4>
-                <label htmlFor="is-published" className="flex items-start">
-                  <Input
-                    type="checkbox"
-                    id="is-published"
-                    checked={section.isPublished}
-                    onChange={(e) => onUpdate({ isPublished: e.target.checked })}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mt-0.5"
-                  />
-                  <div className="ml-3">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Published
-                    </span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Make this section visible to students
-                    </p>
+              {/* Section Settings Footer */}
+              <div className="pt-6 border-t border-gray-100 dark:border-gray-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      id={`publish-${sectionIndex}`}
+                      checked={sectionWatch?.isPublished ?? true}
+                      onCheckedChange={(val) =>
+                        setValue(`sections.${sectionIndex}.isPublished`, val)
+                      }
+                    />
+                    <Label
+                      htmlFor={`publish-${sectionIndex}`}
+                      className="text-sm font-bold text-gray-700 dark:text-gray-300 cursor-pointer"
+                    >
+                      Section is Public
+                    </Label>
                   </div>
-                </label>
+
+                  <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
+
+                  <p className="text-[10px] uppercase tracking-widest font-black text-gray-400">
+                    Last Updated: Recently
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs font-black text-gray-500">
+                  <span className="flex items-center gap-1.5">
+                    <PlayCircle className="w-4 h-4 text-primary/50" /> {totalContent} Assets
+                  </span>
+                  <span className="w-1 h-1 bg-gray-200 rounded-full" />
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-emerald-500/50" />{' '}
+                    {formatDuration(totalDuration)}
+                  </span>
+                </div>
               </div>
             </div>
           </motion.div>

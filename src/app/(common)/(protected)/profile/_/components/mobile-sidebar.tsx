@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { UserCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProfileSidebar } from './profile-sidebar';
 import { User } from '@/types/user';
@@ -21,13 +21,13 @@ export function MobileSidebar({ user }: MobileSidebarProps) {
     <>
       {/* Mobile Menu Button */}
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
         onClick={toggleSidebar}
-        className="lg:hidden"
+        className="lg:hidden rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         aria-label="Toggle navigation menu"
       >
-        <Menu className="h-4 w-4" />
+        <UserCircle className="h-6 w-6 text-slate-600 dark:text-slate-400" />
       </Button>
 
       {/* Overlay */}

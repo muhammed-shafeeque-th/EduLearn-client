@@ -10,6 +10,7 @@ import {
 export interface RequestOptions extends AxiosRequestConfig {
   signal?: AbortSignal | GenericAbortSignal;
   retry?: number;
+  silent?: boolean;
 }
 
 export interface BaseServiceHooks {

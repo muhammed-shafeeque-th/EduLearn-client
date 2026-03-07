@@ -130,17 +130,24 @@ export function useCourseData({
     advanced: false,
     curriculum: false,
   });
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const router = useRouter();
   const { signal, abort } = useAbortController();
   const submissionErrorsRef = useRef<SubmissionError[]>([]);
   const sectionIdMapRef = useRef<Map<string, string>>(new Map());
 
-  // Watch form changes to trigger unsaved changes flag
-  useFormChangeEffect(basicForm, setHasUnsavedChanges);
-  useFormChangeEffect(advancedForm, setHasUnsavedChanges);
-  useFormChangeEffect(curriculumForm, setHasUnsavedChanges);
+  // Track unsaved changes via form state
+  const isBasicDirty = basicForm.formState.isDirty;
+  const isAdvancedDirty = advancedForm.formState.isDirty;
+  const isCurriculumDirty = curriculumForm.formState.isDirty;
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    if (isBasicDirty || isAdvancedDirty || isCurriculumDirty) {
+      setHasUnsavedChanges(true);
+    }
+  }, [isBasicDirty, isAdvancedDirty, isCurriculumDirty]);
 
   const validateAllForms = useCallback(async (): Promise<ValidationState> => {
     const [basic, advanced, curriculum] = await Promise.all([
@@ -170,7 +177,7 @@ export function useCourseData({
       currency: basic.currency,
       durationUnit: basic.duration?.unit,
       durationValue: basic.duration?.value,
-      topics: basic.topics,
+      topics: basic.topics?.map((t: any) => t.text) || [],
       description: advanced.description,
       thumbnail: advanced.thumbnail,
       trailer: advanced.trailer,
@@ -272,7 +279,7 @@ export function useCourseData({
           currency: basic.currency,
           durationUnit: basic.duration?.unit,
           durationValue: basic.duration?.value,
-          topics: basic.topics,
+          topics: basic.topics?.map((t: any) => t.text) || [],
         },
         { retry: 0, signal }
       );

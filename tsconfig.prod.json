@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // "noEmit": true,
+    "removeComments": true,
+    "incremental": false,
+    "sourceMap": false,
+    "declaration": false
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "dist",
+    "**/*spec.ts",
+    "**/*old*.ts",
+    "**/_*.ts",
+    "**/__*/**",
+    "tests",
+    "scripts",
+    "mocks",
+    "playground",
+    "docs",
+    "**/__tests__",
+    "**/__mocks__"
+  ]
+}

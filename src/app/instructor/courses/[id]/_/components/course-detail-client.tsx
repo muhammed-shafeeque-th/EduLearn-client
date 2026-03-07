@@ -42,21 +42,13 @@ export function CourseDetailClient({ courseId }: CourseDetailClientProps) {
     );
   }
 
-  if (!course) {
-    return (
-      <div className="text-center text-muted-foreground py-8">
-        <p>Course not found.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <Suspense fallback={<CourseDetailHeaderSkeleton />}>
-        <CourseDetailHeader course={course} />
+        <CourseDetailHeader course={course!} />
       </Suspense>
       <Suspense fallback={<CourseDetailSkeleton />}>
-        <CourseDetail course={course} />
+        <CourseDetail course={course!} />
       </Suspense>
     </div>
   );

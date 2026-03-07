@@ -78,7 +78,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
   // Determine if the logged in user is the course instructor
   const isInstructor =
-    user && (user.id === course.instructorId || user.id === course.instructor?.id);
+    user && (user.userId === course.instructorId || user.userId === course.instructor?.id);
 
   const isInCart = cart?.items.some((item) => item.courseId === course.id);
   const isInWishlist = wishlist?.items.some((item) => item.courseId === course.id);
@@ -252,7 +252,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
   };
 
   // Course overview redirect
-  const courseOverviewUrl = `instructor/courses/${course.id}/analytics`;
+  const courseOverviewUrl = `/instructor/courses/${course.id}`;
 
   return (
     <motion.div
@@ -329,7 +329,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
               {isInstructor ? (
                 <Button
                   asChild
-                  className="w-full h-10 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full h-10 flex items-center justify-center gap-2 bg-primary/80 hover:bg-primary text-white"
                   size="lg"
                 >
                   <Link href={courseOverviewUrl}>
@@ -339,14 +339,14 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                       className="flex items-center gap-2 w-full"
                     >
                       <Eye className="w-4 h-4" />
-                      View Course Overview
+                      View Your Course
                     </motion.div>
                   </Link>
                 </Button>
               ) : isEnrolled ? (
                 <Button
                   asChild
-                  className="w-full h-10 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full h-10 flex items-center justify-center gap-2 bg-green-400 hover:bg-green-600 text-white"
                   size="lg"
                 >
                   <Link href="/profile/my-courses">
@@ -356,7 +356,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                       className="flex items-center gap-2 w-full"
                     >
                       <GraduationCap className="w-4 h-4" />
-                      Enrolled &mdash; Go to My Courses
+                      Enrolled &mdash; Go to
                     </motion.div>
                   </Link>
                 </Button>

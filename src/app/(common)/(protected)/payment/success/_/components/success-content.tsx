@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, BookOpen, ArrowRight, Share2, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
-import { useSelector } from '@xstate/react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,9 +30,7 @@ export function SuccessContent({
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [loading, setLoading] = useState(Boolean(orderId));
 
-  const orderService = useOrderMachine();
-  const orderState = useSelector(orderService, (state) => state);
-  const { order } = orderState.context;
+  const { hydrate: hydrateOrder, order } = useOrderMachine();
 
   useEffect(() => {
     if (!orderId) {
@@ -45,7 +42,7 @@ export function SuccessContent({
     startTransition(async () => {
       if (cancelled) return;
 
-      orderService.send({ type: 'HYDRATE_ORDER', order: serverOrder });
+      hydrateOrder(serverOrder);
 
       setLoading(false);
     });
@@ -53,7 +50,7 @@ export function SuccessContent({
     return () => {
       cancelled = true;
     };
-  }, [orderId, orderService, serverOrder]);
+  }, [orderId, hydrateOrder, serverOrder]);
 
   useEffect(() => {
     if (hasCelebrated) return;

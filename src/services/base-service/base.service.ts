@@ -8,9 +8,17 @@ import axios, {
   AxiosHeaders,
 } from 'axios';
 import { BaseServiceHooks, BaseServiceOptions, RequestOptions } from './types';
-import { hasErrorMessage, hasMessage, isAxiosError, normalizeRequestConfig } from './guards';
+import {
+  hasErrorMessage,
+  hasMessage,
+  hasErrorWithDetails,
+  isAxiosError,
+  normalizeRequestConfig,
+} from './guards';
 import { ERROR_CODES, ErrorCode } from '@/lib/errors/error-codes';
-import { AppError } from '@/lib/errors/app-error';
+import { AppError, ErrorDetail } from '@/lib/errors/app-error';
+import { getWindow } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export abstract class BaseService {
   protected readonly client: AxiosInstance;
@@ -61,7 +69,6 @@ export abstract class BaseService {
           if (token) headers.set('Authorization', `Bearer ${token}`);
         }
 
-        // Add idempotency (for POST/PATCH only if absent)
         const method = config.method?.toLowerCase();
         if (['post', 'patch'].includes(method || '')) {
           if (!headers.has('Idempotency-Key')) {
@@ -69,7 +76,6 @@ export abstract class BaseService {
           }
         }
 
-        // Trace request
         headers.set('X-Request-ID', uuidv4());
 
         if (this.getHeaders) {
@@ -87,27 +93,23 @@ export abstract class BaseService {
       }
     );
 
-    // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
         this.hooks?.onResponse?.(response);
         return response;
       },
       async (error: AxiosError) => {
-        //  Guard
         if (!isAxiosError(error)) {
           return Promise.reject(new Error('Unknown network error'));
         }
 
         const originalRequest = normalizeRequestConfig(error);
 
-        // If no request config (common in SSR) -> bail out safely
         if (!originalRequest) {
           this.hooks?.onError?.(error);
           return Promise.reject(this._handleError(error));
         }
 
-        //   Handle 401 refresh
         if (error.response?.status === 401 && !originalRequest._retry && this.authRefresh) {
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
@@ -193,15 +195,17 @@ export abstract class BaseService {
     }
 
     let errorCode: ErrorCode | undefined;
+    let errorDetails: ErrorDetail[] | undefined;
     let message: string = error.message || 'Server error occurred';
-    this._logAxiosError(error);
+    // this._logAxiosError(error);
+    let statusCode: number | undefined;
 
     if (error.response) {
       const { status } = error.response;
+      statusCode = status;
       const data = error.response.data;
       // const details = data?.error?.details;
 
-      // Prefer backend-provided error code (if any)
       // if (
       //   data &&
       //   typeof data === 'object' &&
@@ -223,15 +227,18 @@ export abstract class BaseService {
       // }
       // Message priority: backend -> fallback
 
-      errorCode = mapStatusToErrorCode(status);
+      errorCode = mapStatusToErrorCode(statusCode);
 
-      if (hasErrorMessage(data)) {
+      if (hasErrorWithDetails(data)) {
+        errorDetails = data.error.details;
+        message = data.error.message;
+      } else if (hasErrorMessage(data)) {
         message = data.error.message;
       } else if (hasMessage(data)) {
         message = data.message;
       }
 
-      switch (status) {
+      switch (statusCode) {
         case 400:
           message = message || 'Invalid request data';
           break;
@@ -272,17 +279,40 @@ export abstract class BaseService {
     //   });
 
     //   // Update the current route's error_code param in browser environment
-    //   if (getWindow()) {
-    //     try {
-    //       const url = new URL(window.location.href);
-    //       url.searchParams.set('error_code', errorCode);
-    //       window.history.replaceState({}, '', url.toString());
-    //     } catch {
-    //       // Silently ignore if URL cannot be updated
-    //     }
-    //   }
+    if (getWindow()) {
+      // try {
+      //   const url = new URL(getWindow()?.location.href || '');
+      //   url.searchParams.set('error_code', errorCode ?? '');
+      //   window.history.replaceState({}, '', url.toString());
+      // } catch {
+      //   // Silently ignore if URL cannot be updated
+      // }
+
+      const isSilent = (error.config as unknown as Record<string, unknown>)?.silent === true;
+      if (!isSilent) {
+        if (statusCode === 403) {
+          toast.error(
+            'Your account has been blocked. Please contact support for assistance.'
+            // 'Session expired or access denied. Please log in again.'
+          );
+          getWindow()?.dispatchEvent(
+            new CustomEvent('auth:force-logout', { detail: { message: 'Access Denied' } })
+          );
+        }
+        //   else if (statusCode === 401) {
+        //     getWindow()?.dispatchEvent(
+        //       new CustomEvent('auth:force-logout', { detail: { message: 'Session Expired' } })
+        //     );
+        //   } else if (statusCode !== 404 && statusCode !== undefined && statusCode < 500) {
+        //     // generic client level errors, like 400 validation not silent
+        //     toast.error(message || 'An error occurred.');
+        //   } else if (statusCode === undefined || statusCode >= 500) {
+        //     toast.error(message || 'A network or server error occurred.');
+        //   }
+      }
+    }
     // }
-    return new AppError(message, errorCode);
+    return new AppError(message, errorCode, errorDetails, statusCode ?? 500);
   }
 
   private _logAxiosError(error: unknown) {

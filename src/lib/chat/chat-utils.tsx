@@ -19,7 +19,7 @@ export function mergeMessagesBySequence(prev: UiMessage[], incoming: UiMessage[]
 }
 
 export function getOtherUser(chat: Chat, currentUserId: string) {
-  const otherUser = currentUserId === chat.studentId ? chat.instructor : chat.student;
+  const otherUser = chat.otherUser ? chat.otherUser : undefined;
 
   const otherUserId = currentUserId === chat.studentId ? chat.instructorId : chat.studentId;
 
@@ -31,10 +31,7 @@ export function getUserDisplayName(user?: UserInfo | null) {
   return user.name.trim() || user.email || 'Unknown';
 }
 
-// ============================================================================
-// ENHANCED TYPING INDICATOR
-// ============================================================================
-
+// TYPING INDICATOR
 interface TypingIndicatorProps {
   isVisible: boolean;
   userName?: string;
@@ -72,10 +69,7 @@ export function TypingIndicator({ isVisible, userName, className }: TypingIndica
   );
 }
 
-// ============================================================================
-// ENHANCED EMPTY STATE
-// ============================================================================
-
+// EMPTY STATE
 import { MessageSquarePlus, Send, Sparkles, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -174,10 +168,7 @@ export function EmptyMessagesState({ onNewMessage }: EmptyMessagesStateProps) {
   );
 }
 
-// ============================================================================
-// ENHANCED CONNECTION STATUS
-// ============================================================================
-
+// CONNECTION STATUS
 import { useEffect, useState } from 'react';
 import { Wifi, WifiOff, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -291,10 +282,7 @@ export function ConnectionStatusIndicator({ isConnected }: { isConnected: boolea
   );
 }
 
-// ============================================================================
 // LOADING SKELETON
-// ============================================================================
-
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function ChatInterfaceSkeleton() {
@@ -341,10 +329,7 @@ export function ChatInterfaceSkeleton() {
   );
 }
 
-// ============================================================================
 // MESSAGE DELIVERY STATUS
-// ============================================================================
-
 export function MessageDeliveryStatus({
   status,
 }: {

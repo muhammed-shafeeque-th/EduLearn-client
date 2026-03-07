@@ -37,37 +37,38 @@ export function WishlistClient() {
     return <WishlistEmpty />;
   }
 
-  // Main content: Wishlist with items
   return (
-    <section className="container mx-auto px-4 py-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-8 md:py-12 bg-background">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        className="space-y-10"
       >
-        <header className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Heart className="w-6 h-6 text-primary fill-current" aria-hidden="true" />
-            <h1 className="text-2xl font-bold text-foreground">{`Wishlist (${wishlistTotal})`}</h1>
+        <header className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-primary rounded-full" />
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground">My Wishlist</h1>
           </div>
-          <div className="hidden md:block text-sm text-muted-foreground">
-            {wishlistTotal} course{wishlist.total === 1 ? '' : 's'} saved
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Heart className="w-4 h-4" />
+            <p className="text-base">
+              You have {wishlistTotal} {wishlistTotal === 1 ? 'course' : 'courses'} saved for later.
+            </p>
           </div>
         </header>
 
         {/* Course Grid */}
-        <section className="grid grid-cols-1 gap-6" aria-label="Wishlist Courses">
+        <section className="grid grid-cols-1 gap-8" aria-label="Wishlist Courses">
           <AnimatePresence mode="popLayout">
             {wishlist.items.map((item, index) => (
               <motion.div
                 key={item.id}
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{
                   opacity: 0,
-                  x: -100,
-                  scale: 0.95,
+                  scale: 0.9,
                   transition: { duration: 0.3 },
                 }}
                 transition={{
@@ -82,6 +83,6 @@ export function WishlistClient() {
           </AnimatePresence>
         </section>
       </motion.div>
-    </section>
+    </div>
   );
 }

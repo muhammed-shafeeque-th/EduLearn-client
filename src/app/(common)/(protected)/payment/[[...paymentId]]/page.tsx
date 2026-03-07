@@ -61,6 +61,9 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
   // if (!['pending_payment', 'processing', 'created'].includes(order.status)) {
   //   redirect(`/checkout?orderId=${order.id}&error_code=${ERROR_CODES.INVALID_ORDER_STATUS}`);
   // }
+
+  console.log('Rendering paymentPage');
+
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={<PaymentPageSkeleton />}>

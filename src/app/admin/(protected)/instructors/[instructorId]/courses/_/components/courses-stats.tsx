@@ -1,42 +1,47 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useInstructorCoursesStats } from '@/states/server/admin/use-admin-stats';
 import { BookOpen, Users, DollarSign, Clock } from 'lucide-react';
-import { getInstructorCoursesStats } from '../../../../_/libs/apis';
+import { StatsCardsSkeleton } from '../../../../_/components/skeletons/course-card-skeleton';
 
 interface CoursesStatsProps {
   instructorId: string;
 }
 
-export async function CoursesStats({ instructorId }: CoursesStatsProps) {
-  const stats = await getInstructorCoursesStats(instructorId);
+export function CoursesStats({ instructorId }: CoursesStatsProps) {
+  const { stats, isLoading } = useInstructorCoursesStats(instructorId);
+
+  if (isLoading) return <StatsCardsSkeleton />;
 
   const statCards = [
     {
       title: 'Published Courses',
-      value: stats.published.toString(),
+      value: stats?.published.toString(),
       icon: BookOpen,
-      description: `${stats.draft} drafts`,
+      description: `${stats?.draft} drafts`,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     },
     {
       title: 'Total Enrollments',
-      value: stats.totalEnrollments.toLocaleString(),
+      value: stats?.totalEnrollments.toLocaleString(),
       icon: Users,
-      description: `${stats.activeStudents} active`,
+      description: `${stats?.activeStudents} active`,
       color: 'text-green-600',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
     },
     {
       title: 'Revenue (This Month)',
-      value: `₹${stats.monthlyRevenue.toLocaleString()}`,
+      value: `₹${stats?.monthlyRevenue.toLocaleString()}`,
       icon: DollarSign,
-      description: `${stats.revenueGrowth > 0 ? '+' : ''}${stats.revenueGrowth.toFixed(1)}%`,
+      description: `${stats?.revenueGrowth && Number(stats.revenueGrowth) > 0 ? '+' : ''}${stats?.revenueGrowth && Number(stats.revenueGrowth).toFixed(1)}%`,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
     },
     {
       title: 'Avg Completion Rate',
-      value: `${stats.avgCompletionRate}%`,
+      value: `${stats?.avgCompletionRate}%`,
       icon: Clock,
       description: 'All courses',
       color: 'text-orange-600',

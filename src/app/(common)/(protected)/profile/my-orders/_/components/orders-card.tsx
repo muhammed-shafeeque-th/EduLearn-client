@@ -103,7 +103,7 @@ export const OrderCard = memo(function OrderCard({ order }: OrderCardProps) {
         )}
 
         {/* Retry Payment Button with React Query loading and error state */}
-        {order.status === 'failed' && (
+        {(order.status === 'failed' || order.status === 'cancelled') && (
           <div className="mt-3">
             <button
               onClick={handleRetryPayment}

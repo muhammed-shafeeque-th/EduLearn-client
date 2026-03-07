@@ -1,46 +1,58 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import { InstructorsTableClient } from './instructors-table-client';
 import { useInstructors } from '@/states/server/user/use-instructors';
+import { SortingState, ColumnFiltersState } from '@tanstack/react-table';
 
-interface InstructorsTableProps {
-  searchParams: { search?: string; status?: string; page?: string };
-}
+export function InstructorsTable() {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [searchField, setSearchField] = useState<'username' | 'email'>('username');
 
-const PAGE_SIZE = 12;
+  // Derive filters
+  const searchFilter = columnFilters.find((f) => f.id === searchField);
+  const statusFilter = columnFilters.find((f) => f.id === 'status');
+  const searchValue = (searchFilter?.value as string) ?? '';
+  const statusValue = (statusFilter?.value as string) ?? '';
 
-export function InstructorsTable({ searchParams }: InstructorsTableProps) {
-  const router = useRouter();
-  const params = useSearchParams();
+  // Reset pagination when filters change
+  const [prevFilters, setPrevFilters] = useState({
+    columnFilters,
+    searchField,
+    sorting,
+  });
 
-  const { instructors, isSuccess, isLoading, error, totalPages, totalCount } = useInstructors(
-    {
-      pageSize: PAGE_SIZE,
-      search: searchParams.search,
-      // status: searchParams.status,
-      page: parseInt(searchParams.page || '1'),
-    },
-    {
-      enabled: true,
-    }
-  );
+  if (
+    columnFilters !== prevFilters.columnFilters ||
+    searchField !== prevFilters.searchField ||
+    sorting !== prevFilters.sorting
+  ) {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    setPrevFilters({ columnFilters, searchField, sorting });
+  }
 
-  const updateSearchParams = (updates: Record<string, string | undefined>) => {
-    const newParams = new URLSearchParams(params);
+  // Data fetching
+  const {
+    instructors,
+    pagination: apiPagination,
+    isLoading,
+    error,
+    refetch,
+  } = useInstructors({
+    page: pagination.pageIndex + 1,
+    pageSize: pagination.pageSize,
+    // Sort is handled client-side per instructions
+    ...(searchField === 'username' && searchValue ? { name: searchValue } : {}),
+    ...(searchField === 'email' && searchValue ? { email: searchValue } : {}),
+    ...(statusValue ? { status: statusValue as 'active' | 'inactive' } : {}),
+  });
 
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        newParams.delete(key);
-      } else {
-        newParams.set(key, value);
-      }
-    });
-
-    router.push(`?${newParams.toString()}`, { scroll: false });
-  };
-
-  if (error || !isSuccess) {
+  if (error && !isLoading) {
     return (
       <div className="text-center p-8">
         <p className="text-red-500">Failed to load instructors</p>
@@ -51,13 +63,20 @@ export function InstructorsTable({ searchParams }: InstructorsTableProps) {
 
   return (
     <InstructorsTableClient
-      instructors={instructors}
-      totalPages={totalPages}
-      totalItems={totalCount}
-      currentPage={parseInt(searchParams.page || '1')}
+      instructors={instructors || []}
       isLoading={isLoading}
-      searchParams={searchParams}
-      onUpdateSearchParams={updateSearchParams}
+      pageCount={apiPagination?.totalPages ?? 0}
+      pagination={pagination}
+      sorting={sorting}
+      columnFilters={columnFilters}
+      searchField={searchField}
+      onPaginationChange={setPagination}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onSearchFieldChange={setSearchField}
+      onRefresh={async () => {
+        await refetch();
+      }}
     />
   );
 }

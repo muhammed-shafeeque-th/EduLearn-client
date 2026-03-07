@@ -5,6 +5,7 @@ import { CoursesHeader } from './_/components/courses-header';
 import { CoursesStats } from './_/components/courses-stats';
 import { TableSkeleton } from '../../../_components/__table/table-skeleton';
 import { CoursesTable } from './_/components/courses-table';
+import { StatsCardsSkeleton } from '../../_/components/skeletons/course-card-skeleton';
 
 interface InstructorCoursesPageProps {
   params: { instructorId: string };
@@ -25,10 +26,7 @@ export async function generateMetadata({ params }: InstructorCoursesPageProps) {
   };
 }
 
-export default async function InstructorCoursesPage({
-  params,
-  searchParams,
-}: InstructorCoursesPageProps) {
+export default async function InstructorCoursesPage({ params }: InstructorCoursesPageProps) {
   const { instructorId } = params;
 
   const instructor = await getInstructor(instructorId);
@@ -41,12 +39,12 @@ export default async function InstructorCoursesPage({
     <div className="space-y-6">
       <CoursesHeader instructor={instructor} />
 
-      <Suspense fallback={<div>Loading stats...</div>}>
+      <Suspense fallback={<StatsCardsSkeleton />}>
         <CoursesStats instructorId={instructorId} />
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <CoursesTable instructorId={instructorId} searchParams={searchParams} />
+        <CoursesTable instructorId={instructorId} />
       </Suspense>
     </div>
   );

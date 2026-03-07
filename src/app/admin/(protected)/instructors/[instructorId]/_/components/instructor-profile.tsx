@@ -117,7 +117,7 @@ export function InstructorProfile({ instructor: instr }: InstructorProfileProps)
                     {instructor.instructorProfile?.rating?.toFixed(1) ?? 'N/A'}
                   </span>
                   <span className="text-muted-foreground">
-                    ({Math.floor(Math.random() * 500 + 100)} reviews)
+                    ({instructor.instructorProfile?.totalRatings?.toFixed(1) ?? 0} reviews)
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">

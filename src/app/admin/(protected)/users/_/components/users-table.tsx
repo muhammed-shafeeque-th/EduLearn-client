@@ -1,57 +1,61 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { UsersTableClient } from './users-table-client';
 import { useUsers } from '@/states/server/user/use-users';
-
-const PAGE_SIZE = 12;
+import { SortingState, ColumnFiltersState } from '@tanstack/react-table';
 
 export function UsersTable() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [searchField, setSearchField] = useState<'username' | 'email'>('username');
 
-  const paramsObj = useMemo(() => {
-    const obj: Record<string, string> = {};
-    if (searchParams.has('search')) {
-      obj.search = searchParams.get('search') || '';
-    }
-    if (searchParams.has('status')) {
-      obj.status = searchParams.get('status') || '';
-    }
-    obj.page = searchParams.get('page') || '1';
-    return obj;
-  }, [searchParams]);
+  // Derive filters
+  const searchFilter = columnFilters.find((f) => f.id === searchField);
+  const statusFilter = columnFilters.find((f) => f.id === 'status');
+  const searchValue = (searchFilter?.value as string) ?? '';
+  const statusValue = (statusFilter?.value as string) ?? '';
 
-  const { users, pagination, isSuccess, isLoading, error } = useUsers(
-    {
-      pageSize: PAGE_SIZE,
-      name: paramsObj.search,
-      status: paramsObj.status,
-      page: parseInt(paramsObj.page),
-    },
-    {
-      enabled: true,
-    }
-  );
+  // Reset pagination when filters change
+  const [prevFilters, setPrevFilters] = useState({
+    columnFilters,
+    searchField,
+    sorting,
+  });
 
-  const { totalPages, total } = pagination || {};
+  if (
+    columnFilters !== prevFilters.columnFilters ||
+    searchField !== prevFilters.searchField ||
+    sorting !== prevFilters.sorting
+  ) {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    setPrevFilters({ columnFilters, searchField, sorting });
+  }
 
-  const updateSearchParams = (updates: Record<string, string | undefined>) => {
-    const newParams = new URLSearchParams(searchParams);
+  // Data fetching
+  const {
+    users,
+    pagination: apiPagination,
+    isLoading,
+    error,
+    refetch,
+  } = useUsers({
+    page: pagination.pageIndex + 1,
+    pageSize: pagination.pageSize,
+    // Sort is handled client-side per instructions
+    // Use specific search field if provided
+    ...(searchField === 'username' && searchValue ? { name: searchValue } : {}),
+    ...(searchField === 'email' && searchValue ? { email: searchValue } : {}),
+    ...(statusValue
+      ? { status: statusValue as 'active' | 'inactive' | 'pending' | 'rejected' }
+      : {}),
+  });
 
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        newParams.delete(key);
-      } else {
-        newParams.set(key, value);
-      }
-    });
-
-    router.push(`?${newParams.toString()}`, { scroll: false });
-  };
-
-  if (error || !isSuccess) {
+  if (error && !isLoading) {
     return (
       <div className="text-center p-8">
         <p className="text-red-500">Failed to load users</p>
@@ -60,21 +64,22 @@ export function UsersTable() {
     );
   }
 
-  const userSearchParams = {
-    search: paramsObj.search ?? '',
-    status: paramsObj.status ?? '',
-    page: paramsObj.page ?? '1',
-  };
-
   return (
     <UsersTableClient
-      users={users}
-      totalPages={totalPages ?? 1}
-      totalItems={total ?? 0}
-      currentPage={parseInt(userSearchParams.page)}
+      users={users || []}
       isLoading={isLoading}
-      searchParams={userSearchParams}
-      onUpdateSearchParams={updateSearchParams}
+      pageCount={apiPagination?.totalPages ?? 0}
+      pagination={pagination}
+      sorting={sorting}
+      columnFilters={columnFilters}
+      searchField={searchField}
+      onPaginationChange={setPagination}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onSearchFieldChange={setSearchField}
+      onRefresh={async () => {
+        await refetch();
+      }}
     />
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { MoreHorizontal, Ban, UserCheck, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Ban, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,8 @@ import { useTransition } from 'react';
 import { UserMeta } from '@/types/user';
 import { useAdminUser } from '@/states/server/admin/use-admin-users';
 import { getErrorMessage } from '@/lib/utils';
+import { QUERY_KEYS } from '@/lib/react-query/query-keys';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface UserActionsProps {
   user: UserMeta;
@@ -32,7 +34,9 @@ interface UserActionsProps {
 export function UserActions({ user }: UserActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
   const { blockUser, unblockUser, deleteUser } = useAdminUser(user.id);
+  const queryClient = useQueryClient();
 
   // Handle block/unblock action
   const handleBlockToggle = useCallback(() => {
@@ -54,9 +58,12 @@ export function UserActions({ user }: UserActionsProps) {
         }
       } catch (error) {
         toast.error({ title: getErrorMessage(error) });
+      } finally {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.list({}) });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.usersStats() });
       }
     });
-  }, [blockUser, unblockUser, user.id, user.status]);
+  }, [blockUser, unblockUser, user.id, user.status, queryClient]);
 
   // Handle delete action
   const handleDelete = useCallback(() => {
@@ -70,9 +77,12 @@ export function UserActions({ user }: UserActionsProps) {
         }
       } catch (error) {
         toast.error({ title: getErrorMessage(error) });
+      } finally {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.list({}) });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.usersStats() });
       }
     });
-  }, [deleteUser, user.id]);
+  }, [deleteUser, user.id, queryClient]);
 
   return (
     <>
@@ -89,7 +99,7 @@ export function UserActions({ user }: UserActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={handleBlockToggle}
+            onClick={() => setShowBlockDialog(true)}
             className={user.status === 'blocked' ? 'text-green-600' : 'text-orange-600'}
             disabled={isPending}
             aria-label={user.status === 'blocked' ? 'Unblock user' : 'Block user'}
@@ -106,7 +116,7 @@ export function UserActions({ user }: UserActionsProps) {
               </>
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onClick={() => setShowDeleteDialog(true)}
             className="text-red-600"
             disabled={isPending}
@@ -114,7 +124,7 @@ export function UserActions({ user }: UserActionsProps) {
           >
             <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
             Delete
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -139,6 +149,38 @@ export function UserActions({ user }: UserActionsProps) {
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {user.status === 'blocked' ? 'Unblock User' : 'Block User'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to {user.status === 'blocked' ? 'unblock' : 'block'}{' '}
+              <span className="font-semibold">{user.firstName + ' ' + user.lastName}</span>?
+              {user.status !== 'blocked' && ' This will restrict their access to the platform.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                handleBlockToggle();
+                setShowBlockDialog(false);
+              }}
+              disabled={isPending}
+              className={
+                user.status === 'blocked'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-orange-600 hover:bg-orange-700'
+              }
+            >
+              {user.status === 'blocked' ? 'Unblock' : 'Block'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

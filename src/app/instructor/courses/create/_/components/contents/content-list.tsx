@@ -3,9 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Video, FileText, Headphones, ExternalLink, Eye } from 'lucide-react';
-import { Content } from '../../schemas/curriculum-schema';
+import { Content, ContentType } from '../../schemas/curriculum-schema';
 import { formatFileSize } from '../../utils/curriculum-utils';
-import { ContentType } from '../../../__/schemas/curriculum-schema';
 
 interface ContentListProps {
   content?: Content;

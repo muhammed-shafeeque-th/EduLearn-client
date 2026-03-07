@@ -19,6 +19,7 @@ import {
   GenerateCertificateResponse,
   VerifyCertificateResponse,
 } from '@/types/enrollment/enrollment-certificate.type';
+import { getWindow } from '@/lib/utils';
 
 // --- Types and Utilities ---
 export interface SubmitQuizPayload {
@@ -66,6 +67,10 @@ export interface IEnrollmentService {
 
   // Certificates
   getCertificate(
+    certificateId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CertificateData>>;
+  getCertificateByEnrollmentId(
     enrollmentId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<CertificateData>>;
@@ -80,6 +85,7 @@ export interface IEnrollmentService {
     studentName: string,
     options?: RequestOptions
   ): Promise<ApiResponse<GenerateCertificateResponse>>;
+  getUserCertificates(options?: RequestOptions): Promise<ApiResponse<CertificateData[]>>;
 
   // Video URLs
   getSignedVideoUrl(
@@ -136,7 +142,6 @@ export interface IEnrollmentService {
   ): Promise<ApiResponse<Review>>;
 }
 
-// --- EnrollmentService Implementation ---
 export class EnrollmentService extends BaseService implements IEnrollmentService {
   constructor({
     getToken = getClientAuthToken,
@@ -179,6 +184,12 @@ export class EnrollmentService extends BaseService implements IEnrollmentService
 
   // Certificates
   getCertificate(
+    certificateId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CertificateData>> {
+    return this.get<ApiResponse<CertificateData>>(`/certificates/${certificateId}`, options);
+  }
+  getCertificateByEnrollmentId(
     enrollmentId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<CertificateData>> {
@@ -190,7 +201,7 @@ export class EnrollmentService extends BaseService implements IEnrollmentService
   }
 
   getShareUrl(certificateId: string): string {
-    return `${window.location.origin}/certificates/${certificateId}`;
+    return `${getWindow()?.location.origin}/certificates/${certificateId}`;
   }
 
   verifyCertificate(
@@ -198,7 +209,7 @@ export class EnrollmentService extends BaseService implements IEnrollmentService
     options?: RequestOptions
   ): Promise<ApiResponse<VerifyCertificateResponse>> {
     return this.get<ApiResponse<VerifyCertificateResponse>>(
-      `/certificates/${certificateNumber}`,
+      `/certificates/${certificateNumber}/verify`,
       options
     );
   }
@@ -213,6 +224,10 @@ export class EnrollmentService extends BaseService implements IEnrollmentService
       { studentName },
       options
     );
+  }
+
+  getUserCertificates(options?: RequestOptions): Promise<ApiResponse<CertificateData[]>> {
+    return this.get<ApiResponse<CertificateData[]>>('/certificates/me', options);
   }
 
   // Video URLs

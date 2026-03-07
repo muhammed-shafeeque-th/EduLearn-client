@@ -28,9 +28,7 @@ export function useUpdateUser() {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.all, refetchType: 'none' });
       }
     },
-    onError: () => {
-      // Optionally handle errors globally here if needed
-    },
+
     meta: {
       successMessage: 'Profile updated successfully!',
       errorMessage: 'Failed to update profile.',

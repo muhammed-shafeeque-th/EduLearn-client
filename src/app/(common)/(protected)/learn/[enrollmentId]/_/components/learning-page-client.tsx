@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   X,
-  BookOpen,
   BarChart3,
   List,
   Award,
@@ -29,7 +28,7 @@ import type {
 
 import { CourseSidebar } from './course-sidebar';
 import { CourseProgressTab } from './tabs/course-progress-tab';
-import { CourseDetailsTab } from './tabs/course-detail-tab';
+import { CourseDiscussionTab } from './tabs/course-discussion-tab';
 import { CourseStructureTab } from './tabs/course-structure-tab';
 import { CourseQuizzesTab } from './tabs/course-quizzes-tab';
 import { CourseReviewsTab } from './tabs/course-review-tab';
@@ -40,7 +39,6 @@ import { CourseCertificateTab } from './tabs/course-certificate-tab';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
 import { AuthUser } from '@/lib/auth/require-auth/types';
-import { useMessaging } from '@/services/ws/chat/hooks/use-instructor-messaging';
 
 interface EnrollmentLearningClientProps {
   enrollmentId: string;
@@ -71,11 +69,10 @@ export function EnrollmentLearningClient({
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    'progress' | 'details' | 'structure' | 'quizzes' | 'reviews'
+    'progress' | 'discussion' | 'structure' | 'quizzes' | 'reviews'
   >('progress');
   const [currentItemId, setCurrentItemId] = useState<string | undefined>(initialItemId);
   const [showQuizMode, setShowQuizMode] = useState(initialItemType === 'quiz');
-  const [isCreatingChat, setIsCreatingChat] = useState(false);
 
   const completedToastRef = useRef<string | null>(null);
 
@@ -150,20 +147,6 @@ export function EnrollmentLearningClient({
   );
 
   const handleItemHover = useCallback(() => {}, []);
-
-  const handleChatWithInstructor = useCallback(async () => {
-    setIsCreatingChat(true);
-    try {
-      router.push(`/profile/my-chats?enrollmentId=${enrollmentId}`);
-    } catch (err) {
-      toast.error({
-        title: 'Failed to create chat with instructor.',
-        description: getErrorMessage(err),
-      });
-    } finally {
-      setIsCreatingChat(false);
-    }
-  }, [enrollmentId, router]);
 
   const handleItemClick = useCallback(
     (item: CourseItem, bypassLock = false) => {
@@ -290,19 +273,7 @@ export function EnrollmentLearningClient({
             </div>
           </div>
 
-          {/* --- Chat With Instructor Button --- */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 px-3"
-              onClick={handleChatWithInstructor}
-              disabled={isCreatingChat}
-              title="Chat with Instructor"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className="hidden md:inline">Chat with Instructor</span>
-            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -356,9 +327,9 @@ export function EnrollmentLearningClient({
                   <BarChart3 className="h-4 w-4" />
                   <span className="hidden sm:inline">Progress</span>
                 </TabsTrigger>
-                <TabsTrigger value="details" className="flex items-center gap-1">
-                  <BookOpen className="h-4 w-4" />
-                  <span className="hidden sm:inline">Details</span>
+                <TabsTrigger value="discussion" className="flex items-center gap-1">
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Discussion</span>
                 </TabsTrigger>
                 <TabsTrigger value="structure" className="flex items-center gap-1">
                   <List className="h-4 w-4" />
@@ -393,8 +364,14 @@ export function EnrollmentLearningClient({
                     <CourseProgressTab enrollment={initialEnrollment} progress={progress} />
                   </TabsContent>
 
-                  <TabsContent value="details" className="mt-0">
-                    <CourseDetailsTab enrollment={initialEnrollment} />
+                  <TabsContent value="discussion" className="mt-0">
+                    <CourseDiscussionTab
+                      courseId={initialEnrollment.courseId}
+                      enrollmentId={enrollmentId}
+                      userId={user.id}
+                      userName={user.name || ''}
+                      // instructorId={initialEnrollment.instructorId}
+                    />
                   </TabsContent>
 
                   <TabsContent value="structure" className="mt-0">

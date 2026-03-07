@@ -11,12 +11,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     getUser: getAdmin as any,
     roles: ['admin'],
     redirectTo: '/admin/auth/login',
-    // condition: (user, ctx) => {
-    //   const course = ctx?.resource as Course;
-    //   return course.instructorId === user.id;
-    // },
-    // context: { resource: course },
   });
+
   return (
     <div className="min-h-screen bg-background">
       <AdminSidebar />

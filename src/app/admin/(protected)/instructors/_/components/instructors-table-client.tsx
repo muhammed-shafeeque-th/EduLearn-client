@@ -1,17 +1,29 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   ColumnDef,
   flexRender,
-  getCoreRowModel,
-  // getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
+  ColumnFiltersState,
+  getCoreRowModel,
+  getSortedRowModel,
+  PaginationState,
   SortingState,
+  Updater,
 } from '@tanstack/react-table';
 import { motion } from 'framer-motion';
-import { Search, Filter, ChevronDown, ArrowUpDown } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  RotateCcw,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +34,13 @@ import {
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -31,46 +50,86 @@ import {
 } from '@/components/ui/table';
 import { InstructorRow } from './instructor-row';
 import { InstructorActions } from './instructor-action';
-import { TableSkeleton } from '../../../_components/__table/table-skeleton';
 import { InstructorMeta } from '@/types/user';
+import { TableSkeleton } from './skeletons/table-skeleton';
 
-interface InstructorsTableClientProps {
+type InstructorsTableClientProps = {
   instructors: InstructorMeta[];
-  totalPages: number;
-  totalItems: number;
-  currentPage: number;
   isLoading: boolean;
-  searchParams: { search?: string; status?: string; page?: string };
-  onUpdateSearchParams: (updates: Record<string, string | undefined>) => void;
-}
+  pageCount: number;
+  pagination: PaginationState;
+  sorting: SortingState;
+  columnFilters: ColumnFiltersState;
+  onRefresh: () => Promise<void>;
+  onPaginationChange: (updater: Updater<PaginationState>) => void;
+  onSortingChange: (updater: Updater<SortingState>) => void;
+  onColumnFiltersChange: (updater: Updater<ColumnFiltersState>) => void;
+  searchField: 'username' | 'email';
+  onSearchFieldChange: (field: 'username' | 'email') => void;
+};
+
+const SEARCH_FIELD_OPTIONS = [
+  { value: 'username', label: 'Instructor' },
+  { value: 'email', label: 'Email' },
+];
 
 export function InstructorsTableClient({
   instructors,
-  totalPages,
-  totalItems,
-  currentPage,
   isLoading,
-  searchParams,
-  onUpdateSearchParams,
+  pageCount,
+  pagination,
+  sorting,
+  columnFilters,
+  onPaginationChange,
+  onSortingChange,
+  onColumnFiltersChange,
+  searchField,
+  onSearchFieldChange,
+  onRefresh,
 }: InstructorsTableClientProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
+  const [searchValue, setSearchValue] = useState('');
 
-  const handleSearch = useCallback(
-    (value: string) => {
-      onUpdateSearchParams({ search: value || undefined, page: undefined });
-    },
-    [onUpdateSearchParams]
-  );
+  const currentSearchValue = useMemo(() => {
+    return (columnFilters.find((f) => f.id === searchField)?.value as string) || '';
+  }, [columnFilters, searchField]);
+
+  const [prevPropSearchValue, setPrevPropSearchValue] = useState(currentSearchValue);
+  if (currentSearchValue !== prevPropSearchValue) {
+    setSearchValue(currentSearchValue);
+    setPrevPropSearchValue(currentSearchValue);
+  }
+
+  // Debounce search update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onColumnFiltersChange((prev: ColumnFiltersState) => {
+        const newer = prev.filter((f) => f.id !== 'username' && f.id !== 'email');
+        if (searchValue) {
+          newer.push({ id: searchField, value: searchValue });
+        }
+        return newer;
+      });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue, searchField, onColumnFiltersChange]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchValue(value);
+  }, []);
 
   const handleStatusFilter = useCallback(
     (status: string) => {
-      onUpdateSearchParams({
-        status: status === 'all' ? undefined : status,
-        page: undefined,
+      onColumnFiltersChange((prev: ColumnFiltersState) => {
+        const newer = prev.filter((f) => f.id !== 'status');
+        if (status !== 'all') {
+          newer.push({ id: 'status', value: status });
+        }
+        return newer;
       });
     },
-    [onUpdateSearchParams]
+    [onColumnFiltersChange]
   );
 
   const columns: ColumnDef<InstructorMeta>[] = useMemo(
@@ -88,6 +147,20 @@ export function InstructorsTableClient({
           </Button>
         ),
         cell: ({ row }) => <InstructorRow instructor={row.original} />,
+      },
+      {
+        accessorKey: 'email',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="h-8 px-2"
+          >
+            Email
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => <div className="font-medium text-sm">{row.original.email}</div>,
       },
       {
         accessorKey: 'specialization',
@@ -124,7 +197,6 @@ export function InstructorsTableClient({
         },
       },
       {
-        // The correct approach is to use 'accessorFn' when accessing nested properties:
         accessorFn: (row) => row.totalCourses ?? '-',
         id: 'totalCourses',
         header: ({ column }) => (
@@ -191,14 +263,22 @@ export function InstructorsTableClient({
   const table = useReactTable({
     data: instructors,
     columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
     state: {
+      pagination,
       sorting,
+      columnFilters,
       rowSelection,
     },
+    pageCount,
+    manualPagination: true,
+    manualSorting: false, // Client side sorting
+    manualFiltering: true,
+    onPaginationChange,
+    onSortingChange,
+    onColumnFiltersChange,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   if (isLoading) {
@@ -215,17 +295,42 @@ export function InstructorsTableClient({
         <CardHeader>
           <CardTitle>Instructors Management</CardTitle>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search instructors..."
-                defaultValue={searchParams.search || ''}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10"
-              />
+            <div className="relative flex-1 max-w-sm flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={`Search instructors by ${searchField === 'username' ? 'name' : 'email'}...`}
+                  value={searchValue}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="min-w-[100px]">
+                    {SEARCH_FIELD_OPTIONS.find((opt) => opt.value === searchField)?.label}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {SEARCH_FIELD_OPTIONS.map((opt) => (
+                    <DropdownMenuCheckboxItem
+                      key={opt.value}
+                      checked={searchField === opt.value}
+                      onCheckedChange={() => onSearchFieldChange(opt.value as 'username' | 'email')}
+                    >
+                      {opt.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => onRefresh()} title="Refresh">
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Refresh
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -236,25 +341,25 @@ export function InstructorsTableClient({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuCheckboxItem
-                    checked={!searchParams.status}
+                    checked={!columnFilters.find((f) => f.id === 'status')}
                     onCheckedChange={() => handleStatusFilter('all')}
                   >
                     All Status
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
-                    checked={searchParams.status === 'active'}
+                    checked={columnFilters.find((f) => f.id === 'status')?.value === 'active'}
                     onCheckedChange={() => handleStatusFilter('active')}
                   >
                     Active
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
-                    checked={searchParams.status === 'pending'}
+                    checked={columnFilters.find((f) => f.id === 'status')?.value === 'pending'}
                     onCheckedChange={() => handleStatusFilter('pending')}
                   >
                     Pending
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
-                    checked={searchParams.status === 'inactive'}
+                    checked={columnFilters.find((f) => f.id === 'status')?.value === 'inactive'}
                     onCheckedChange={() => handleStatusFilter('inactive')}
                   >
                     Inactive
@@ -304,50 +409,86 @@ export function InstructorsTableClient({
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between space-x-2 py-4">
-            <div className="text-sm text-muted-foreground">
-              Showing {instructors.length} of {totalItems} instructors
+          <div className="flex items-center justify-between px-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+              {table.getFilteredRowModel().rows.length > 0 ? (
+                <>
+                  Showing{' '}
+                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{' '}
+                  to{' '}
+                  {Math.min(
+                    (table.getState().pagination.pageIndex + 1) *
+                      table.getState().pagination.pageSize,
+                    table.getFilteredRowModel().rows.length
+                  )}{' '}
+                  of {table.getFilteredRowModel().rows.length} instructors
+                </>
+              ) : (
+                'No instructors found'
+              )}
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  onUpdateSearchParams({
-                    page: Math.max(1, currentPage - 1).toString(),
-                  })
-                }
-                disabled={currentPage <= 1}
-              >
-                Previous
-              </Button>
-              <div className="flex items-center space-x-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => onUpdateSearchParams({ page: page.toString() })}
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
+            <div className="flex items-center space-x-6 lg:space-x-8">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium">Rows per page</p>
+                <Select
+                  value={`${table.getState().pagination.pageSize}`}
+                  onValueChange={(value) => {
+                    table.setPageSize(Number(value));
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                      <SelectItem key={pageSize} value={`${pageSize}`}>
+                        {pageSize}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  onUpdateSearchParams({
-                    page: Math.min(totalPages, currentPage + 1).toString(),
-                  })
-                }
-                disabled={currentPage >= totalPages}
-              >
-                Next
-              </Button>
+              <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span className="sr-only">Go to first page</span>
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span className="sr-only">Go to previous page</span>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span className="sr-only">Go to next page</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span className="sr-only">Go to last page</span>
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

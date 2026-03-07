@@ -7,7 +7,6 @@ import { AuthSessionProvider } from '@/lib/providers/auth-session-provider';
 import React, { Suspense } from 'react';
 import { ToastProvider } from '@/lib/providers/toast-provider';
 import OneTapProvider from '@/lib/providers/one-tap-provider';
-// import { getOneTapConfig } from '@/lib/config/one-tap-config';
 import LoadingScreen from '@/components/ui/loading-screen';
 
 const geistSans = Geist({
@@ -59,9 +58,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Get One Tap configuration - you can change this to any preset from one-tap-config.ts
-  // const config = getOneTapConfig('mobile-friendly');
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} antialiased`}>
@@ -82,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </StateProviders>
         <ToastProvider />
 
-        {/* Portals/Modals can be rendered here if needed */}
+        {/* Portals/Modals can be rendered here  */}
         <div id="modal-root" />
       </body>
     </html>

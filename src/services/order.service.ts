@@ -18,7 +18,6 @@ export interface PaginationParams {
 function getOrderPaginationParams(params?: PaginationParams): URLSearchParams {
   const searchParams = new URLSearchParams();
 
-  // Note: PaginationParams contains only page, pageSize, sortOrder
   if (params?.sortOrder) {
     searchParams.set('sortOrder', params.sortOrder);
   }
@@ -75,7 +74,6 @@ export class OrderService extends BaseService implements IOrderService {
 
     const queryString = queryParams.toString();
 
-    // FIX: Pass query params as URL search params, not as a path
     return this.get<ApiResponse<Order[]>>(`?${queryString}`, options);
   }
 

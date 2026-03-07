@@ -31,6 +31,8 @@ export interface UserSocials {
   providerUserUrl?: string;
 }
 
+import { Review } from '../review';
+
 export interface InstructorProfile {
   bio: string;
   headline: string;
@@ -43,6 +45,7 @@ export interface InstructorProfile {
   totalRatings: number;
   totalCourses: number;
   totalStudents: number;
+  reviews?: Review[];
 }
 
 export type User =

@@ -23,10 +23,6 @@ export function AdminHeader() {
   const { admin } = useAdminSelector();
   const dispatch = useAppDispatch();
 
-  /**
-   * Handles admin logout.
-   * Memoized for best performance, especially relevant when passed to children.
-   */
   const handleLogout = useCallback(async () => {
     // if (!admin?.email) {
     //   toast.warning({ title: "Can't logout", description: 'Admin not found.' });
@@ -40,13 +36,9 @@ export function AdminHeader() {
     commonToasts.logoutSuccess();
   }, [dispatch]);
 
-  /**
-   * Memoized user display info for efficient rendering.
-   */
   const { displayName, email, avatarInitials } = useMemo(() => {
     const name = admin?.name?.trim() || 'Admin User';
     const emailAddr = admin?.email || 'admin@edulearn.com';
-    // Avatar image is static, as admin info does not provide avatar
     const initials =
       name
         .split(' ')

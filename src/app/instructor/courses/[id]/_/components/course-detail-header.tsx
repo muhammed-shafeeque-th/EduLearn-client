@@ -17,6 +17,13 @@ import {
   Ban,
   Trash2,
   Loader2,
+  BarChart3,
+  MessageSquare,
+  Globe,
+  GraduationCap,
+  Award,
+  Star,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,17 +51,16 @@ interface CourseDetailHeaderProps {
   course: Course;
 }
 
-const courseStatusColors: Record<CourseStatus, string> = {
+const statusStyles: Record<CourseStatus, string> = {
   published:
-    'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400',
-  draft:
-    'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400',
+    'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400',
+  draft: 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/20 dark:text-amber-400',
   unpublished:
     'bg-orange-100 text-orange-800 hover:bg-orange-200 dark:bg-orange-900/20 dark:text-orange-400',
-  deleted: 'bg-destructive text-destructive-foreground dark:bg-red-900/20 dark:text-red-400',
+  deleted: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
 };
 
-const courseStatusLabels: Record<CourseStatus, string> = {
+const statusLabels: Record<CourseStatus, string> = {
   published: 'Published',
   draft: 'Draft',
   unpublished: 'Unpublished',
@@ -137,23 +143,30 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
     }
   }, [deleteCourse, course.id, router]);
 
-  const statusColor = useMemo(() => {
-    return (
-      courseStatusColors[course.status as CourseStatus] ??
-      'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-900/20 dark:text-gray-400'
-    );
-  }, [course.status]);
-  const statusLabel = useMemo(() => {
-    return (
-      courseStatusLabels[course.status as CourseStatus] ??
-      course.status.charAt(0).toUpperCase() + course.status.slice(1)
-    );
-  }, [course.status]);
+  const statusColor = useMemo(
+    () =>
+      statusStyles[course.status as CourseStatus] ??
+      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
+    [course.status]
+  );
+
+  const statusLabel = useMemo(
+    () =>
+      statusLabels[course.status as CourseStatus] ??
+      course.status.charAt(0).toUpperCase() + course.status.slice(1),
+    [course.status]
+  );
 
   const canEdit = course.status !== 'deleted';
   const canPublish = course.status === 'draft' || course.status === 'unpublished';
   const canUnpublish = course.status === 'published';
   const canDelete = course.status !== 'deleted';
+
+  const formatDuration = () => {
+    if (!course.durationValue) return null;
+    const unit = course.durationUnit || 'hours';
+    return `${course.durationValue} ${unit}`;
+  };
 
   return (
     <>
@@ -211,24 +224,78 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
         {/* Course Header */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Course Info */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-5">
             <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
+              <div className="space-y-3">
+                {/* Status + Category */}
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge className={statusColor}>{statusLabel}</Badge>
                   <Badge variant="outline">{course.category}</Badge>
+                  {course.subCategory && (
+                    <Badge variant="outline" className="text-muted-foreground">
+                      {course.subCategory}
+                    </Badge>
+                  )}
                 </div>
+
+                {/* Title */}
                 <h1 className="text-2xl lg:text-3xl font-bold text-foreground leading-tight">
                   {course.title}
                 </h1>
-                <p className="text-muted-foreground max-w-2xl">
+
+                {course.subTitle && (
+                  <p className="text-base text-muted-foreground">{course.subTitle}</p>
+                )}
+
+                {/* Description */}
+                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
                   {course.description?.length && course.description.length > 300
-                    ? `${course.description.slice(0, 300)} ...`
+                    ? `${course.description.slice(0, 300)}...`
                     : course.description}
                 </p>
+
+                {/* Metadata Badges */}
+                <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
+                  {course.level && (
+                    <span className="inline-flex items-center gap-1">
+                      <GraduationCap className="w-3.5 h-3.5" />
+                      {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                    </span>
+                  )}
+                  {course.language && (
+                    <span className="inline-flex items-center gap-1">
+                      <Globe className="w-3.5 h-3.5" />
+                      {course.language}
+                    </span>
+                  )}
+                  {course.certificate && (
+                    <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                      <Award className="w-3.5 h-3.5" />
+                      Certificate
+                    </span>
+                  )}
+                  {formatDuration() && (
+                    <span className="inline-flex items-center gap-1">⏱ {formatDuration()}</span>
+                  )}
+                  {course.students > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5" />
+                      {course.students.toLocaleString()} students
+                    </span>
+                  )}
+                  {course.rating > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      {course.rating.toFixed(1)}
+                      {course.totalRatings > 0 && (
+                        <span className="text-xs">({course.totalRatings})</span>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Actions Dropdown or Loading Spinner */}
+              {/* Actions Dropdown */}
               {isAnyActionLoading ? (
                 <div className="flex items-center justify-center h-10 w-10">
                   <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -252,13 +319,13 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
                         View as Student
                       </a>
                     </DropdownMenuItem>
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={handleShare}
                       disabled={isAnyActionLoading || !canEdit}
                     >
                       <Share2 className="w-4 h-4 mr-2" />
                       Share Course
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={handleExport}
                       disabled={isExporting || isAnyActionLoading || !canEdit}
@@ -268,16 +335,15 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
 
-                    {/* Publish/Unpublish options based on course status */}
                     {canPublish && (
                       <DropdownMenuItem
                         onClick={handlePublish}
-                        disabled={isPublishing || isAnyActionLoading || !canEdit}
+                        disabled={isPublishing || isAnyActionLoading}
                       >
                         {isPublishing ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin text-green-600" />
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin text-emerald-600" />
                         ) : (
-                          <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                          <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" />
                         )}
                         {isPublishing ? 'Publishing...' : 'Publish Course'}
                       </DropdownMenuItem>
@@ -285,7 +351,7 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
                     {canUnpublish && (
                       <DropdownMenuItem
                         onClick={handleUnpublish}
-                        disabled={isUnpublishing || isAnyActionLoading || !canEdit}
+                        disabled={isUnpublishing || isAnyActionLoading}
                       >
                         {isUnpublishing ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin text-orange-600" />
@@ -297,7 +363,6 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
                     )}
                     <DropdownMenuSeparator />
 
-                    {/* Delete Option (not for already deleted course) */}
                     {canDelete && (
                       <DropdownMenuItem
                         onClick={() => setIsDeleteDialogOpen(true)}
@@ -313,12 +378,24 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
               )}
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons + Quick Links */}
             <div className="flex flex-wrap gap-3">
               <Button asChild disabled={isAnyActionLoading || !canEdit}>
                 <Link href={`/instructor/courses/${course.id}/edit`}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Course
+                </Link>
+              </Button>
+              <Button variant="outline" asChild disabled={isAnyActionLoading}>
+                <Link href={`/instructor/courses/${course.id}/analytics`}>
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Analytics
+                </Link>
+              </Button>
+              <Button variant="outline" asChild disabled={isAnyActionLoading}>
+                <Link href={`/instructor/courses/${course.id}/discussion`}>
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Discussion
                 </Link>
               </Button>
               <Button
@@ -340,8 +417,39 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
 
           {/* Course Thumbnail */}
           <div className="lg:col-span-1">
-            <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg">
+            <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg border border-border/50">
               <Image src={course.thumbnail} alt={course.title} fill className="object-cover" />
+              {/* Price overlay */}
+              {course.price > 0 && (
+                <div className="absolute bottom-3 left-3">
+                  <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border border-border/50">
+                    {course.discountPrice > 0 && course.discountPrice < course.price ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-foreground">
+                          {course.currency ?? '$'}
+                          {course.discountPrice}
+                        </span>
+                        <span className="text-sm text-muted-foreground line-through">
+                          {course.currency ?? '$'}
+                          {course.price}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-lg font-bold text-foreground">
+                        {course.currency ?? '$'}
+                        {course.price}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              {course.price === 0 && (
+                <div className="absolute bottom-3 left-3">
+                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 text-sm px-3 py-1">
+                    Free
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -50,12 +50,12 @@ export function CartEmpty() {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
-              <Button size="lg" className="bg-primary/90 hover:bg-primary text-white" asChild>
-                <Link href="/courses">
+              <Link href="/courses">
+                <Button size="lg" className="bg-primary/90 hover:bg-primary text-white">
                   <Search className="w-5 h-5 mr-2" />
                   Browse Courses
-                </Link>
-              </Button>
+                </Button>
+              </Link>
 
               <Button variant="outline" size="lg" asChild>
                 <Link href="#">

@@ -12,7 +12,7 @@ export interface ActionButtonsProps {
   onSaveAndNext: () => void;
   onSaveAndPreview: () => void;
   onPrevious: () => void;
-  hasUnsavedChanges?: () => boolean;
+  hasUnsavedChanges?: boolean;
   disabled?: boolean;
 }
 
@@ -30,7 +30,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = React.memo(
     onSaveAndNext,
     onSaveAndPreview,
     onPrevious,
-    hasUnsavedChanges = () => false,
+    hasUnsavedChanges = false,
     disabled = false,
   }) => {
     // Hide action buttons when on the submit tab
@@ -89,7 +89,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = React.memo(
               <Save className="w-4 h-4 mr-2" />
             )}
             Save Draft
-            {hasUnsavedChanges() && !isLoading && (
+            {hasUnsavedChanges && !isLoading && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
             )}
           </motion.button>

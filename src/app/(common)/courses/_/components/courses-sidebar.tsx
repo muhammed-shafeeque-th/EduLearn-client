@@ -2,6 +2,8 @@ import { ChevronDown, ChevronUp, Star, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { CourseFilters } from '../types';
 import { CourseLevel } from '@/types/course';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 const categories = [
   { name: 'Development', count: 12 },
@@ -34,15 +36,25 @@ interface FilterSectionProps {
 }
 
 const FilterSection = memo(({ title, children, isExpanded, onToggle }: FilterSectionProps) => (
-  <div className="mb-6">
+  <div className="mb-6 last:mb-0">
     <button
       onClick={onToggle}
-      className="w-full flex justify-between items-center font-semibold text-sm mb-3 hover:text-blue-600 transition-colors"
+      className="w-full flex justify-between items-center font-bold text-[11px] uppercase tracking-wider text-muted-foreground/70 mb-4 hover:text-primary transition-colors group"
     >
       {title}
-      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      <div className="p-1 rounded-md group-hover:bg-primary/10 transition-colors">
+        {isExpanded ? (
+          <ChevronUp className="h-3.5 w-3.5" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5" />
+        )}
+      </div>
     </button>
-    {isExpanded && <div className="space-y-2">{children}</div>}
+    {isExpanded && (
+      <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+        {children}
+      </div>
+    )}
   </div>
 ));
 
@@ -113,162 +125,188 @@ export const CoursesSidebar = memo(function CoursesSidebar({
     [filters.price, onFiltersChange]
   );
 
+  const totalActiveFilters =
+    filters.categories.length + filters.rating.length + filters.level.length;
+
   return (
     <div
-      className={`${isMobile ? 'fixed inset-0 z-50 bg-white' : 'w-80 border-r'} p-6 overflow-y-auto`}
+      className={cn(
+        'h-full flex flex-col',
+        isMobile ? 'fixed inset-0 z-50 bg-background' : 'w-72 bg-card/30'
+      )}
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">Filters</span>
-          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-            {filters.categories.length + filters.rating.length + filters.level.length}
-          </span>
+      <div className="flex items-center justify-between p-6 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <h2 className="font-bold text-lg tracking-tight">Filters</h2>
+          {totalActiveFilters > 0 && (
+            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm shadow-primary/20">
+              {totalActiveFilters}
+            </span>
+          )}
         </div>
         {isMobile && (
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         )}
       </div>
 
-      <FilterSection
-        title="CATEGORY"
-        isExpanded={expanded.category}
-        onToggle={() => toggleSection('category')}
-      >
-        {categories.map((cat) => (
-          <label
-            key={cat.name}
-            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={filters.categories.includes(cat.name)}
-                onChange={() => handleCategoryChange(cat.name)}
-                className="w-4 h-4 text-blue-600"
-              />
-              <span className="text-sm">{cat.name}</span>
-            </div>
-            <span className="text-xs text-gray-500">{cat.count}</span>
-          </label>
-        ))}
-      </FilterSection>
+      <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <FilterSection
+          title="Categories"
+          isExpanded={expanded.category}
+          onToggle={() => toggleSection('category')}
+        >
+          {categories.map((cat) => (
+            <label
+              key={cat.name}
+              className="group flex items-center justify-between cursor-pointer py-1.5 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={filters.categories.includes(cat.name)}
+                    onChange={() => handleCategoryChange(cat.name)}
+                    className="peer h-4 w-4 shrink-0 rounded border border-border bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 accent-primary! cursor-pointer text-primary"
+                  />
+                </div>
+                <span
+                  className={cn(
+                    'text-sm transition-colors',
+                    filters.categories.includes(cat.name)
+                      ? 'text-primary font-semibold'
+                      : 'text-muted-foreground group-hover:text-foreground'
+                  )}
+                >
+                  {cat.name}
+                </span>
+              </div>
+              {/* <span className="text-[10px] font-bold text-muted-foreground/50 bg-muted/50 px-1.5 py-0.5 rounded uppercase">
+                {cat.count}
+              </span> */}
+            </label> 
+          ))}
+        </FilterSection>
 
-      <div className="border-t my-4" />
+        <div className="h-px bg-border/50 my-6" />
 
-      <FilterSection
-        title="RATING"
-        isExpanded={expanded.rating}
-        onToggle={() => toggleSection('rating')}
-      >
-        {ratings.map((rating) => (
-          <label
-            key={rating.value}
-            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
-          >
-            <div className="flex items-center gap-2">
+        <FilterSection
+          title="Rating"
+          isExpanded={expanded.rating}
+          onToggle={() => toggleSection('rating')}
+        >
+          {ratings.map((rating) => (
+            <label
+              key={rating.value}
+              className="group flex items-center gap-3 cursor-pointer py-1.5"
+            >
               <input
                 type="checkbox"
                 checked={filters.rating.includes(rating.value)}
-                aria-label={`Filter by ${rating.name} rating`}
                 onChange={() => handleRatingChange(rating.value)}
-                className="w-4 h-4 text-blue-600"
+                className="h-4 w-4 shrink-0 rounded border border-border accent-primary! cursor-pointer"
               />
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-3 w-3 ${i < parseInt(rating.value) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                    className={cn(
+                      'h-3.5 w-3.5 transition-all',
+                      i < parseInt(rating.value)
+                        ? 'fill-yellow-400 text-yellow-400 group-hover:scale-110'
+                        : 'text-muted-foreground/30'
+                    )}
                   />
                 ))}
-                <span className="text-sm ml-1">{rating.name}</span>
+                <span
+                  className={cn(
+                    'text-sm ml-1',
+                    filters.rating.includes(rating.value)
+                      ? 'text-primary font-semibold'
+                      : 'text-muted-foreground group-hover:text-foreground'
+                  )}
+                >
+                  {rating.name}
+                </span>
               </div>
-            </div>
-          </label>
-        ))}
-      </FilterSection>
+            </label>
+          ))}
+        </FilterSection>
 
-      <div className="border-t my-4" />
+        <div className="h-px bg-border/50 my-6" />
 
-      <FilterSection
-        title="COURSE LEVEL"
-        isExpanded={expanded.level}
-        onToggle={() => toggleSection('level')}
-      >
-        {levels.map((level) => (
-          <label
-            key={level.name}
-            className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
-          >
-            <input
-              type="checkbox"
-              checked={filters.level.includes(level.value)}
-              onChange={() => handleLevelChange(level.value)}
-              className="w-4 h-4 text-blue-600"
-            />
-            <span className="text-sm">{level.name}</span>
-          </label>
-        ))}
-      </FilterSection>
+        <FilterSection
+          title="Course Level"
+          isExpanded={expanded.level}
+          onToggle={() => toggleSection('level')}
+        >
+          {levels.map((level) => (
+            <label key={level.name} className="group flex items-center gap-3 cursor-pointer py-1.5">
+              <input
+                type="checkbox"
+                checked={filters.level.includes(level.value)}
+                onChange={() => handleLevelChange(level.value)}
+                className="h-4 w-4 shrink-0 rounded border border-border accent-primary! cursor-pointer"
+              />
+              <span
+                className={cn(
+                  'text-sm',
+                  filters.level.includes(level.value)
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground group-hover:text-foreground'
+                )}
+              >
+                {level.name}
+              </span>
+            </label>
+          ))}
+        </FilterSection>
 
-      <div className="border-t my-4" />
+        <div className="h-px bg-border/50 my-6" />
 
-      <FilterSection
-        title="PRICE"
-        isExpanded={expanded.price}
-        onToggle={() => toggleSection('price')}
-      >
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>${filters.price.min}</span>
-              <span>${filters.price.max}+</span>
+        <FilterSection
+          title="Price Range"
+          isExpanded={expanded.price}
+          onToggle={() => toggleSection('price')}
+        >
+          <div className="pt-2 px-1">
+            <div className="flex justify-between items-end mb-4">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">
+                  Min Price
+                </span>
+                <span className="text-sm font-bold text-primary">₹{filters.price.min}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">
+                  Max Price
+                </span>
+                <span className="text-sm font-bold">₹{filters.price.max}+</span>
+              </div>
             </div>
             <input
               type="range"
               min="0"
               max="4500"
+              step="50"
               value={filters.price.max}
               onChange={(e) => handlePriceChange([filters.price.min, parseInt(e.target.value)])}
-              className="w-full"
+              className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
             />
           </div>
-          {/* <label className="flex items-center justify-between">
-            <span className="text-sm">Free</span>
-            <input
-              type="checkbox"
-              checked={filters.price.free}
-              onChange={(e) =>
-                onFiltersChange({
-                  price: { ...filters.price, free: e.target.checked },
-                })
-              }
-              className="w-4 h-4 text-blue-600"
-            />
-          </label>
-          <label className="flex items-center justify-between">
-            <span className="text-sm">Paid</span>
-            <input
-              type="checkbox"
-              checked={filters.price.paid}
-              onChange={(e) =>
-                onFiltersChange({
-                  price: { ...filters.price, paid: e.target.checked },
-                })
-              }
-              className="w-4 h-4 text-blue-600"
-            />
-          </label> */}
-        </div>
-      </FilterSection>
+        </FilterSection>
+      </div>
 
-      <button
-        onClick={onClearAll}
-        className="w-full mt-8 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-      >
-        Clear All Filters
-      </button>
+      <div className="p-6 border-t border-border/50 bg-background/50">
+        <Button
+          variant="outline"
+          onClick={onClearAll}
+          className="w-full font-bold text-xs uppercase tracking-widest border-2 hover:bg-muted"
+        >
+          Reset All Filters
+        </Button>
+      </div>
     </div>
   );
 });

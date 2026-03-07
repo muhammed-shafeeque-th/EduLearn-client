@@ -34,7 +34,6 @@ export interface StripeSession {
 
 type PaymentSessionMeta = {
   paymentId: string;
-  status: string;
   userId: string;
   userDetails?: {
     email?: string;
@@ -55,6 +54,9 @@ export interface RazorpayPaymentProof {
 export interface StripePaymentProof {
   sessionId: string;
 }
+export interface PaymentIdPayload {
+  paymentId: string;
+}
 export interface PaypalPaymentProof {
   orderId: string;
 }
@@ -66,6 +68,7 @@ export type PaymentProof =
 
 interface Context {
   order: Order | null;
+  paymentId: string | null;
   provider: Provider | null;
   providerSession: ProviderSessionResult | null;
   error: string | null;
@@ -86,6 +89,7 @@ type PaymentConfirmedEvent = { type: 'PAYMENT_CONFIRMED_CLIENT'; proof?: Payment
 type RetryEvent = { type: 'RETRY' };
 type CancelEvent = { type: 'CANCEL' };
 type HydrateOrderEvent = { type: 'HYDRATE_ORDER'; order: Order; provider?: Provider | null };
+type SetPaymentIdEvent = { type: 'SET_PAYMENT_ID'; payload: PaymentIdPayload };
 
 type Events =
   | SelectProviderEvent
@@ -95,12 +99,12 @@ type Events =
   | PaymentConfirmedEvent
   | RetryEvent
   | CancelEvent
+  | SetPaymentIdEvent
   | HydrateOrderEvent;
 
 type ProviderSessionResponse = {
   userId: string;
   paymentId: string;
-  status: string;
   stripe?: StripeSession;
   paypal?: PaypalSession;
   razorpay?: RazorpaySession;
@@ -110,11 +114,16 @@ type ProviderSessionResponse = {
   };
 };
 
+type CreatePaymentInput = {
+  orderId: string;
+};
+
 type CreateOrderInput = {
   payload: PlaceOrderPayload;
 };
+
 type CreateProviderSessionInput = {
-  order: Order;
+  paymentId: string;
   provider: Provider;
   successUrl: string | null;
   cancelUrl: string | null;
@@ -182,6 +191,12 @@ const orderMachineSetup = setup({
       } satisfies Partial<Context>;
     }),
 
+    setPaymentId: assign(({ event }) => {
+      const data = ('output' in event && event.output) || ('payload' in event && event.payload);
+      if (!data) return {};
+      return { paymentId: (data as PaymentIdPayload).paymentId };
+    }),
+
     setProviderSession: assign(({ event }) => {
       if (!('output' in event) || !event.output) return {};
       return {
@@ -203,6 +218,10 @@ const orderMachineSetup = setup({
         providerSession: null,
         error: null,
         provider,
+        paymentId:
+          event.order.paymentDetails?.paymentId && event.order.paymentDetails.paymentId !== ''
+            ? event.order.paymentDetails.paymentId
+            : null,
       } satisfies Partial<Context>;
     }),
 
@@ -228,8 +247,14 @@ const orderMachineSetup = setup({
     })),
   },
   guards: {
+    canCreatePayment: ({ context }) => {
+      return context.order !== null;
+    },
     canCreateProviderSession: ({ context }) => {
       return context.order !== null && context.provider !== null;
+    },
+    hasPaymentIdAndProvider: ({ context }) => {
+      return context.order !== null && context.provider !== null && context.paymentId !== null;
     },
 
     canRetryProviderSession: ({ context }) =>
@@ -244,11 +269,19 @@ const orderMachineSetup = setup({
       return response.data;
     }),
 
+    createPayment: fromPromise(async ({ input }) => {
+      const { orderId } = input as CreatePaymentInput;
+      const response = await paymentService.createPayment({ orderId }, { timeout: 30_000 });
+      if (!response.success || !response.data)
+        throw new Error(response.message ?? 'Failed to initiate payment');
+      return response.data;
+    }),
+
     createProviderSession: fromPromise(async ({ input }) => {
-      const { order, provider, successUrl, cancelUrl } = input as CreateProviderSessionInput;
-      const response = await paymentService.createPayment(
+      const { paymentId, provider, successUrl, cancelUrl } = input as CreateProviderSessionInput;
+      const response = await paymentService.createProviderSession(
         {
-          orderId: order.id,
+          paymentId,
           provider,
           successUrl: successUrl ?? undefined,
           cancelUrl: cancelUrl ?? undefined,
@@ -267,7 +300,6 @@ const orderMachineSetup = setup({
             provider: 'stripe',
             stripe,
             paymentId: session.paymentId,
-            status: session.status,
             userId: session.userId,
             userDetails: {
               email: session.userDetails?.email,
@@ -282,7 +314,6 @@ const orderMachineSetup = setup({
             provider: 'paypal',
             paypal,
             paymentId: session.paymentId,
-            status: session.status,
             userId: session.userId,
             userDetails: {
               email: session.userDetails?.email,
@@ -298,7 +329,6 @@ const orderMachineSetup = setup({
             provider: 'razorpay',
             razorpay,
             paymentId: session.paymentId,
-            status: session.status,
             userId: session.userId,
             userDetails: {
               email: session.userDetails?.email,
@@ -325,11 +355,8 @@ const orderMachineSetup = setup({
       if (provider === 'paypal' && !proof?.paypal?.orderId) {
         throw new Error('Invalid payload for paypal verify request');
       }
-      if (provider === 'stripe') {
+      if (provider === 'stripe' && !proof?.stripe?.sessionId) {
         throw new Error('Invalid payload for stripe verify request');
-        if (proof?.stripe) {
-          delete proof?.stripe;
-        }
       }
       const resolved = await paymentService.resolvePayment({
         provider,
@@ -404,6 +431,7 @@ export type StateValues =
   | 'creatingOrder'
   | 'orderCreated'
   | 'failure'
+  | 'creatingPayment'
   | 'creatingProviderSession'
   | 'cancelled'
   | 'awaitingProvider'
@@ -415,9 +443,15 @@ export type StateValues =
 export const orderMachine = orderMachineSetup.createMachine({
   id: 'order',
   initial: 'idle',
-
+  entry: ['logAction'],
+  on: {
+    '*': {
+      actions: ['logAction'],
+    },
+  },
   context: {
     order: null,
+    paymentId: null,
     provider: null,
     providerSession: null,
     error: null,
@@ -469,15 +503,47 @@ export const orderMachine = orderMachineSetup.createMachine({
     orderCreated: {
       on: {
         SELECT_PROVIDER: { actions: 'setProvider' },
-        CREATE_PROVIDER_SESSION: {
-          target: 'creatingProviderSession',
-          actions: ['prepareProviderSession', 'clearError'],
-          guard: 'canCreateProviderSession',
-        },
+        CREATE_PROVIDER_SESSION: [
+          {
+            target: 'creatingProviderSession',
+            actions: ['prepareProviderSession', 'clearError'],
+            guard: 'hasPaymentIdAndProvider',
+          },
+          {
+            target: 'creatingPayment',
+            actions: ['prepareProviderSession', 'clearError'],
+            guard: 'canCreateProviderSession',
+          },
+        ],
+        SET_PAYMENT_ID: { actions: 'setPaymentId' },
         HYDRATE_ORDER: {
           actions: 'hydrateOrder',
         },
         CANCEL: 'cancelPayment',
+      },
+    },
+
+    creatingPayment: {
+      invoke: {
+        id: 'createPayment',
+        src: 'createPayment',
+        input: ({ context }) => {
+          if (!context.order) throw new Error('Order not found in context');
+          return {
+            orderId: context.order.id,
+          } satisfies CreatePaymentInput;
+        },
+        onDone: {
+          target: 'creatingProviderSession',
+          actions: 'setPaymentId',
+        },
+        onError: {
+          target: 'failure',
+          actions: {
+            type: 'assignError',
+            params: { fallback: 'Failed to initiate payment' },
+          },
+        },
       },
     },
 
@@ -486,10 +552,10 @@ export const orderMachine = orderMachineSetup.createMachine({
         id: 'createProviderSession',
         src: 'createProviderSession',
         input: ({ context }) => {
-          if (!context.order || !context.provider)
-            throw new Error('Order and provider must be set before creating a provider session');
+          if (!context.paymentId || !context.provider)
+            throw new Error('Payment and provider must be set before creating a provider session');
           return {
-            order: context.order,
+            paymentId: context.paymentId,
             provider: context.provider,
             successUrl: context.successUrl,
             cancelUrl: context.cancelUrl,

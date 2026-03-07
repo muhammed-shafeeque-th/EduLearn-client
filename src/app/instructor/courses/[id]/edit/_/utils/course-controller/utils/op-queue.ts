@@ -1,26 +1,41 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CourseOp, CurriculumOp, OpResult } from '../types';
 
 type EntityKey = `section:${string}` | `lesson:${string}` | `quiz:${string}`;
+type Listener = (size: number) => void;
 
 /**
- * Manages the queue of operations to be executed
+ * Manages the queue of operations with reactive subscription support
  */
 export class OperationQueue {
   private queue: CourseOp[] = [];
-  private results: OpResult[] = [];
   private readonly executedResults: OpResult[] = [];
+  private listeners: Set<Listener> = new Set();
+
+  /**
+   * Subscribe to queue size changes
+   */
+  subscribe(listener: Listener): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private notify(): void {
+    this.listeners.forEach((l) => l(this.queue.length));
+  }
 
   push(op: CourseOp): void {
     this.queue.push(op);
+    this.notify();
   }
 
   pushMultiple(ops: CourseOp[]): void {
     this.queue.push(...ops);
+    this.notify();
   }
 
   /**
-   * Update operations in the queue matching a predicate using the provided updater.
-   * Returns the count of updated items.
+   * Update operations in the queue matching a predicate
    */
   updateCreateOp<T extends CurriculumOp>(
     predicate: (op: T) => boolean,
@@ -34,37 +49,38 @@ export class OperationQueue {
       }
       return op;
     });
+    if (updatedCount > 0) this.notify();
     return updatedCount;
   }
+
   /**
-   * Remove all CREATE operations from the queue that match the given predicate.
-   * Returns the count of removed items.
+   * Remove CREATE operations matching the predicate
    */
   removeCreateOp<T extends CurriculumOp>(predicate: (op: T) => boolean): number {
-    let removedCount = 0;
+    const initialLen = this.queue.length;
     this.queue = this.queue.filter((op) => {
       if (typeof op.type === 'string' && op.type.endsWith('_CREATE') && predicate(op as T)) {
-        removedCount++;
         return false;
       }
       return true;
     });
+
+    const removedCount = initialLen - this.queue.length;
+    if (removedCount > 0) this.notify();
     return removedCount;
   }
 
-  /**
-   * Returns a COPY of all queued ops. Caller code cannot mutate internals.
-   */
   getAll(): readonly CourseOp[] {
     return [...this.queue];
   }
 
   clear(): void {
     this.queue = [];
+    this.notify();
   }
 
   /**
-   * Add a result to result-tracking (for retries, errors, etc)
+   * Metrics and Result Tracking
    */
   addResult(result: OpResult) {
     this.executedResults.push(result);
@@ -118,12 +134,13 @@ export class OperationQueue {
     }
   }
 
+  /**
+   * Normalizes the queue by coalescing redundant operations
+   */
   public normalize(): void {
-    const ops = this.queue;
-
     const entityMap = new Map<EntityKey, CourseOp[]>();
 
-    for (const op of ops) {
+    for (const op of this.queue) {
       const key = this.getEntityKey(op);
       if (!key) continue;
 
@@ -134,13 +151,14 @@ export class OperationQueue {
     }
 
     const normalized: CourseOp[] = [];
-
     for (const [, entityOps] of entityMap) {
       const result = this.coalesceEntityOps(entityOps);
       if (result) normalized.push(...result);
     }
 
+    const hasChanged = this.queue.length !== normalized.length;
     this.queue = normalized;
+    if (hasChanged) this.notify();
   }
 
   private coalesceEntityOps(ops: CourseOp[]): CourseOp[] | null {
@@ -155,60 +173,51 @@ export class OperationQueue {
       } else if (op.type.endsWith('_UPDATE')) {
         updateOp = updateOp ? this.mergeUpdates(updateOp, op) : op;
       } else if (op.type.endsWith('_REORDER')) {
+        // Only keep the LAST reorder operation as it represents the final state
         reorderOp = op;
       } else if (op.type.endsWith('_DELETE')) {
         deleteOp = op;
       }
     }
 
-    if (createOp && deleteOp) {
-      console.warn('Dropped ops for entity', ops);
-      return null;
-    }
+    // Optimization: If created and then deleted, just drop both
+    if (createOp && deleteOp) return null;
 
+    // Create + Update = Merged Create
     if (createOp) {
-      if (updateOp) {
-        return [this.mergeCreateAndUpdate(createOp, updateOp)];
-      }
-
-      return [createOp];
+      return [updateOp ? this.mergeCreateAndUpdate(createOp, updateOp) : createOp];
     }
 
-    if (deleteOp) {
-      return [deleteOp];
-    }
+    // Delete trumps updates/reorders
+    if (deleteOp) return [deleteOp];
 
     const result: CourseOp[] = [];
     if (updateOp) result.push(updateOp);
     if (reorderOp) result.push(reorderOp);
 
-    return result.length > 0 ? result : (console.warn('Dropped ops for entity', ops) ?? null);
+    return result.length > 0 ? result : null;
   }
 
   private mergeCreateAndUpdate(create: CourseOp, update: CourseOp): CourseOp {
-    if (!('data' in create) || !('data' in update)) {
-      return create;
-    }
+    if (!('data' in create) || !('data' in update)) return create;
 
     return {
       ...create,
       data: {
-        ...create.data,
-        ...update.data,
+        ...(create.data as any),
+        ...(update.data as any),
       },
     } as CourseOp;
   }
 
   private mergeUpdates(a: CourseOp, b: CourseOp): CourseOp {
-    if (!('data' in a) || !('data' in b)) {
-      return b;
-    }
+    if (!('data' in a) || !('data' in b)) return b;
 
     return {
       ...a,
       data: {
-        ...a.data,
-        ...b.data,
+        ...(a.data as any),
+        ...(b.data as any),
       },
     } as CourseOp;
   }

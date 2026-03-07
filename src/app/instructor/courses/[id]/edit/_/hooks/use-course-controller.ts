@@ -46,6 +46,7 @@ export function useCourseController(props: UseCourseControllerProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const queryClient = useQueryClient();
 
   const controllerRef = useRef<CourseController | null>(null);
@@ -92,6 +93,14 @@ export function useCourseController(props: UseCourseControllerProps) {
       debug('Abort commit on unmount');
       controller.abortCommit?.();
     };
+  }, [controller]);
+
+  // Sync pending count
+  useEffect(() => {
+    const unsubscribe = controller.subscribe((count) => {
+      setPendingCount(count);
+    });
+    return unsubscribe;
   }, [controller]);
 
   // BASIC OPERATIONS
@@ -348,13 +357,6 @@ export function useCourseController(props: UseCourseControllerProps) {
     return ret;
   }, [controller]);
 
-  const getPendingCount = useCallback((): number => {
-    debug('getPendingCount - called');
-    const ret = controller.getPendingOperationsCount();
-    debug('getPendingCount - return', ret);
-    return ret;
-  }, [controller]);
-
   const clearPending = useCallback((): void => {
     debug('clearPending - called');
     controller.clearPendingOperations();
@@ -405,8 +407,9 @@ export function useCourseController(props: UseCourseControllerProps) {
     publishCourse,
 
     // Utilities
-    hasUnsavedChanges,
-    getPendingCount,
+    hasUnsavedChanges: hasUnsavedChanges(),
+    isDirty: pendingCount > 0 || hasUnsavedChanges(),
+    pendingCount,
     clearPending,
     getResults,
   };

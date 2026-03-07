@@ -12,7 +12,6 @@ import { Course } from '@/types/course';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 
-// Utility: Render instructor initials
 const getInstructorInitials = (name: string) =>
   name
     .split(' ')
@@ -25,7 +24,6 @@ interface CourseHeaderProps {
   course: Course;
 }
 
-// Single-responsibility rendering helpers for clarity
 function CourseThumbnail({
   src,
   alt,
@@ -160,7 +158,6 @@ export function CourseHeader({ course }: CourseHeaderProps) {
     [course.trailer]
   );
 
-  // Accessibility: Focus management helpers could be added for modal
 
   const handleShowPreview = useCallback(() => setShowVideoPreview(true), []);
   const handleHidePreview = useCallback(() => setShowVideoPreview(false), []);

@@ -14,6 +14,9 @@ export interface Message {
   content: string;
   createdAt: number;
   updatedAt: number;
+  status?: string;
+  editedAt?: number | string;
+  deletedAt?: number | string;
   sequence: number;
   reactions: MessageReaction[];
 }
@@ -31,7 +34,6 @@ export interface UiMessage extends Message {
 
 export interface Chat {
   id: string;
-  enrollmentId: string;
 
   studentId: string;
   instructorId: string;
@@ -39,6 +41,8 @@ export interface Chat {
   createdAt: number;
   updatedAt: number;
   lastMessageId?: string;
+  lastMessagePreview?: string;
+  unreadCount?: number;
 
   // viewer-specific
   isPinned: boolean;
@@ -46,8 +50,7 @@ export interface Chat {
   mutedUntil?: number;
 
   // UI convenience only
-  student?: UserInfo;
-  instructor?: UserInfo;
+  otherUser?: UserInfo;
 }
 
 export interface TypingIndicator {
@@ -67,11 +70,6 @@ export interface MessageFilters {
     from: Date;
     to: Date;
   };
-}
-export interface MessageFilters {
-  search: string;
-  type: 'all' | 'unread' | 'pinned' | 'archived';
-  sortBy: 'recent' | 'unread' | 'name';
 }
 
 export interface CallInfo {

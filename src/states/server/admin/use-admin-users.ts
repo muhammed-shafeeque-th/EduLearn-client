@@ -214,7 +214,6 @@ export function useAdminUser(
     unblockError,
     resetUnblock,
 
-    // Delete user (now fully exposed for UI usage)
     deleteUser,
     isDeleting,
     isDeleteSuccess,

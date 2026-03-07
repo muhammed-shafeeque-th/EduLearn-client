@@ -1,301 +1,323 @@
 'use client';
 import React from 'react';
-import { UseFormReturn, FieldErrors, FieldError } from 'react-hook-form';
+import { UseFormReturn, Controller } from 'react-hook-form';
 import { BasicInfoFormData } from '../schemas/course-schemas';
 import { categories, subCategories, languages, levels, durationUnits } from '../utils/constants';
 import { Label } from '@/components/ui/label';
-import { Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-
-// Helper function to get nested field errors
-const getNestedError = (errors: FieldErrors, field: string): FieldError | undefined => {
-  const parts = field.split('.');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let current: any = errors;
-  for (const part of parts) {
-    if (!current) return undefined;
-    current = current[part];
-  }
-  return current as FieldError | undefined;
-};
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DynamicFieldSection } from '../components/dynamic-field-section';
 
 interface BasicInformationTabProps {
   form: UseFormReturn<BasicInfoFormData>;
+  topicFields: Array<{ id: string; text: string }>;
+  appendTopic: (data: { id: string; text: string }) => void;
+  removeTopic: (index: number) => void;
 }
 
-export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({ form }) => {
+export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({
+  form,
+  topicFields,
+  appendTopic,
+  removeTopic,
+}) => {
   const {
     register,
+    control,
     formState: { errors },
     watch,
     setValue,
   } = form;
 
-  // Watch state
   const selectedCategory = watch('category');
   const titleLength = watch('title')?.length || 0;
   const subtitleLength = watch('subTitle')?.length || 0;
-  const subCategory = watch('subCategory');
-  const topics = watch('topics') || [];
-
-  // Error helpers for nested duration fields and topics
-  const durationValueError = getNestedError(errors, 'duration.value');
-  const durationUnitError = getNestedError(errors, 'duration.unit');
-  const topicsError: FieldError | undefined = errors.topics as FieldError | undefined;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-        Basic Information
-      </h2>
+    <div className="bg-card rounded-xl shadow-sm border border-border p-8 space-y-10">
+      <div>
+        <h2 className="text-2xl font-semibold text-foreground">Basic Information</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Set the foundation for your course. These details will help students find your content.
+        </p>
+      </div>
 
-      <div className="space-y-6">
-        {/* Title */}
-        <div>
-          <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Title
-          </Label>
-          <div className="relative">
-            <Input
-              {...register('title')}
-              type="text"
-              placeholder="Your course title"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              maxLength={80}
-              autoComplete="off"
-            />
-            <span className="absolute right-3 top-2 text-sm text-gray-400">{titleLength}/80</span>
-          </div>
-          {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
-        </div>
-
-        {/* Subtitle */}
-        <div>
-          <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Subtitle
-          </Label>
-          <div className="relative">
-            <Input
-              {...register('subTitle')}
-              type="text"
-              placeholder="Your course subtitle"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              maxLength={120}
-              autoComplete="off"
-            />
-            <span className="absolute right-3 top-2 text-sm text-gray-400">
-              {subtitleLength}/120
-            </span>
-          </div>
-          {errors.subTitle && (
-            <p className="text-red-500 text-sm mt-1">{errors.subTitle.message}</p>
-          )}
-        </div>
-
-        {/* Category and Sub-category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Category */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Course Category
-            </Label>
-            <select
-              {...register('category')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Select...</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
-            )}
-          </div>
-
-          {/* Sub-category */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Course Sub-category
-            </Label>
-            <select
-              {...register('subCategory')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-              disabled={!selectedCategory && !subCategory}
-            >
-              <option value="">Select...</option>
-              {selectedCategory &&
-                subCategories[selectedCategory]?.map((subCat) => (
-                  <option key={subCat} value={subCat}>
-                    {subCat}
-                  </option>
-                ))}
-            </select>
-            {errors.subCategory && (
-              <p className="text-red-500 text-sm mt-1">{errors.subCategory.message}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Course topics */}
-        <div>
-          <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Course Topics
-          </Label>
+      <div className="space-y-8">
+        {/* Title & Subtitle Section */}
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
-            {topics && Array.isArray(topics) && topics.length > 0
-              ? topics.map((objective: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Input
-                      type="text"
-                      value={objective}
-                      onChange={(e) => {
-                        const newObjectives = [...topics];
-                        newObjectives[index] = e.target.value;
-                        setValue('topics', newObjectives, { shouldValidate: true });
-                      }}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-                      placeholder={`Course topic ${index + 1}`}
-                      autoComplete="off"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newObjectives = topics.filter((_: string, i: number) => i !== index);
-                        setValue('topics', newObjectives, { shouldValidate: true });
-                      }}
-                      className="p-2 text-red-400 hover:text-red-600 transition-colors"
-                      aria-label="Remove topic"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))
-              : null}
-            <button
-              type="button"
-              onClick={() => {
-                setValue('topics', [...(topics || []), ''], { shouldValidate: true });
-              }}
-              className="text-sm text-primary dark:text-primary-foreground hover:underline"
-            >
-              + Add Course topic
-            </button>
+            <Label className="text-sm font-semibold text-foreground/80">Course Title</Label>
+            <div className="relative group">
+              <Input
+                {...register('title')}
+                placeholder="e.g. Master the Art of Web Design from Scratch"
+                className={`h-11 px-4 rounded-xl transition-all ${
+                  errors.title
+                    ? 'border-destructive focus-visible:ring-destructive'
+                    : 'border-border'
+                }`}
+                maxLength={80}
+              />
+              <span
+                className={`absolute right-4 top-2.5 text-[10px] font-semibold ${
+                  titleLength > 70 ? 'text-amber-500' : 'text-muted-foreground/50'
+                }`}
+              >
+                {titleLength}/80
+              </span>
+              {errors.title && (
+                <p className="text-destructive text-xs mt-1.5 flex items-center gap-1 font-medium">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Your title should be catchy and contain keywords for better search results.
+            </p>
           </div>
-          {/* Show errors for topics array itself, and for empty individual topics */}
-          {topicsError && typeof topicsError.message === 'string' && (
-            <p className="text-red-500 text-sm mt-1">{topicsError.message}</p>
-          )}
-          {Array.isArray(errors.topics) &&
-            errors.topics.map(
-              (topicErr, i) =>
-                topicErr &&
-                topicErr.message && (
-                  <p key={i} className="text-red-500 text-sm mt-1">
-                    Topic {i + 1}: {topicErr.message}
-                  </p>
-                )
-            )}
-        </div>
 
-        {/* Language Settings */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Language */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Course Language
-            </Label>
-            <select
-              {...register('language')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Select...</option>
-              {languages.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
-            {errors.language && (
-              <p className="text-red-500 text-sm mt-1">{errors.language.message}</p>
-            )}
-          </div>
-          {/* Subtitle Language */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Subtitle Language (Optional)
-            </Label>
-            <select
-              {...register('subtitleLanguage')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Select...</option>
-              {languages.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
-            {errors.subtitleLanguage && (
-              <p className="text-red-500 text-sm mt-1">{errors.subtitleLanguage.message}</p>
-            )}
-          </div>
-          {/* Level */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Course Level
-            </Label>
-            <select
-              {...register('level')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Select...</option>
-              {levels.map((level) => (
-                <option key={level} value={level.toLowerCase()}>
-                  {level}
-                </option>
-              ))}
-            </select>
-            {errors.level && <p className="text-red-500 text-sm mt-1">{errors.level.message}</p>}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-foreground/80">Course Subtitle</Label>
+            <div className="relative group">
+              <Input
+                {...register('subTitle')}
+                placeholder="e.g. Learn UI/UX principles, typography, and modern design tools."
+                className={`h-11 px-4 rounded-xl transition-all ${
+                  errors.subTitle
+                    ? 'border-destructive focus-visible:ring-destructive'
+                    : 'border-border'
+                }`}
+                maxLength={120}
+              />
+              <span
+                className={`absolute right-4 top-2.5 text-[10px] font-semibold ${
+                  subtitleLength > 100 ? 'text-amber-500' : 'text-muted-foreground/50'
+                }`}
+              >
+                {subtitleLength}/120
+              </span>
+              {errors.subTitle && (
+                <p className="text-destructive text-xs mt-1.5 flex items-center gap-1 font-medium">
+                  {errors.subTitle.message}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Duration */}
-        <div>
-          <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Duration
-          </Label>
-          <div className="flex space-x-2">
-            <Input
-              {...register('duration.value')}
-              type="number"
-              placeholder="Course duration"
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-              min={0}
+        {/* Categories Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-foreground/80">Category</Label>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    setValue('subCategory', ''); // Reset subcategory
+                  }}
+                  value={field.value}
+                >
+                  <SelectTrigger className="h-11 rounded-xl border-border">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat} className="rounded-lg">
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
-            <select
-              {...register('duration.unit')}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-            >
-              {durationUnits.map((unit) => (
-                <option key={unit} value={unit}>
-                  {unit}
-                </option>
-              ))}
-            </select>
+            {errors.category && (
+              <p className="text-destructive text-xs mt-1 font-medium">{errors.category.message}</p>
+            )}
           </div>
-          {/* Show errors for duration */}
-          {durationValueError && (
-            <p className="text-red-500 text-sm mt-1">{durationValueError.message}</p>
-          )}
-          {durationUnitError && (
-            <p className="text-red-500 text-sm mt-1">{durationUnitError.message}</p>
-          )}
-          {errors.duration && typeof errors.duration.message === 'string' && (
-            <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
-          )}
+
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-foreground/80">Sub-category</Label>
+            <Controller
+              name="subCategory"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={!selectedCategory}
+                >
+                  <SelectTrigger className="h-11 rounded-xl border-border">
+                    <SelectValue
+                      placeholder={
+                        selectedCategory ? 'Select a sub-category' : 'Select a category first'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {selectedCategory &&
+                      subCategories[selectedCategory]?.map((subCat) => (
+                        <SelectItem key={subCat} value={subCat} className="rounded-lg">
+                          {subCat}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.subCategory && (
+              <p className="text-destructive text-xs mt-1 font-medium">
+                {errors.subCategory.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Topics Section */}
+        <div className="pt-4">
+          <DynamicFieldSection
+            title="Course Topics"
+            description="What are the specific topics covered in your course? (Max 10)"
+            fields={topicFields}
+            register={register}
+            errors={errors}
+            fieldName="topics"
+            onAdd={() => appendTopic({ id: Date.now().toString(), text: '' })}
+            onRemove={removeTopic}
+            placeholder="e.g. React Hooks"
+            maxFields={10}
+            minFields={1}
+          />
+        </div>
+
+        {/* Language & Level Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-foreground/80">Language</Label>
+            <Controller
+              name="language"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-11 rounded-xl">
+                    <SelectValue placeholder="Select Language" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {languages.map((lang) => (
+                      <SelectItem key={lang} value={lang} className="rounded-lg">
+                        {lang}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.language && (
+              <p className="text-destructive text-xs font-medium">{errors.language.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-foreground/80">Subtitle Language</Label>
+            <Controller
+              name="subtitleLanguage"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-11 rounded-xl">
+                    <SelectValue placeholder="Select (Optional)" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {languages.map((lang) => (
+                      <SelectItem key={lang} value={lang} className="rounded-lg">
+                        {lang}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-foreground/80">Level</Label>
+            <Controller
+              name="level"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-11 rounded-xl capitalize">
+                    <SelectValue placeholder="Select Level" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {levels.map((level) => (
+                      <SelectItem
+                        key={level}
+                        value={level.toLowerCase()}
+                        className="rounded-lg capitalize"
+                      >
+                        {level}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.level && (
+              <p className="text-destructive text-xs font-medium">{errors.level.message}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Duration Section */}
+        <div className="pt-2">
+          <Label className="text-sm font-semibold text-foreground/80 mb-2 block">
+            Estimated Course Duration
+          </Label>
+          <div className="flex gap-4">
+            <div className="flex-1 space-y-1">
+              <Input
+                {...register('duration.value')}
+                type="number"
+                placeholder="Value"
+                className={`h-11 rounded-xl ${errors.duration?.value ? 'border-destructive' : 'border-border'}`}
+                min={1}
+              />
+              {errors.duration?.value && (
+                <p className="text-destructive text-xs font-medium">
+                  {errors.duration.value.message}
+                </p>
+              )}
+            </div>
+            <div className="w-40">
+              <Controller
+                name="duration.unit"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-11 rounded-xl capitalize">
+                      <SelectValue placeholder="Unit" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      {durationUnits.map((unit) => (
+                        <SelectItem key={unit} value={unit} className="rounded-lg capitalize">
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

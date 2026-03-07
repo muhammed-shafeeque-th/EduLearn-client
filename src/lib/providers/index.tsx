@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { compress, decompress } from 'lz-string';
-import { restoreCredentials } from '@/states/client/slices/auth-slice';
+import { restoreCredentials, logout } from '@/states/client/slices/auth-slice';
 import { NotificationProvider } from '@/states/client/providers/notification';
 
 // Auth Plugin Interface
@@ -90,6 +90,15 @@ export function StateProviders({ children }: ProvidersProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       store.dispatch(restoreCredentials());
+
+      const handleForceLogout = () => {
+        store.dispatch(logout());
+      };
+
+      window.addEventListener('auth:force-logout', handleForceLogout);
+      return () => {
+        window.removeEventListener('auth:force-logout', handleForceLogout);
+      };
     }
   }, []);
 

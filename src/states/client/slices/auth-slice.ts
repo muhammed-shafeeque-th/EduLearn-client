@@ -347,6 +347,7 @@ function mapToAuthUser(data: any): AuthUser | null {
     email: data.email,
     role: data.role,
     userId: data.userId,
+    id: data.userId,
     username: data.username,
     avatar: data.avatar,
   };

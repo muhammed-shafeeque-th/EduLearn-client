@@ -101,7 +101,7 @@ export const CourseEditor = ({ course }: CourseEditorProps) => {
   };
 
   const handleClearForm = () => {
-    if (controller.hasUnsavedChanges()) {
+    if (controller.hasUnsavedChanges) {
       const confirmed = window.confirm(
         'You have unsaved changes. Are you sure you want to clear all data?'
       );

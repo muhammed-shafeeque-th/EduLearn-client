@@ -1,39 +1,26 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { DollarSign, BookOpen, MessageSquare, Clock, Activity } from 'lucide-react';
-import { getInstructorCoursesStats } from '../../../_/libs/apis';
+import { DollarSign, BookOpen, Clock, Activity } from 'lucide-react';
+import { useInstructorCoursesStats } from '@/states/server/admin/use-admin-stats';
 
 interface InstructorStatsProps {
   instructorId: string;
 }
 
-// Types from InstructorCoursesStats API return type
-type CourseStatsResponse = Awaited<ReturnType<typeof getInstructorCoursesStats>>;
+export function InstructorStats({ instructorId }: InstructorStatsProps) {
+  const { stats } = useInstructorCoursesStats(instructorId);
 
-export async function InstructorStats({ instructorId }: InstructorStatsProps) {
-  const instructorCoursesStats: CourseStatsResponse = await getInstructorCoursesStats(instructorId);
-
-  // Defensive fallback if data not returned as expected
-  const stats = instructorCoursesStats ?? {};
-
-  // Map API data to expected display variables (with fallback defaults)
-  const monthlyRevenue = stats.monthlyRevenue ?? 0;
-  const revenueGrowth = stats.revenueGrowth ?? 0;
-  const monthlyEnrollments = stats.totalEnrollments ?? 0;
-  // Enrollment growth not available in stats - set placeholder
-  const enrollmentGrowth = 0;
-  const averageRating = stats.avgCompletionRate ?? 0;
-  // totalReviews, responseTime not in stats - placeholder values
-  const totalReviews = 0;
-  const responseTime = 0;
-  const completionRate = stats.avgCompletionRate ?? 0;
-  // engagementRate not in stats - placeholder
-  const engagementRate = 0;
-  const activeCourses = stats.published ?? 0;
-  // totalDiscussions not in stats - placeholder
-  const totalDiscussions = 0;
-  // hoursTeached not in stats - placeholder
-  const hoursTeached = 0;
+  const monthlyRevenue = stats?.monthlyRevenue ?? 0;
+  const revenueGrowth = stats?.revenueGrowth ?? 0;
+  const monthlyEnrollments = stats?.totalEnrollments ?? 0;
+  const enrollmentGrowth = stats?.enrollmentGrowth ?? 0;
+  const averageRating = stats?.averageRating ?? 0;
+  const totalReviews = stats?.totalReviews ?? 0;
+  const completionRate = stats?.avgCompletionRate ?? 0;
+  const activeCourses = stats?.published ?? 0;
+  const hoursTaught = stats?.totalHoursTaught ?? 0;
 
   return (
     <div className="space-y-6">
@@ -87,14 +74,6 @@ export async function InstructorStats({ instructorId }: InstructorStatsProps) {
             <Progress value={completionRate} className="h-2" />
           </div>
 
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Student Engagement</span>
-              <span>{engagementRate}%</span>
-            </div>
-            <Progress value={engagementRate} className="h-2" />
-          </div>
-
           <div className="grid grid-cols-1 gap-3">
             <div className="flex justify-between text-sm">
               <span>Average Rating</span>
@@ -106,10 +85,6 @@ export async function InstructorStats({ instructorId }: InstructorStatsProps) {
             <div className="flex justify-between text-sm">
               <span>Total Reviews</span>
               <span className="font-semibold">{totalReviews}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Response Time</span>
-              <span className="font-semibold">&lt; {responseTime}h</span>
             </div>
           </div>
         </CardContent>
@@ -133,77 +108,13 @@ export async function InstructorStats({ instructorId }: InstructorStatsProps) {
               <span className="font-semibold">{activeCourses}</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <MessageSquare className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Discussions</span>
-              </div>
-              <span className="font-semibold">{totalDiscussions}</span>
-            </div>
-
             <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 text-purple-500" />
                 <span className="text-sm">Hours Taught</span>
               </div>
-              <span className="font-semibold">{hoursTeached.toLocaleString()}h</span>
+              <span className="font-semibold">{hoursTaught.toLocaleString()}h</span>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              {
-                action: 'Published new lesson',
-                course: 'Advanced React',
-                time: '2 hours ago',
-                type: 'success',
-              },
-              {
-                action: 'Responded to 5 questions',
-                course: 'Next.js Course',
-                time: '4 hours ago',
-                type: 'info',
-              },
-              {
-                action: 'Updated course materials',
-                course: 'TypeScript Basics',
-                time: '1 day ago',
-                type: 'warning',
-              },
-              {
-                action: 'Completed live session',
-                course: 'React Hooks',
-                time: '2 days ago',
-                type: 'success',
-              },
-            ].map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3 p-2">
-                <div
-                  className={`w-2 h-2 rounded-full mt-2 ${
-                    activity.type === 'success'
-                      ? 'bg-green-500'
-                      : activity.type === 'info'
-                        ? 'bg-blue-500'
-                        : activity.type === 'warning'
-                          ? 'bg-yellow-500'
-                          : 'bg-gray-500'
-                  }`}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground">{activity.course}</p>
-                </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
           </div>
         </CardContent>
       </Card>

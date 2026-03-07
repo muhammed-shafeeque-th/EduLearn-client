@@ -18,29 +18,28 @@ import { useCurrentUser } from '@/states/server/user/use-current-user';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 import { useInstructorStats } from '@/states/server/user/use-user-stats';
 import { useInstructorCourses } from '@/states/server/course/use-courses';
+import { CourseStatsSkeleton } from './courses/[id]/_/components/skeletons';
 
-/**
- * Main dashboard for instructors.
- * Provides a summary of course stats, quick actions, and recent activity.
- */
 export default function InstructorDashboard() {
   const router = useRouter();
 
-  // Fetch current user
   const {
     data: user,
     isLoading: isUserLoading,
-    isError: userError,
+    // isError: userError,
   } = useCurrentUser({ enabled: true });
 
-  // Fetch instructor statistics only if user exists and is not blocked
   const {
     data: instructorStats,
     isLoading: isStatsLoading,
     isError: statsError,
   } = useInstructorStats(user?.id ?? '', { enabled: !!user && user.status !== 'blocked' });
 
-  const { courses: courses } = useInstructorCourses(user?.id, {
+  const {
+    courses: courses,
+    isLoading: isInstructorCourseLoading,
+    error: coursesError,
+  } = useInstructorCourses(user?.id ?? '', {
     sortBy: 'created_at',
     sortOrder: 'desc',
     page: 1,
@@ -65,18 +64,7 @@ export default function InstructorDashboard() {
             rating: course.rating,
             revenue: course.price * course.students, // TODO: Add proper data received from backend
           }))
-        : [
-            // fallback
-            { id: 1, title: 'React Masterclass', students: 245, rating: 4.9, revenue: 4800 },
-            { id: 2, title: 'Node.js Complete Guide', students: 189, rating: 4.7, revenue: 3600 },
-            {
-              id: 3,
-              title: 'UI/UX Design Fundamentals',
-              students: 167,
-              rating: 4.8,
-              revenue: 2800,
-            },
-          ],
+        : [],
     [courses]
   );
 
@@ -88,11 +76,10 @@ export default function InstructorDashboard() {
         totalRevenue: instructorStats.totalRevenue ?? 0,
         activeCourses: instructorStats.activeCourses ?? 0,
         rating: instructorStats.averageRating ?? 0,
-        totalHours: instructorStats.totalContentHours ?? 0,
+        totalHours: instructorStats.totalHours ?? 0,
         completionRate: instructorStats.completionRate ?? 0,
       };
     }
-    // Remove mock/fake data in production; only used here as fallback
     return {
       totalStudents: 0,
       totalRevenue: 0,
@@ -103,23 +90,23 @@ export default function InstructorDashboard() {
     };
   }, [instructorStats]);
 
-  // Render loading state
-  if (isUserLoading || isStatsLoading) {
-    return (
-      <div className="p-8 text-center">
-        <span className="text-gray-700 dark:text-gray-300">Loading dashboard...</span>
-      </div>
-    );
-  }
+  // // Render loading state
+  // if (isUserLoading || isStatsLoading) {
+  //   return (
+  //     <div className="p-8 text-center">
+  //       <span className="text-gray-700 dark:text-gray-300">Loading dashboard...</span>
+  //     </div>
+  //   );
+  // }
 
-  // Error states
-  if (userError || statsError) {
-    return (
-      <div className="p-8 text-center text-red-600 dark:text-red-400">
-        Failed to load dashboard. Please refresh.
-      </div>
-    );
-  }
+  // // Error states
+  // if (userError || statsError) {
+  //   return (
+  //     <div className="p-8 text-center text-red-600 dark:text-red-400">
+  //       Failed to load dashboard. Please refresh.
+  //     </div>
+  //   );
+  // }
 
   // Defensive fallback: if user removed after loading
   if (!user) {
@@ -163,35 +150,28 @@ export default function InstructorDashboard() {
   ];
 
   // Recent Activity placeholder (could come from API in real app)
-  const recentActivities = [
-    {
-      type: 'enrollment',
-      message: '5 new students enrolled in React Masterclass',
-      time: '2 hours ago',
-    },
-    {
-      type: 'review',
-      message: 'New 5-star review on Node.js Complete Guide',
-      time: '4 hours ago',
-    },
-    {
-      type: 'message',
-      message: '3 new student messages waiting for response',
-      time: '6 hours ago',
-    },
-    {
-      type: 'completion',
-      message: '12 students completed UI/UX Design Fundamentals',
-      time: '1 day ago',
-    },
-  ];
-
-  // Helper for dynamic Tailwind classes
-  const getColorClass = (color: string, prefix: string = '', dark = false) =>
-    // Use only allowed tailwind classes
-    dark ? `dark:bg-${color}-900/30` : `${prefix}${color}-100`;
-
-  const getTextColorClass = (color: string) => `text-${color}-500`;
+  // const recentActivities = [
+  //   {
+  //     type: 'enrollment',
+  //     message: '5 new students enrolled in React Masterclass',
+  //     time: '2 hours ago',
+  //   },
+  //   {
+  //     type: 'review',
+  //     message: 'New 5-star review on Node.js Complete Guide',
+  //     time: '4 hours ago',
+  //   },
+  //   {
+  //     type: 'message',
+  //     message: '3 new student messages waiting for response',
+  //     time: '6 hours ago',
+  //   },
+  //   {
+  //     type: 'completion',
+  //     message: '12 students completed UI/UX Design Fundamentals',
+  //     time: '1 day ago',
+  //   },
+  // ];
 
   return (
     <div className="p-6 space-y-8">
@@ -226,33 +206,43 @@ export default function InstructorDashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {statsGrid.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                    {stat.label}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+      {isStatsLoading ? (
+        <CourseStatsSkeleton />
+      ) : statsError ? (
+        <div className="p-8 text-center text-red-600 dark:text-red-400">
+          Failed to load stats. Please refresh.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {statsGrid.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                  </div>
+                  {/* TODO: Consider clsx/twMerge for dynamic classnames in real production */}
+                  <div
+                    className={`p-3 rounded-xl bg-${stat.color}-100 dark:bg-${stat.color}-900/30`}
+                  >
+                    <Icon className={`w-6 h-6 text-${stat.color}-500`} />
+                  </div>
                 </div>
-                {/* TODO: Consider clsx/twMerge for dynamic classnames in real production */}
-                <div className={`p-3 rounded-xl bg-${stat.color}-100 dark:bg-${stat.color}-900/30`}>
-                  <Icon className={`w-6 h-6 text-${stat.color}-500`} />
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div>
@@ -287,53 +277,65 @@ export default function InstructorDashboard() {
       </div>
 
       {/* Recent Courses */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-            Top Performing Courses
-          </h2>
-          <div className="space-y-4">
-            {recentCourses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{course.title}</h3>
-                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                    ${course.revenue?.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center">
-                      <Users className="w-4 h-4 mr-1" />
-                      {course.students}
-                    </span>
-                    <span className="flex items-center">
-                      <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                      {course.rating}
-                    </span>
-                  </div>
-                  <button
-                    className="text-primary dark:text-primary/40 hover:underline"
-                    onClick={() => {
-                      router.push(`/instructor/courses/${course.id}`);
-                    }}
-                  >
-                    View Details
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+      {isInstructorCourseLoading ? (
+        <div className="p-8 text-center">
+          <span className="text-gray-700 dark:text-gray-300">Loading recent courses...</span>
         </div>
+      ) : coursesError ? (
+        <div className="p-8 text-center text-red-600 dark:text-red-400">
+          Failed to load recent courses. Please refresh.
+        </div>
+      ) : (
+        recentCourses.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                Top Performing Courses
+              </h2>
+              <div className="space-y-4">
+                {recentCourses.map((course, index) => (
+                  <motion.div
+                    key={course.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {course.title}
+                      </h3>
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                        ${course.revenue?.toLocaleString()}
+                      </span>
+                    </div>
 
-        <div>
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center space-x-4">
+                        <span className="flex items-center">
+                          <Users className="w-4 h-4 mr-1" />
+                          {course.students}
+                        </span>
+                        <span className="flex items-center">
+                          <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                          {course.rating}
+                        </span>
+                      </div>
+                      <button
+                        className="text-primary dark:text-primary/40 hover:underline"
+                        onClick={() => {
+                          router.push(`/instructor/courses/${course.id}`);
+                        }}
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Recent Activity</h2>
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="space-y-4">
@@ -354,8 +356,10 @@ export default function InstructorDashboard() {
               ))}
             </div>
           </div>
-        </div>
-      </div>
+        </div> */}
+          </div>
+        )
+      )}
     </div>
   );
 }

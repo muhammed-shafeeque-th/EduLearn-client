@@ -1,12 +1,17 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUsersStats } from '@/states/server/admin/use-admin-stats';
 import { Users, BookOpen, Star, ShieldOff } from 'lucide-react';
-import { getUsersStats } from '../../../instructors/_/libs/apis';
+import { StatsCardsSkeleton } from './skeletons/course-card-skeleton';
 
-export async function UsersStats() {
-  // Get stats from API
-  const stats = await getUsersStats();
+export function UsersStats() {
+  const { stats, isLoading } = useUsersStats({ enabled: true });
 
-  // Defend: fallback for bad API response shape
+  if (isLoading) {
+    return <StatsCardsSkeleton />;
+  }
+
   const safeStats = {
     total: stats?.total ?? 0,
     active: stats?.active ?? 0,

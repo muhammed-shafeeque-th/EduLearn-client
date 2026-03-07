@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState, useTransition } from 'react';
 import { motion } from 'framer-motion';
 import { XCircle, RefreshCw, ArrowLeft, AlertTriangle, CreditCard, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useSelector } from '@xstate/react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,9 +28,7 @@ export function FailureContent({ orderId, error, order: serverOrder }: FailureCo
 
   const { restoreOrder, isRestoring, restoreError } = useOrder(orderId!, { enabled: false });
 
-  const orderService = useOrderMachine();
-  const orderState = useSelector(orderService, (state) => state);
-  const { order, error: machineError } = orderState.context;
+  const { hydrate: hydrateOrder, machineError, order } = useOrderMachine();
 
   useEffect(() => {
     if (!orderId) {
@@ -41,13 +38,13 @@ export function FailureContent({ orderId, error, order: serverOrder }: FailureCo
     let cancelled = false;
     startTransition(() => {
       if (cancelled) return;
-      orderService.send({ type: 'HYDRATE_ORDER', order: serverOrder });
+      hydrateOrder(serverOrder);
       setHydrating(false);
     });
     return () => {
       cancelled = true;
     };
-  }, [orderId, orderService, serverOrder]);
+  }, [orderId, hydrateOrder, serverOrder]);
 
   const resolvedError = useMemo(() => {
     if (restoreError) {

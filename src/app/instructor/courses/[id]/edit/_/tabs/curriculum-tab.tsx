@@ -130,7 +130,7 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
   });
 
   const sections = useMemo(() => watchedSections || [], [watchedSections]);
-  const pendingCount = useMemo(() => controller.getPendingCount(), [controller]);
+  const pendingCount = useMemo(() => controller.pendingCount, [controller]);
 
   // STATS CALCULATION
 
