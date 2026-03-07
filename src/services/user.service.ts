@@ -8,6 +8,7 @@ import {
   InstructorMeta,
   RegisterInstructorPayload,
   User,
+  UserInfo,
   UserMeta,
   UserProfileUpdatePayload,
 } from '@/types/user';
@@ -42,8 +43,12 @@ export interface InstructorsStats {
 
 export interface InstructorCoursesStats {
   published: number;
+  averageRating: number;
+  totalHoursTaught: number;
+  totalReviews: number;
   draft: number;
   totalEnrollments: number;
+  enrollmentGrowth: number;
   activeStudents: number;
   monthlyRevenue: number;
   revenueGrowth: string;
@@ -74,6 +79,8 @@ export interface UsersFilters {
   name?: string;
   email?: string;
   role?: string;
+  search?: string;
+  status?: string;
 }
 
 export type UsersParams = UsersFilters & PaginationParams;
@@ -87,6 +94,8 @@ function buildQueryParams(params: UsersParams = {}): URLSearchParams {
   if (params.name) searchParams.set('name', params.name);
   if (params.email) searchParams.set('email', params.email);
   if (params.role) searchParams.set('role', params.role);
+  if (params.search) searchParams.set('search', params.search);
+  if (params.status) searchParams.set('status', params.status);
   return searchParams;
 }
 
@@ -104,13 +113,13 @@ export interface IUserService {
   getStudentsOfInstructor(
     params?: UsersParams,
     options?: RequestOptions
-  ): Promise<ApiResponse<UserMeta[]>>;
+  ): Promise<ApiResponse<UserInfo[]>>;
   getInstructorsOfStudent(
     params?: UsersParams,
     options?: RequestOptions
-  ): Promise<ApiResponse<InstructorMeta[]>>;
+  ): Promise<ApiResponse<UserInfo[]>>;
   getInstructors(
-    params?: PaginationParams,
+    params?: UsersParams,
     options?: RequestOptions
   ): Promise<ApiResponse<InstructorMeta[]>>;
   getInstructorStats(
@@ -197,17 +206,16 @@ export class UserService extends BaseService implements IUserService {
   ): Promise<ApiResponse<UserMeta[]>> {
     const searchParams = buildQueryParams(params);
     const queryString = searchParams.toString();
-    // If queryString has value, prefix with '?'
-    return this.get<ApiResponse<UserMeta[]>>(queryString ? `?${queryString}` : '/', options);
+    return this.get<ApiResponse<UserMeta[]>>(queryString ? `?${queryString}` : '', options);
   }
 
   public async getStudentsOfInstructor(
     params: UsersParams = {},
     options?: RequestOptions
-  ): Promise<ApiResponse<UserMeta[]>> {
+  ): Promise<ApiResponse<UserInfo[]>> {
     const searchParams = buildQueryParams(params);
     const queryString = searchParams.toString();
-    return this.get<ApiResponse<UserMeta[]>>(
+    return this.get<ApiResponse<UserInfo[]>>(
       `/me/students${queryString ? `?${queryString}` : ''}`,
       options
     );
@@ -216,20 +224,20 @@ export class UserService extends BaseService implements IUserService {
   public async getInstructorsOfStudent(
     params: UsersParams = {},
     options?: RequestOptions
-  ): Promise<ApiResponse<InstructorMeta[]>> {
+  ): Promise<ApiResponse<UserInfo[]>> {
     const searchParams = buildQueryParams(params);
     const queryString = searchParams.toString();
-    return this.get<ApiResponse<InstructorMeta[]>>(
+    return this.get<ApiResponse<UserInfo[]>>(
       `/me/instructors${queryString ? `?${queryString}` : ''}`,
       options
     );
   }
 
   public async getInstructors(
-    params: PaginationParams = {},
+    params: UsersParams = {},
     options?: RequestOptions
   ): Promise<ApiResponse<InstructorMeta[]>> {
-    const searchParams = buildQueryParams(params as UsersParams);
+    const searchParams = buildQueryParams(params);
     const queryString = searchParams.toString();
     return this.get<ApiResponse<InstructorMeta[]>>(
       queryString ? `/instructors?${queryString}` : '/instructors',
