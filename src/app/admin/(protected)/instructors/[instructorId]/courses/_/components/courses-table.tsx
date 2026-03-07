@@ -11,10 +11,9 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { motion } from 'framer-motion';
-import { Search, ArrowUpDown, MoreHorizontal, Eye } from 'lucide-react';
+import { ArrowUpDown, MoreHorizontal, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -37,7 +36,7 @@ import Image from 'next/image';
 
 interface CoursesTableProps {
   instructorId: string;
-  searchParams: { search?: string; status?: string; page?: string };
+  // searchParams: { search?: string; status?: string; page?: string };
 }
 
 export type CourseStatus = 'draft' | 'published' | 'unpublished' | 'deleted';
@@ -51,28 +50,41 @@ function truncateDescription(description: string, maxLength: number): string {
   return description.slice(0, maxLength).trim() + '...';
 }
 
-export function CoursesTable({ instructorId, searchParams }: CoursesTableProps) {
+export function CoursesTable({ instructorId }: CoursesTableProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  // const pathname = usePathname();
   const urlSearchParams = useSearchParams();
 
   const [page, setPage] = useState<number>(() => {
-    const pageNum = Number(searchParams.page);
+    const pageNum = Number(urlSearchParams.get('page'));
     return Number.isInteger(pageNum) && pageNum > 0 ? pageNum : 1;
   });
+  const [status, setStatus] = useState<string>(() => {
+    const statusVal = urlSearchParams.get('status');
+    return statusVal || '';
+  });
+
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [search, setSearch] = useState(searchParams.search || '');
+  const [search, setSearch] = useState(urlSearchParams.get('search') || '');
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const statusVal = urlSearchParams.get('status');
+    if (statusVal !== status) {
+      setStatus(statusVal || '');
+      setPage(1);
+    }
+  }, [urlSearchParams, status]);
 
   const apiParams = useMemo(
     () => ({
       page,
       pageSize: PAGE_LIMIT,
       ...(search ? { search } : {}),
-      ...(searchParams.status ? { status: searchParams.status } : {}),
+      ...(status ? { status } : {}),
     }),
-    [page, search, searchParams.status]
+    [page, search, status]
   );
 
   const { courses, isLoading, isError, totalPages } = useInstructorCourses(instructorId, apiParams);
@@ -87,17 +99,17 @@ export function CoursesTable({ instructorId, searchParams }: CoursesTableProps) 
 
   const pageCount: number = totalPages;
 
-  const updateQuery = useCallback(
-    (params: Record<string, string | number | undefined>) => {
-      const next = new URLSearchParams(urlSearchParams.toString());
-      Object.entries(params).forEach(([key, value]) => {
-        if (value === undefined || value === '') next.delete(key);
-        else next.set(key, String(value));
-      });
-      router.push(`${pathname}?${next.toString()}`);
-    },
-    [router, pathname, urlSearchParams]
-  );
+  // const updateQuery = useCallback(
+  //   (params: Record<string, string | number | undefined>) => {
+  //     const next = new URLSearchParams(urlSearchParams.toString());
+  //     Object.entries(params).forEach(([key, value]) => {
+  //       if (value === undefined || value === '') next.delete(key);
+  //       else next.set(key, String(value));
+  //     });
+  //     router.push(`${pathname}?${next.toString()}`);
+  //   },
+  //   [router, pathname, urlSearchParams]
+  // );
 
   const handleNavigateToCourse = useCallback(
     (courseId: string) => {
@@ -301,29 +313,26 @@ export function CoursesTable({ instructorId, searchParams }: CoursesTableProps) 
     pageCount,
   });
 
-  const handlePageChange = useCallback(
-    (nextPage: number) => {
-      setPage(nextPage);
-      updateQuery({ page: nextPage });
-    },
-    [updateQuery]
-  );
+  const handlePageChange = useCallback((nextPage: number) => {
+    setPage(nextPage);
+    // updateQuery({ page: nextPage });
+  }, []);
 
-  const handleSearch = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearch(value);
-      setPage(1);
+  // const handleSearch = useCallback(
+  //   (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     const value = e.target.value;
+  //     setSearch(value);
+  //     setPage(1);
 
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-      debounceTimeout.current = setTimeout(() => {
-        updateQuery({ search: value || undefined, page: 1 });
-      }, 300);
-    },
-    [updateQuery]
-  );
+  //     if (debounceTimeout.current) {
+  //       clearTimeout(debounceTimeout.current);
+  //     }
+  //     debounceTimeout.current = setTimeout(() => {
+  //       // updateQuery({ search: value || undefined, page: 1 });
+  //     }, 300);
+  //   },
+  //   [updateQuery]
+  // );
 
   useEffect(() => {
     return () => {
@@ -341,7 +350,7 @@ export function CoursesTable({ instructorId, searchParams }: CoursesTableProps) 
     >
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between w-full">
+          {/* <div className="flex items-center justify-center w-full">
             <CardTitle>Courses</CardTitle>
             <div className="relative max-w-sm w-full">
               <Search
@@ -357,7 +366,7 @@ export function CoursesTable({ instructorId, searchParams }: CoursesTableProps) 
                 autoComplete="off"
               />
             </div>
-          </div>
+          </div> */}
         </CardHeader>
         <CardContent>
           <div className="rounded-md border overflow-x-auto">

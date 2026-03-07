@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Plus, Download } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +54,7 @@ export function CoursesHeader({ instructor }: CoursesHeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
             Export Report
@@ -63,7 +63,7 @@ export function CoursesHeader({ instructor }: CoursesHeaderProps) {
             <Plus className="mr-2 h-4 w-4" />
             New Course
           </Button>
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );

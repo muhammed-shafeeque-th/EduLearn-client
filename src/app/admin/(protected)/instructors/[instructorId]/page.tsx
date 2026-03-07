@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ProfileSkeleton } from '../_/components/skeletons/profile-skeleton';
 import { getInstructor } from '../_/libs/apis';
 import { InstructorProfile } from './_/components/instructor-profile';
-import { InstructorCourses } from '@/app/admin/(protected)/instructors/[instructorId]/_/components/instructor-courses';
+import { InstructorCourses } from './_/components/instructor-courses';
 import { InstructorStats } from './_/components/instructor-stats';
 
 interface InstructorPageProps {
