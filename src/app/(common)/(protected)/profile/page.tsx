@@ -19,15 +19,19 @@ const ProfileForm = dynamic(
 export default function ProfilePage() {
   return (
     <div className="p-4 lg:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* Desktop Header */}
-        <header className="hidden lg:block mb-8">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Edit Profile</h1>
-          <p className="text-muted-foreground">Update your profile information and preferences</p>
+        <header className="hidden lg:block">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            Account Settings
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            Manage your public profile and account preferences.
+          </p>
         </header>
 
         {/* Form Container */}
-        <section className="bg-card rounded-lg shadow-sm border">
+        <section className="pb-20">
           <Suspense fallback={<ProfileFormSkeleton />}>
             <ProfileForm />
           </Suspense>
