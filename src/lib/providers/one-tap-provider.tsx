@@ -5,6 +5,7 @@ import GoogleOneTapSignIn, {
   GoogleOneTapSignInProps,
 } from '@/components/one-tap/google-one-tap-signin';
 import { useAuthSelector } from '@/states/client';
+import { usePathname } from 'next/navigation';
 
 export interface OneTapProviderProps {
   position?: GoogleOneTapSignInProps['position'];
@@ -22,11 +23,12 @@ export default function OneTapProvider({
   cancelOnTapOutside = true,
 }: OneTapProviderProps) {
   useAuthSync();
+  const pathname = usePathname();
 
-  // Only render the One Tap component if the user is not authenticated
+  // Only render the One Tap component if the user is not authenticated and not in admin route
   const { status } = useAuthSelector();
 
-  if (status !== 'unauthenticated') {
+  if (status !== 'unauthenticated' || pathname.startsWith('/admin')) {
     return null;
   }
 
