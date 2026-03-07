@@ -72,7 +72,6 @@ export const OrdersContent = memo(function OrdersContent() {
     );
   }
 
-  // Page UI (mobile-first with mobile-friendly paddings)
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
@@ -98,7 +97,6 @@ export const OrdersContent = memo(function OrdersContent() {
       </div>
 
       {/* Main Content */}
-      {/* Show empty state below filters if no orders */}
       {!isOrderDataReady || !orders.length ? (
         <EmptyState status={status} />
       ) : (
