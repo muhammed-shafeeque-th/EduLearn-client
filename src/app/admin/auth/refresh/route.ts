@@ -2,13 +2,12 @@ import { verifyAccessToken } from '@/lib/auth/token-utils';
 import { serverAdminRefresh } from '@/lib/server-apis';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const next = req.nextUrl.searchParams.get('next') || '/admin';
 
   try {
-    /**
-     * Call admin refresh API
-     */
     const response = await serverAdminRefresh();
 
     const accessToken = response?.token;
@@ -16,21 +15,23 @@ export async function GET(req: NextRequest) {
       throw new Error('No admin access token');
     }
 
-    /**
-     * Verify token
-     */
     verifyAccessToken(accessToken);
 
-    /**
-     * Redirect back
-     */
-    return NextResponse.redirect(new URL(next, req.url));
+    const res = NextResponse.redirect(new URL(next, req.url));
+
+    //  Forward all cookies to browser
+    for (const cookie of response.setCookie ?? []) {
+      res.headers.append('set-cookie', cookie);
+    }
+
+    //  disable caching
+    res.headers.set('Cache-Control', 'no-store');
+
+    return res;
   } catch {
-    /**
-     * Refresh failed → admin login
-     */
     const loginUrl = new URL('/admin/auth/login', req.url);
     loginUrl.searchParams.set('next', next);
+    loginUrl.searchParams.set('session_expired', 'true');
 
     return NextResponse.redirect(loginUrl);
   }

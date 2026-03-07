@@ -2,31 +2,37 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AdminLoginSchemaType } from '../schemas';
-import { useAppDispatch, useAuthIsAuthenticated } from '@/states/client';
+import { useAdminSelector, useAppDispatch } from '@/states/client';
 import { toast } from '@/hooks/use-toast';
 import { useCallback, useEffect } from 'react';
-import { adminLogin } from '@/states/client/slices/admin-slice';
+import { adminLogin, adminLogout } from '@/states/client/slices/admin-slice';
 import { getErrorMessage } from '@/lib/utils';
 
 export const useAdminLogin = () => {
-  const isAuthenticated = useAuthIsAuthenticated();
+  const { isAuthenticated } = useAdminSelector();
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
   const redirectOnAuthenticated = useCallback(() => {
     const next = searchParams.get('next');
-
     const redirectPath = next && next.startsWith('/admin') ? next : '/admin';
     router.replace(redirectPath);
     router.refresh();
   }, [router, searchParams]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const sessionExpired = searchParams.get('session_expired');
+    if (sessionExpired) {
+      dispatch(adminLogout());
+      // Remove the query param to allow login attempt
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('session_expired');
+      window.history.replaceState({}, '', newUrl.toString());
+    } else if (isAuthenticated) {
       redirectOnAuthenticated();
     }
-  }, [isAuthenticated, redirectOnAuthenticated]);
+  }, [isAuthenticated, redirectOnAuthenticated, searchParams, dispatch]);
 
   const handleSubmit = async (credentials: AdminLoginSchemaType) => {
     try {
