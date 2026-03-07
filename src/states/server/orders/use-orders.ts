@@ -34,7 +34,6 @@ export function useOrder(orderId: string, options?: { enabled?: boolean }) {
     select: (data) => (data.success ? data.data : null),
   });
 
-  // Example mutation: restore order (customize as needed)
   const {
     mutateAsync: restoreOrder,
     isPending: isRestoring,
@@ -44,7 +43,6 @@ export function useOrder(orderId: string, options?: { enabled?: boolean }) {
   } = useMutation({
     mutationFn: () => orderService.restoreOrder(orderId),
     onSuccess: async () => {
-      // Invalidate relevant order queries
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: QUERY_KEYS.orders.list(authUser?.userId || 'current', {}),
@@ -57,8 +55,6 @@ export function useOrder(orderId: string, options?: { enabled?: boolean }) {
       errorMessage: 'Failed to restore order',
     },
   });
-
-  // More mutations (e.g. cancelOrder, updateOrder, etc.) can be implemented similarly
 
   return {
     order,
