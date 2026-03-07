@@ -103,11 +103,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
               <div className="flex items-center space-x-3">
                 <item.icon className="w-5 h-5" aria-hidden />
                 <span>{item.title}</span>
-                {item.badge && (
+                {/* {item.badge && (
                   <Badge variant="outline" className="ml-auto">
                     {item.badge}
                   </Badge>
-                )}
+                )} */}
               </div>
               {isExpanded ? (
                 <ChevronDown className="w-4 h-4" aria-hidden />
