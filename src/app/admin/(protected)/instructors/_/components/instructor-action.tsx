@@ -37,6 +37,7 @@ export function InstructorActions({ instructor }: InstructorActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
   const queryClient = useQueryClient();
 
   const handleAction = (action: string) => {
@@ -48,6 +49,7 @@ export function InstructorActions({ instructor }: InstructorActionsProps) {
       const result = await handleInstructorAction(null, formData);
 
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.instructors() });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.usersStats() });
 
       if (result.success) {
         toast.success(result.message);
@@ -80,8 +82,9 @@ export function InstructorActions({ instructor }: InstructorActionsProps) {
             </DropdownMenuItem>
           )}
 
+          {/* Block/Unblock */}
           <DropdownMenuItem
-            onClick={() => handleAction(instructor.status === 'blocked' ? 'unblock' : 'block')}
+            onClick={() => setShowBlockDialog(true)}
             className={instructor.status === 'blocked' ? 'text-green-600' : 'text-orange-600'}
           >
             {instructor.status === 'blocked' ? (
@@ -104,11 +107,43 @@ export function InstructorActions({ instructor }: InstructorActionsProps) {
             }}
             className="text-red-600"
           >
-           className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {instructor.status === 'blocked' ? 'Unblock Instructor' : 'Block Instructor'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to {instructor.status === 'blocked' ? 'unblock' : 'block'}{' '}
+              <span className="font-semibold">{instructor.username}</span>?
+              {instructor.status !== 'blocked' &&
+                ' This will restrict their access to the platform.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                handleAction(instructor.status === 'blocked' ? 'unblock' : 'block');
+                setShowBlockDialog(false);
+              }}
+              className={
+                instructor.status === 'blocked'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-orange-600 hover:bg-orange-700'
+              }
+            >
+              {instructor.status === 'blocked' ? 'Unblock' : 'Block'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
