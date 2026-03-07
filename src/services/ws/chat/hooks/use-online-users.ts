@@ -2,9 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { userService } from '@/services/user.service';
 import { getSocketService, SocketService } from '../socket.service';
 
-/**
- * Hook to subscribe to online users list (server + live events)
- */
 export function useOnlineUsers() {
   // store the socket service instance (stable ref, no re-instantiation)
   const socketRef = useRef<SocketService | null>(null);
@@ -64,6 +61,5 @@ export function useOnlineUsers() {
     // We intentionally don't want to re-run if socket changes
   }, []);
 
-  // Return a readonly set
   return new Set(onlineUsers) as ReadonlySet<string>;
 }
