@@ -120,7 +120,7 @@ export function useInstructorCoursesInfinite(
     meta: {
       errorMessage: 'Failed to load instructor courses',
     },
-    select: (data) => data, // Keep flexible for transforms if needed
+    select: (data) => data,
   });
 }
 export function useInstructorCourses(instructorId: string, params: Partial<PaginationParams> = {}) {

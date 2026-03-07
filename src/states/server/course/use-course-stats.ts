@@ -4,7 +4,6 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { courseService } from '@/services/course.service';
 import { CourseAnalytics, CoursesStats } from '@/services/course.service';
-import { ApiResponse } from '@/types/api-response';
 
 /**
  * Hook to fetch analytics for a specific course.
@@ -15,17 +14,17 @@ import { ApiResponse } from '@/types/api-response';
  */
 export function useCourseAnalytics(
   courseId: string,
-  options?: Partial<UseQueryOptions<ApiResponse<CourseAnalytics>, Error, CourseAnalytics>>
+  options?: Partial<UseQueryOptions<CourseAnalytics, Error, CourseAnalytics>>
 ) {
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery<
-    ApiResponse<CourseAnalytics>,
+    CourseAnalytics,
     Error,
     CourseAnalytics
   >({
     queryKey: QUERY_KEYS.courses.analytics(courseId),
     queryFn: async ({ signal }) => {
       const response = await courseService.getCourseAnalytics(courseId, { signal });
-      if (!response.success) {
+      if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to fetch course analytics');
       }
       return response.data;
@@ -36,11 +35,10 @@ export function useCourseAnalytics(
       errorMessage: 'Failed to load course analytics',
     },
     ...options,
-    select: options?.select ?? ((data) => (data?.success ? data.data : null)),
   });
 
   return {
-    data,
+    data: data ?? null,
     isLoading,
     isError,
     error,
@@ -57,17 +55,17 @@ export function useCourseAnalytics(
  * @param options - Optional react-query options.
  */
 export function useCoursesStats(
-  options?: Partial<UseQueryOptions<ApiResponse<CoursesStats>, Error, CoursesStats>>
+  options?: Partial<UseQueryOptions<CoursesStats, Error, CoursesStats>>
 ) {
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery<
-    ApiResponse<CoursesStats>,
+    CoursesStats,
     Error,
     CoursesStats
   >({
     queryKey: QUERY_KEYS.courses.coursesStats(),
     queryFn: async () => {
       const response = await courseService.getCoursesStats();
-      if (!response.success) {
+      if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to fetch courses stats');
       }
       return response.data;
@@ -78,11 +76,10 @@ export function useCoursesStats(
       errorMessage: 'Failed to load courses stats',
     },
     ...options,
-    select: options?.select ?? ((data) => (data?.success ? data.data : null)),
   });
 
   return {
-    data,
+    data: data ?? null,
     isLoading,
     isError,
     error,
