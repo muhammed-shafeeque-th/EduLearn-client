@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import type { RequireAuthOptions, AuthUser } from './types';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { getUser as getAuthUser } from '../auth-user';
+import { isDynamicServerError } from 'next/dist/client/components/hooks-server-context';
 
 const DEFAULT_LOGIN_REDIRECT = '/auth/login';
 const DEFAULT_HOME_REDIRECT = '/';
@@ -89,6 +90,11 @@ export async function requireAuth<P = Record<string, string>, R = unknown>(
     if (isRedirectError(error)) {
       throw error;
     }
+
+    if (isDynamicServerError(error)) {
+      throw error;
+    }
+
     // Log the error for observability and security
     console.error('Error during requireAuth:', error);
 
@@ -103,11 +109,9 @@ export async function requireAuth<P = Record<string, string>, R = unknown>(
       redirect(DEFAULT_HOME_REDIRECT);
     }
 
-    // If redirectOnException is false or not set, you could rethrow or return null (here we fallback to generic redirect)
     // redirect(DEFAULT_FORBIDDEN_REDIRECT);
     return null;
   }
 
-  // Fail-safe return; will not be reached due to redirects above
   return null;
 }
