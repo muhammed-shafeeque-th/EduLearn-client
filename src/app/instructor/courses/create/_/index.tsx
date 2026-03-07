@@ -62,6 +62,9 @@ export const CourseCreator = () => {
     removeAudience,
     removeRequirement,
     appendRequirement,
+    topicFields,
+    appendTopic,
+    removeTopic,
 
     saveFormData,
     clearSavedData,
@@ -207,7 +210,12 @@ export const CourseCreator = () => {
             <AnimatePresence mode="wait">
               {activeTab === 'basic' && (
                 <motion.div key="basic" {...ANIMATION_VARIANTS.slideIn}>
-                  <BasicInformationTab form={basicForm as UseFormReturn<BasicInfoFormData>} />
+                  <BasicInformationTab
+                    form={basicForm as UseFormReturn<BasicInfoFormData>}
+                    topicFields={topicFields}
+                    appendTopic={appendTopic}
+                    removeTopic={removeTopic}
+                  />
                 </motion.div>
               )}
 

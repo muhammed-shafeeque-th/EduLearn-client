@@ -7,7 +7,7 @@ import { z } from 'zod';
 // . , : ; - & ( ) ! ? @ # $ % * + _ = [ ] / \ ' " { } | < > ~ ` ^ ° ¡ ¿ “ ” ‘ ’ — … °
 const noSpecialCharsRegex = /^[\p{L}\p{N}\s.,:;,\-–—&()!?@#$%*+_=\[\]\/\\'"{}|<>~`^°¡¿“”‘’…•]+$/iu;
 
-// Helper: Count alphanumeric characters in string
+// Count alphanumeric characters in string
 const countAlphanumeric = (val: string) => (val.match(/[a-zA-Z0-9]/g) || []).length;
 
 // Utility for safe title fields; reject suspicious characters and ensure minimum alphanumeric chars
@@ -74,13 +74,16 @@ export const basicInfoSchema = z
     subCategory: nonEmptyString,
     topics: z
       .array(
-        nonEmptyString
-          .refine((val) => val.length <= 50, {
-            message: 'Topic too long',
-          })
-          .refine((val) => countAlphanumeric(val) >= 1, {
-            message: 'Topic must contain at least 1 alphanumeric character',
-          }),
+        z.object({
+          id: z.string(),
+          text: nonEmptyString
+            .refine((val) => val.length <= 50, {
+              message: 'Topic too long',
+            })
+            .refine((val) => countAlphanumeric(val) >= 1, {
+              message: 'Topic must contain at least 1 alphanumeric character',
+            }),
+        }),
         { required_error: 'Topics are required' }
       )
       .min(1, 'At least one topic required')
@@ -111,9 +114,9 @@ export const advancedInfoSchema = z.object({
     .trim()
     .min(50, 'Description must be at least 50 characters')
     .max(5000, 'Description cannot exceed 5000 characters')
-    .refine((val) => !/[<>[\]{};/\\|`~^]/.test(val), {
-      message: 'Description contains invalid or unsafe characters',
-    })
+    // .refine((val) => !/[<>[\]{};/\\|`~^]/.test(val), {
+    //   message: 'Description contains invalid or unsafe characters',
+    // })
     .refine((val) => countAlphanumeric(val) >= 10, {
       message: 'Description must contain at least 10 alphanumeric characters',
     }),

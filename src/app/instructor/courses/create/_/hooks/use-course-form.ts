@@ -10,10 +10,10 @@ const DEFAULT_BASIC_VALUES = {
   subTitle: '',
   category: '',
   subCategory: '',
-  topics: [''],
+  topics: [{ id: '1', text: '' }],
   language: '',
   subtitleLanguage: '',
-  level: 'beginner',
+  level: 'beginner' as const,
   duration: { value: '', unit: 'days' as const },
   price: 0,
   discountPrice: undefined,
@@ -81,6 +81,15 @@ export const useCourseForm = () => {
     criteriaMode: 'all',
   });
 
+  const {
+    fields: topicFields,
+    append: appendTopic,
+    remove: removeTopic,
+  } = useFieldArray({
+    control: basicForm.control,
+    name: 'topics',
+  });
+
   const { saveFormData, clearSavedData, loadFormData } = useFormPersistence(
     basicForm,
     advancedForm,
@@ -119,6 +128,9 @@ export const useCourseForm = () => {
       basicForm,
       advancedForm,
       curriculumForm,
+      topicFields,
+      appendTopic,
+      removeTopic,
       learningFields,
       audienceFields,
       requirementFields,
@@ -139,6 +151,9 @@ export const useCourseForm = () => {
       basicForm,
       advancedForm,
       curriculumForm,
+      topicFields,
+      appendTopic,
+      removeTopic,
       learningFields,
       audienceFields,
       requirementFields,
