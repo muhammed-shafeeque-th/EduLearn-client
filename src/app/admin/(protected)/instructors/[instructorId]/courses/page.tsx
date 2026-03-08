@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 import { getInstructor } from '../../_/libs/apis';
 import { CoursesHeader } from './_/components/courses-header';
 import { CoursesStats } from './_/components/courses-stats';
-import { TableSkeleton } from '../../../_components/__table/table-skeleton';
 import { CoursesTable } from './_/components/courses-table';
 import { StatsCardsSkeleton } from '../../_/components/skeletons/course-card-skeleton';
+import { TableSkeleton } from '../../_/components/skeletons/table-skeleton';
 
 interface InstructorCoursesPageProps {
   params: { instructorId: string };
