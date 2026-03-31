@@ -1,90 +1,12 @@
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
+import { BaseService, BaseServiceOptions, RequestOptions } from '../base-service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
 import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
 import { Chat, Message } from '@/types/chat';
+import { IChatService } from './chat.service.interface';
+import { getMessagePaginationParams, MessagesParams } from './chat.types';
 
-export interface MessageFilters {
-  userId?: string;
-  status?: string;
-}
-
-export interface PaginationParams {
-  page?: number;
-  pageSize?: number;
-  sortMessage?: 'asc' | 'desc';
-}
-
-function getMessagePaginationParams(params?: PaginationParams): URLSearchParams {
-  const searchParams = new URLSearchParams();
-
-  // Note: PaginationParams contains only page, pageSize, sortMessage
-  if (params?.sortMessage) {
-    searchParams.set('sortOrder', params.sortMessage);
-  }
-  searchParams.set('page', params?.page?.toString() || '1');
-  searchParams.set('pageSize', params?.pageSize?.toString() || '10');
-  return searchParams;
-}
-
-export type MessagesParams = MessageFilters & PaginationParams;
-
-export interface IMessageService {
-  markAsRead(chatId: string, options?: RequestOptions): Promise<ApiResponse<Message>>;
-  getMessages(
-    chatId: string,
-    params?: MessagesParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Message[]>>;
-  getStudentChats(params?: MessagesParams, options?: RequestOptions): Promise<ApiResponse<Chat[]>>;
-  getInstructorChats(
-    params?: MessagesParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Chat[]>>;
-  sendMessage(
-    chatId: string,
-    content: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Message>>;
-  editMessage(
-    chatId: string,
-    messageId: string,
-    content: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Message>>;
-  deleteMessage(
-    chatId: string,
-    messageId: string,
-    deleteForEveryone?: boolean,
-    options?: RequestOptions
-  ): Promise<ApiResponse<void>>;
-  reactMessage(
-    chatId: string,
-    messageId: string,
-    emoji?: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Message>>;
-  removeReaction(
-    chatId: string,
-    messageId: string,
-    reactionId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Message>>;
-  createOrGetChat(
-    params: { studentId: string; instructorId: string; role: string },
-    options?: RequestOptions
-  ): Promise<ApiResponse<Chat>>;
-  pinChat(chatId: string, options?: RequestOptions): Promise<ApiResponse<Chat>>;
-  unpinChat(chatId: string, options?: RequestOptions): Promise<ApiResponse<Chat>>;
-  muteChat(chatId: string, duration?: number, options?: RequestOptions): Promise<ApiResponse<Chat>>;
-  unmuteChat(chatId: string, options?: RequestOptions): Promise<ApiResponse<Chat>>;
-  archiveChat(chatId: string, options?: RequestOptions): Promise<ApiResponse<Chat>>;
-  unarchiveChat(chatId: string, options?: RequestOptions): Promise<ApiResponse<Chat>>;
-  deleteChat(chatId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
-  getUnreadCount(options?: RequestOptions): Promise<ApiResponse<number>>;
-}
-
-export class MessageService extends BaseService implements IMessageService {
+export class ChatService extends BaseService implements IChatService {
   constructor({
     getToken = getClientAuthToken,
     authRefresh = authRefreshToken,
@@ -117,7 +39,7 @@ export class MessageService extends BaseService implements IMessageService {
     queryParams.append('role', 'instructor');
 
     const queryString = queryParams.toString();
-    return this.get<ApiResponse<Chat[]>>(`?${queryString}`, options);
+    return this.get<ApiResponse<Chat[]>>(`/instructor?${queryString}`, options);
   }
   public async getMessages(
     chatId: string,
@@ -259,9 +181,9 @@ export class MessageService extends BaseService implements IMessageService {
 
   // Static factory for SSR usage (pass a token getter or headers)
   static create(options: BaseServiceOptions) {
-    return new MessageService(options);
+    return new ChatService(options);
   }
 }
 
 // Singleton for client-side usage
-export const messageService: IMessageService = new MessageService();
+export const chatService: IChatService = new ChatService();
