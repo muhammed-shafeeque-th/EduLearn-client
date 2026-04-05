@@ -305,50 +305,55 @@ export function ChatList({
       </div>
 
       {/* Chat List */}
-      <ScrollArea className="flex-1">
-        {isLoading ? (
-          <div className="p-4 space-y-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <ChatItemSkeleton key={i} />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="p-8 text-center space-y-4">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
-              <MessageSquarePlus className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+      <ScrollArea className="flex-1 h-full w-full custom-scrollbar">
+        <div className="h-full flex flex-col min-h-0">
+          {isLoading ? (
+            <div className="p-4 space-y-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <ChatItemSkeleton key={i} />
+              ))}
             </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">
-                {search ? 'No chats found' : 'No conversations yet'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {search ? 'Try a different search term' : 'Start a new conversation to get started'}
-              </p>
+          ) : filtered.length === 0 ? (
+            <div className="p-8 text-center space-y-4">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
+                <MessageSquarePlus className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">
+                  {search ? 'No chats found' : 'No conversations yet'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {search
+                    ? 'Try a different search term'
+                    : 'Start a new conversation to get started'}
+                </p>
+              </div>
+              {search && (
+                <Button variant="outline" onClick={handleClearSearch} className="mt-4">
+                  Clear search
+                </Button>
+              )}
             </div>
-            {search && (
-              <Button variant="outline" onClick={handleClearSearch} className="mt-4">
-                Clear search
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="divide-y divide-border/50">
-            {filtered.map((chat) => (
-              <ChatItem
-                key={chat.id}
-                chat={chat}
-                isSelected={selectedChat?.id === chat.id}
-                onSelect={() => onSelectChat(chat)}
-                currentUser={currentUser}
-                onlineUsers={onlineUsers}
-                onPin={() => onPin(chat.id)}
-                onMute={() => onMute(chat.id)}
-                onArchive={() => onArchive(chat.id)}
-                onDelete={() => onDelete(chat.id)}
-              />
-            ))}
-          </div>
-        )}
+          ) : (
+            <div className="divide-y divide-border/50 flex-1 w-full">
+              {filtered.map((chat, index) => (
+                <ChatItem
+                  key={chat.id}
+                  chat={chat}
+                  isSelected={selectedChat?.id === chat.id}
+                  onSelect={() => onSelectChat(chat)}
+                  currentUser={currentUser}
+                  onlineUsers={onlineUsers}
+                  onPin={() => onPin(chat.id)}
+                  onMute={() => onMute(chat.id)}
+                  onArchive={() => onArchive(chat.id)}
+                  onDelete={() => onDelete(chat.id)}
+                  animationDelay={index * 50}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </ScrollArea>
     </div>
   );
@@ -364,6 +369,7 @@ const ChatItem = memo(function ChatItem({
   onMute,
   onArchive,
   onDelete: _onDelete,
+  animationDelay = 0,
 }: {
   chat: Chat;
   isSelected: boolean;
@@ -374,6 +380,7 @@ const ChatItem = memo(function ChatItem({
   onMute: () => void;
   onArchive: () => void;
   onDelete: () => void;
+  animationDelay?: number;
 }) {
   const { otherUser, otherUserId } = getOtherUser(chat, currentUser.id);
   const isOnline = otherUserId ? onlineUsers.has(otherUserId) : false;
@@ -393,12 +400,19 @@ const ChatItem = memo(function ChatItem({
     <button
       type="button"
       onClick={onSelect}
+      style={{
+        animation: `slideInLeft 0.3s ease-out ${animationDelay}ms both`,
+      }}
       className={cn(
-        'w-full p-4 hover:bg-accent/50 transition-all duration-200 relative group',
+        'w-full p-4 hover:bg-accent/50 transition-colors duration-200 relative group',
+        'hover:transition-[background-color] hover:duration-200',
+        'active:scale-95 active:transition-transform active:duration-100',
         isSelected &&
-          'bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 border-l-4 border-l-blue-600',
-        !isSelected && hasUnread && 'bg-blue-50/30 dark:bg-blue-950/10',
-        isMuted && 'opacity-60'
+          'bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 border-l-4 border-l-blue-600 transition-all duration-300',
+        !isSelected &&
+          hasUnread &&
+          'bg-blue-50/30 dark:bg-blue-950/10 transition-colors duration-200',
+        isMuted && 'opacity-60 transition-opacity duration-200'
       )}
     >
       <div className="flex items-start gap-3">
@@ -500,7 +514,7 @@ const ChatItem = memo(function ChatItem({
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuContent side="left" className="w-52">
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();

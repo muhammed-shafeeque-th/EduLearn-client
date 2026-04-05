@@ -40,9 +40,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
-/**
- * A custom ScrollArea replacement for precise message scroll control and containment.
- */
 function ChatScrollArea(props: {
   children: React.ReactNode;
   messagesContainerRef: MutableRefObject<HTMLDivElement | null>;
