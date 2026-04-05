@@ -4,7 +4,7 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
-import { getDiscussionService } from '@/services/discussion.service';
+import { getDiscussionService } from '@/services/discussion';
 import { getSocketService } from '@/services/ws/chat/socket.service';
 import type { DiscussionRoom, DiscussionMessage, UiDiscussionMessage } from '@/types/discussion';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';

@@ -28,7 +28,7 @@ import {
   useRemoveMessageReaction,
 } from '@/states/server/messaging/use-messaging';
 import { useSendMessage, useChatMutations } from '@/states/server/messaging/use-chat-mutations';
-import { messageService } from '@/services/messaging.service';
+import { messageService } from '@/services/_/messaging.service';
 import { debounce } from '@/lib/utils';
 import { useOnlineUsers } from './use-online-users';
 
