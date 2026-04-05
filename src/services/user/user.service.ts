@@ -1,4 +1,4 @@
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
+import { BaseService, BaseServiceOptions, RequestOptions } from '../base-service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
 import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
@@ -12,149 +12,22 @@ import {
   UserMeta,
   UserProfileUpdatePayload,
 } from '@/types/user';
-import { CourseAnalytics } from './course.service';
+import { CourseAnalytics } from '../course';
+import { IUserDomainService, IUserService } from './interfaces/user.service.interface';
+import {
+  buildQueryParams,
+  InstructorCoursesStats,
+  InstructorStats,
+  InstructorsStats,
+  UsersParams,
+  UsersStats,
+} from './types/user.types';
+import { getPaginationParams, WalletParams } from './types/wallet.types';
+import { UserWallet, WalletTransaction } from '@/types/wallet';
+import { Wishlist, WishlistItem } from '@/types/wishlist';
+import { Cart, CartItem } from '@/types/cart';
 
-// Types & Helper for user/instructor stats and filtering
-export interface PaginationParams {
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  pageSize?: number;
-}
-
-export interface UsersStats {
-  total: number;
-  active: number;
-  inactive: number;
-  blocked: number;
-}
-
-export interface InstructorsStats {
-  total: number;
-  active: number;
-  inactive: number;
-  pending: number;
-  newThisMonth: number;
-  totalCourses: number;
-  newCourses: number;
-  averageRating: number;
-  ratingChange: number;
-}
-
-export interface InstructorCoursesStats {
-  published: number;
-  averageRating: number;
-  totalHoursTaught: number;
-  totalReviews: number;
-  draft: number;
-  totalEnrollments: number;
-  enrollmentGrowth: number;
-  activeStudents: number;
-  monthlyRevenue: number;
-  revenueGrowth: string;
-  avgCompletionRate: number;
-}
-// export interface InstructorCoursesStats {
-//   totalCourses: number;
-//   totalStudents: number;
-//   averageRating: number;
-//   totalRevenue: number;
-// }
-
-export interface InstructorStats {
-  totalStudents: number;
-  totalRevenue: number;
-  activeCourses: number;
-  rating: number;
-  totalHours: number;
-  completionRate: number;
-  monthlyRevenue: number;
-  revenueGrowth: number;
-  monthlyEnrollments: number;
-  totalReviews: number;
-  averageRating: number;
-}
-
-export interface UsersFilters {
-  name?: string;
-  email?: string;
-  role?: string;
-  search?: string;
-  status?: string;
-}
-
-export type UsersParams = UsersFilters & PaginationParams;
-
-function buildQueryParams(params: UsersParams = {}): URLSearchParams {
-  const searchParams = new URLSearchParams();
-  if (params.sortBy) searchParams.set('sortBy', params.sortBy);
-  if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder);
-  if (params.page !== undefined) searchParams.set('page', params.page.toString());
-  if (params.pageSize !== undefined) searchParams.set('pageSize', params.pageSize.toString());
-  if (params.name) searchParams.set('name', params.name);
-  if (params.email) searchParams.set('email', params.email);
-  if (params.role) searchParams.set('role', params.role);
-  if (params.search) searchParams.set('search', params.search);
-  if (params.status) searchParams.set('status', params.status);
-  return searchParams;
-}
-
-export interface IUserService {
-  getCurrentUser(options?: RequestOptions): Promise<ApiResponse<User>>;
-  updateUserProfile(
-    data: Partial<UserProfileUpdatePayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<User>>;
-  registerInstructor(
-    credential: RegisterInstructorPayload,
-    options?: RequestOptions
-  ): Promise<ApiResponse<User>>;
-  getUsers(params?: UsersParams, options?: RequestOptions): Promise<ApiResponse<UserMeta[]>>;
-  getStudentsOfInstructor(
-    params?: UsersParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<UserInfo[]>>;
-  getInstructorsOfStudent(
-    params?: UsersParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<UserInfo[]>>;
-  getInstructors(
-    params?: UsersParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<InstructorMeta[]>>;
-  getInstructorStats(
-    instructorId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<InstructorStats>>;
-  getInstructorCoursesStats(
-    instructorId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<InstructorCoursesStats>>;
-  getInstructorCourseStats(
-    instructorId: string,
-    courseId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseAnalytics>>;
-
-  getCourseAnalytics(
-    instructorId: string,
-    courseId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseAnalytics>>;
-
-  getInstructorsStats(options?: RequestOptions): Promise<ApiResponse<InstructorsStats>>;
-  getUsersStats(options?: RequestOptions): Promise<ApiResponse<UsersStats>>;
-
-  getUser(userId: string, options?: RequestOptions): Promise<ApiResponse<User>>;
-  checkUsername(
-    params: CheckUsernameRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CheckUsernameResponse>>;
-
-  getOnlineUsers(options?: RequestOptions): Promise<ApiResponse<string[]>>;
-}
-
-export class UserService extends BaseService implements IUserService {
+export class UserService extends BaseService implements IUserDomainService {
   constructor({
     getToken = getClientAuthToken,
     authRefresh = authRefreshToken,
@@ -245,7 +118,7 @@ export class UserService extends BaseService implements IUserService {
     );
   }
 
-  async getInstructorCoursesStats(
+  public async getInstructorCoursesStats(
     instructorId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<InstructorCoursesStats>> {
@@ -254,7 +127,8 @@ export class UserService extends BaseService implements IUserService {
       options
     );
   }
-  async getInstructorCourseStats(
+
+  public async getInstructorCourseStats(
     instructorId: string,
     courseId: string,
     options?: RequestOptions
@@ -265,7 +139,7 @@ export class UserService extends BaseService implements IUserService {
     );
   }
 
-  async getCourseAnalytics(
+  public async getCourseAnalytics(
     instructorId: string,
     courseId: string,
     options?: RequestOptions
@@ -288,6 +162,7 @@ export class UserService extends BaseService implements IUserService {
   ): Promise<ApiResponse<InstructorsStats>> {
     return this.get<ApiResponse<InstructorsStats>>(`/instructors/stats`, options);
   }
+
   public async getUsersStats(options?: RequestOptions): Promise<ApiResponse<UsersStats>> {
     return this.get<ApiResponse<UsersStats>>(`/stats`, options);
   }
@@ -299,6 +174,98 @@ export class UserService extends BaseService implements IUserService {
   static create(serviceOptions: BaseServiceOptions): IUserService {
     return new UserService(serviceOptions);
   }
+
+  // ==================================================================================================
+  //                      CART
+  // ==================================================================================================
+
+  public async getCurrentUserCart(options?: RequestOptions): Promise<ApiResponse<Cart>> {
+    return this.get<ApiResponse<Cart>>(`/me/carts`, options);
+  }
+  public async clearCart(options?: RequestOptions): Promise<ApiResponse<void>> {
+    return this.delete<ApiResponse<void>>(`/me/carts`, options);
+  }
+  public async getUserCart(userId: string, options?: RequestOptions): Promise<ApiResponse<Cart>> {
+    return this.get<ApiResponse<Cart>>(`/${userId}/carts`, options);
+  }
+
+  public async addToCart(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CartItem>> {
+    return this.post<ApiResponse<CartItem>>('/me/carts', { courseId }, options);
+  }
+  public async toggleCartItem(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CartItem>> {
+    return this.post<ApiResponse<CartItem>>('/me/carts', { courseId }, options);
+  }
+  public async removeFromCart(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<void>> {
+    return this.delete<ApiResponse<void>>(`/carts?courseId=${courseId}`, options);
+  }
+
+  // ==================================================================================================
+  //                      WISHLIST
+  // ==================================================================================================
+
+  public async getCurrentUserWishlist(options?: RequestOptions): Promise<ApiResponse<Wishlist>> {
+    return this.get<ApiResponse<Wishlist>>(`/me/wishlists`, options);
+  }
+  public async getUserWishlist(
+    userId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<Wishlist>> {
+    return this.get<ApiResponse<Wishlist>>(`/${userId}/wishlists`, options);
+  }
+
+  public async addToWishlist(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<WishlistItem>> {
+    return this.post<ApiResponse<WishlistItem>>('/me/wishlists', { courseId }, options);
+  }
+  public async toggleWishlistItem(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<WishlistItem>> {
+    return this.post<ApiResponse<WishlistItem>>('/me/wishlists', { courseId }, options);
+  }
+  public async removeFromWishlist(
+    courseId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<void>> {
+    return this.delete<ApiResponse<void>>(`/me/wishlists?courseId=${courseId}`, options);
+  }
+
+  // ==================================================================================================
+  //                            WALLETS
+  // ==================================================================================================
+
+  public async getCurrentUserWallet(options?: RequestOptions): Promise<ApiResponse<UserWallet>> {
+    return this.get<ApiResponse<UserWallet>>(`/me/wallets`, options);
+  }
+
+  public async getUserWallet(
+    userId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<UserWallet>> {
+    return this.get<ApiResponse<UserWallet>>(`/${userId}/wallets`, options);
+  }
+
+  public async getWalletTransactions(
+    params?: WalletParams,
+    options?: RequestOptions
+  ): Promise<ApiResponse<WalletTransaction[]>> {
+    const searchParams = getPaginationParams(params);
+    const queryString = searchParams.toString();
+    const url = `/me/wallets/transactions${queryString ? `?${queryString}` : ''}`;
+
+    return this.get<ApiResponse<WalletTransaction[]>>(url, options);
+  }
 }
 
-export const userService: IUserService = new UserService();
+export const userService: IUserDomainService = new UserService();
