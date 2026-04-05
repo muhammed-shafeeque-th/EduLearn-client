@@ -1,13 +1,8 @@
+import { BaseService, BaseServiceOptions, RequestOptions } from '../base-service';
 import { config } from '@/lib/config';
-import { store } from '@/states/client';
-import { refreshToken } from '@/states/client/slices/auth-slice';
-
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
-
 import { ApiResponse } from '@/types/api-response';
-
+import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
 import { LoginCredentials } from '@/types/auth';
-
 import { Auth2SignData, AuthResponse, OAuthResponse, RegisterData } from '@/types/auth';
 
 import {
@@ -18,63 +13,12 @@ import {
   ResendOTPRequest,
   VerifyOTPRequest,
 } from '@/types/auth';
-
-export interface IAuthService {
-  login(
-    credentials: LoginCredentials,
-    options?: RequestOptions
-  ): Promise<ApiResponse<AuthResponse>>;
-  register(
-    userdata: RegisterData,
-    options?: RequestOptions
-  ): Promise<ApiResponse<{ userId: string }>>;
-  oauthSign(userdata: Auth2SignData, options?: RequestOptions): Promise<ApiResponse<OAuthResponse>>;
-  verify(
-    verifyData: VerifyOTPRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<AuthResponse>>;
-  resendOtp(
-    resendData: ResendOTPRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<AuthResponse>>;
-  refreshToken(options?: RequestOptions): Promise<ApiResponse<AuthResponse>>;
-  logout(options?: RequestOptions): Promise<ApiResponse<void>>;
-  forgotPassword(
-    email: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<{ message: string }>>;
-  resetPassword(
-    data: PasswordResetRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<{ message: string }>>;
-  changePassword(
-    data: PasswordChangeRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<{ message: string }>>;
-  checkEmail(
-    params: CheckEmailRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CheckEmailResponse>>;
-}
-
-const getClientToken = () => store?.getState()?.auth?.token ?? null;
-
-const authClientRefresh = async () => {
-  const response = await store.dispatch(refreshToken());
-  if (
-    response.meta.requestStatus === 'rejected' ||
-    !(response.payload as { success: boolean; message: string })?.success
-  ) {
-    throw new Error((response.payload as { success: boolean; message: string })?.message);
-  }
-
-  return { token: (response.payload as { data: { token: string } })?.data?.token };
-};
+import { IAuthService } from './auth.service.interface';
 
 export class AuthService extends BaseService implements IAuthService {
   constructor({
-    getToken = getClientToken,
-    authRefresh = authClientRefresh,
+    getToken = getClientAuthToken,
+    authRefresh = authRefreshToken,
     hooks,
     ...options
   }: BaseServiceOptions = {}) {
