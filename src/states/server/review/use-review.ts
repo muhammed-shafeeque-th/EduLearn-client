@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { courseService, PaginationParams } from '@/services/course.service';
+import { courseService, PaginationParams } from '@/services/course';
 
 /**
  * Hook to fetch paginated course reviews using React Query's useInfiniteQuery.

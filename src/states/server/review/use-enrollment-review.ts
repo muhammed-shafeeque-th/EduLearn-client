@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { enrollmentService } from '@/services/enrollment.service';
+import { enrollmentService } from '@/services/enrollment';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { SubmitCourseReviewPayload } from '@/types/enrollment/enrollment.type';
-import { Review } from '@/types/course';
+import { Review } from '@/types/review';
 import { RequestOptions } from '@/services/base-service';
 
 export function useEnrollmentReview(enrollmentId: string) {
