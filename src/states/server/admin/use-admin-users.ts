@@ -1,11 +1,11 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { ApiResponse } from '@/types/api-response';
 import { User, UserProfileUpdatePayload } from '@/types/user';
-import { adminService } from '@/services/admin.service';
+import { adminService } from '@/services/admin';
 
 /**
  * Admin hook for fetching and mutating a user's data.
@@ -16,6 +16,8 @@ export function useAdminUser(
   options?: Partial<UseQueryOptions<ApiResponse<User | null>, null, User | null>>
 ) {
   const queryClient = useQueryClient();
+
+  const isEnabled = !!userId && (options?.enabled || false);
 
   // --- Get user details ---
   const {
@@ -29,7 +31,7 @@ export function useAdminUser(
     queryKey: QUERY_KEYS.users.detail(userId || ''),
     queryFn: ({ signal }) => userService.getUser(userId!, { signal }),
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
-    enabled: !!userId,
+    enabled: isEnabled,
     select: (data) => (data?.success ? data.data : null),
     ...options,
     meta: {
@@ -76,23 +78,23 @@ export function useAdminUser(
     },
   });
 
-  // --- Block user ---
+  // --- Block account ---
   const {
-    mutateAsync: blockUser,
-    isPending: isBlocking,
-    isSuccess: isBlockSuccess,
-    isError: isBlockError,
-    error: blockError,
-    reset: resetBlock,
+    mutateAsync: blockAccount,
+    isPending: isBlockingAccount,
+    isSuccess: isBlockAccountSuccess,
+    isError: isBlockAccountError,
+    error: blockAccountError,
+    reset: resetBlockAccount,
   } = useMutation({
-    mutationFn: (mutateUserId: string) => adminService.blockUser(mutateUserId),
+    mutationFn: (mutateUserId: string) => adminService.blockAccount(mutateUserId),
     onMutate: async (mutateUserId) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.detail(mutateUserId) });
       const previous = queryClient.getQueryData<User>(QUERY_KEYS.users.detail(mutateUserId));
       if (previous) {
         queryClient.setQueryData(QUERY_KEYS.users.detail(mutateUserId), {
           ...previous,
-          status: 'blocked',
+          accountStatus: 'blocked',
         });
       }
       return { previous };
@@ -108,28 +110,28 @@ export function useAdminUser(
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.detail(mutateUserId) });
     },
     meta: {
-      successMessage: 'User blocked successfully!',
-      errorMessage: 'Failed to block user',
+      successMessage: 'Account blocked successfully!',
+      errorMessage: 'Failed to block account',
     },
   });
 
-  // --- Unblock user ---
+  // --- Unblock account ---
   const {
-    mutateAsync: unblockUser,
-    isPending: isUnblocking,
-    isSuccess: isUnblockSuccess,
-    isError: isUnblockError,
-    error: unblockError,
-    reset: resetUnblock,
+    mutateAsync: unblockAccount,
+    isPending: isUnblockingAccount,
+    isSuccess: isUnblockAccountSuccess,
+    isError: isUnblockAccountError,
+    error: unblockAccountError,
+    reset: resetUnblockAccount,
   } = useMutation({
-    mutationFn: (mutateUserId: string) => adminService.unBlockUser(mutateUserId),
+    mutationFn: (mutateUserId: string) => adminService.unblockAccount(mutateUserId),
     onMutate: async (mutateUserId) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.detail(mutateUserId) });
       const previous = queryClient.getQueryData<User>(QUERY_KEYS.users.detail(mutateUserId));
       if (previous) {
         queryClient.setQueryData(QUERY_KEYS.users.detail(mutateUserId), {
           ...previous,
-          status: 'active',
+          accountStatus: 'active',
         });
       }
       return { previous };
@@ -145,8 +147,8 @@ export function useAdminUser(
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.all, refetchType: 'none' });
     },
     meta: {
-      successMessage: 'User unblocked successfully!',
-      errorMessage: 'Failed to unblock user',
+      successMessage: 'Account unblocked successfully!',
+      errorMessage: 'Failed to unblock account',
     },
   });
 
@@ -198,21 +200,21 @@ export function useAdminUser(
     updateError,
     resetUpdate,
 
-    // Block user
-    blockUser,
-    isBlocking,
-    isBlockSuccess,
-    isBlockError,
-    blockError,
-    resetBlock,
+    // Block account
+    blockAccount,
+    isBlockingAccount,
+    isBlockAccountSuccess,
+    isBlockAccountError,
+    blockAccountError,
+    resetBlockAccount,
 
-    // Unblock user
-    unblockUser,
-    isUnblocking,
-    isUnblockSuccess,
-    isUnblockError,
-    unblockError,
-    resetUnblock,
+    // Unblock account
+    unblockAccount,
+    isUnblockingAccount,
+    isUnblockAccountSuccess,
+    isUnblockAccountError,
+    unblockAccountError,
+    resetUnblockAccount,
 
     deleteUser,
     isDeleting,

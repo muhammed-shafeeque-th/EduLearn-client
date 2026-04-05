@@ -2,8 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { adminService } from '@/services/admin.service';
-import { courseService } from '@/services/course.service';
+import { adminService } from '@/services/admin';
+import { courseService, PaginationParams } from '@/services/course';
 
 /**
  * Hook to fetch and mutate a single course by ID, including publish, unpublish, and delete actions.
@@ -13,6 +13,8 @@ import { courseService } from '@/services/course.service';
  */
 export function useAdminCourse(courseId?: string, enabled: boolean = false) {
   const queryClient = useQueryClient();
+
+  const isEnabled = !!courseId && (enabled ?? true);
 
   // Fetch course details
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
@@ -25,7 +27,7 @@ export function useAdminCourse(courseId?: string, enabled: boolean = false) {
       return courseService.getCourseById(courseId, { signal });
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !!courseId && !!enabled,
+    enabled: isEnabled,
     meta: {
       errorMessage: 'Failed to load course details',
     },
@@ -135,5 +137,47 @@ export function useAdminCourse(courseId?: string, enabled: boolean = false) {
     deleteCourse,
     isDeleting,
     deleteError,
+  };
+}
+
+export function useAdminInstructorCourses(
+  instructorId: string,
+  params: Partial<PaginationParams> = {}
+) {
+  const query = useQuery({
+    queryKey: QUERY_KEYS.courses.byInstructor(instructorId),
+    queryFn: async ({ signal }) =>
+      adminService.getCoursesByInstructor(instructorId, { ...params }, { signal }),
+    enabled: !!instructorId,
+    staleTime: 5 * 60 * 1000,
+    meta: {
+      errorMessage: 'Failed to load instructor courses',
+    },
+  });
+
+  const data = query.data;
+  const courses = data?.success ? data.data : [];
+  const pagination = data?.success ? data.pagination : undefined;
+  const totalPages = pagination?.totalPages ?? 0;
+  const totalCount = pagination?.total ?? 0;
+  const currentPage = pagination?.page ?? 1;
+
+  return {
+    courses,
+    pagination,
+    totalPages,
+    totalCount,
+    currentPage,
+    data,
+    // Core query helpers and states
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    isSuccess: query.isSuccess,
+    isFetched: query.isFetched,
+    // For advanced needs
+    query,
   };
 }
