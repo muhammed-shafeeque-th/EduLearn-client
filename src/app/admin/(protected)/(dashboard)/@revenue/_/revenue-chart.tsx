@@ -53,7 +53,7 @@ export function RevenueChart() {
   const { data, isLoading } = useRevenueStats(year);
 
   const chartData = useMemo(() => {
-    const filledData = new Array(12).fill(0);
+    const filledData = new Array<number>(12).fill(0);
     if (data && Array.isArray(data)) {
       data.forEach((item) => {
         const monthIndex = Number(item.month) - 1;
