@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { config } from '@/lib/config';
 import { v4 as uuidv4 } from 'uuid';
 import axios, {
@@ -11,14 +12,18 @@ import { BaseServiceHooks, BaseServiceOptions, RequestOptions } from './types';
 import {
   hasErrorMessage,
   hasMessage,
-  hasErrorWithDetails,
+  hasErrorCode,
   isAxiosError,
   normalizeRequestConfig,
+  isApiErrorResponse,
 } from './guards';
 import { ERROR_CODES, ErrorCode } from '@/lib/errors/error-codes';
 import { AppError, ErrorDetail } from '@/lib/errors/app-error';
 import { getWindow } from '@/lib/utils';
 import { toast } from 'sonner';
+import { clearCsrfToken, fetchCsrfToken, MUTATION_METHODS, _csrfToken } from './csrf';
+import { CSRF_HEADER } from '@/lib/constants';
+import { AuthCustomEvents } from '@/lib/constants/auth-events';
 
 export abstract class BaseService {
   protected readonly client: AxiosInstance;
@@ -64,24 +69,32 @@ export abstract class BaseService {
             ? config.headers
             : new AxiosHeaders(config.headers);
 
+        // First apply any dynamic headers (includes server-side cookies in Next.js)
+        if (this.getHeaders) {
+          const providedHeaders = await this.getHeaders();
+          Object.entries(providedHeaders).forEach(([k, v]) => headers.set(k, v));
+        }
+
         if (this.getToken) {
           const token = await this.getToken();
           if (token) headers.set('Authorization', `Bearer ${token}`);
         }
 
         const method = config.method?.toLowerCase();
-        if (['post', 'patch'].includes(method || '')) {
+
+        // Inject CSRF token on all state-mutating requests
+        if (method && MUTATION_METHODS.has(method)) {
+          const cookieHeader = headers.get('Cookie') as string;
+          const csrfToken =
+            (getWindow() ? _csrfToken : null) ?? (await fetchCsrfToken(cookieHeader));
+          if (csrfToken) headers.set(CSRF_HEADER, csrfToken);
+
           if (!headers.has('Idempotency-Key')) {
             headers.set('Idempotency-Key', uuidv4());
           }
         }
 
         headers.set('X-Request-ID', uuidv4());
-
-        if (this.getHeaders) {
-          const providedHeaders = await this.getHeaders();
-          Object.entries(providedHeaders).forEach(([k, v]) => headers.set(k, v));
-        }
 
         this.hooks?.onRequest?.(config);
 
@@ -153,6 +166,25 @@ export abstract class BaseService {
 
         const maxRetry = originalRequest.retry ?? this.retry;
 
+        // CSRF token was rejected by the server (e.g., after a page refresh before the
+        // cookie was set). Clear the cached token, fetch a new one, and retry once.
+        if (
+          error.response?.status === 403 &&
+          (error.response?.data as any)?.error?.code === 'CSRF_TOKEN_INVALID' &&
+          !originalRequest._csrfRetry
+        ) {
+          originalRequest._csrfRetry = true;
+          clearCsrfToken();
+          const freshToken = await fetchCsrfToken();
+          if (freshToken) {
+            originalRequest.headers = {
+              ...originalRequest.headers,
+              [CSRF_HEADER]: freshToken,
+            };
+          }
+          return this.client(originalRequest);
+        }
+
         if (
           originalRequest._retryCount! < maxRetry &&
           (!error.response || error.response.status >= 500)
@@ -197,7 +229,7 @@ export abstract class BaseService {
     let errorCode: ErrorCode | undefined;
     let errorDetails: ErrorDetail[] | undefined;
     let message: string = error.message || 'Server error occurred';
-    // this._logAxiosError(error);
+    this._logAxiosError(error);
     let statusCode: number | undefined;
 
     if (error.response) {
@@ -227,9 +259,8 @@ export abstract class BaseService {
       // }
       // Message priority: backend -> fallback
 
-      errorCode = mapStatusToErrorCode(statusCode);
-
-      if (hasErrorWithDetails(data)) {
+      if (isApiErrorResponse(data)) {
+        errorCode = data.error.code as ErrorCode;
         errorDetails = data.error.details;
         message = data.error.message;
       } else if (hasErrorMessage(data)) {
@@ -237,6 +268,9 @@ export abstract class BaseService {
       } else if (hasMessage(data)) {
         message = data.message;
       }
+      errorCode ??= hasErrorCode(data)
+        ? (data.error.code as ErrorCode)
+        : mapStatusToErrorCode(statusCode);
 
       switch (statusCode) {
         case 400:
@@ -278,7 +312,6 @@ export abstract class BaseService {
     //     writable: true,
     //   });
 
-    //   // Update the current route's error_code param in browser environment
     if (getWindow()) {
       // try {
       //   const url = new URL(getWindow()?.location.href || '');
@@ -289,26 +322,26 @@ export abstract class BaseService {
       // }
 
       const isSilent = (error.config as unknown as Record<string, unknown>)?.silent === true;
+      const isCsrfError = (error.response?.data as any)?.error?.code?.startsWith('CSRF_TOKEN');
       if (!isSilent) {
-        if (statusCode === 403) {
-          toast.error(
-            'Your account has been blocked. Please contact support for assistance.'
-            // 'Session expired or access denied. Please log in again.'
-          );
+        if (errorCode === ERROR_CODES.ACCOUNT_BLOCKED) {
+          toast.error('Your account has been blocked. Please contact support for assistance.');
           getWindow()?.dispatchEvent(
-            new CustomEvent('auth:force-logout', { detail: { message: 'Access Denied' } })
+            new CustomEvent(AuthCustomEvents.ForceLogout, {
+              detail: { message: 'Account Blocked' },
+            })
           );
+        } else if (errorCode === ERROR_CODES.INSTRUCTOR_ACCESS_DENIED) {
+          toast.error(
+            'Your instructor access has been blocked. Please contact admin if you think this is a mistake.'
+          );
+          // Don't force logout for instructor block, just inform them.
+          // They might still be able to use the platform as a student.
+          // However, we should probably force a session sync.
+          getWindow()?.dispatchEvent(new CustomEvent(AuthCustomEvents.SyncSession));
+        } else if (statusCode === 403 && !isCsrfError) {
+          toast.error('Access denied. You do not have permission for this action.');
         }
-        //   else if (statusCode === 401) {
-        //     getWindow()?.dispatchEvent(
-        //       new CustomEvent('auth:force-logout', { detail: { message: 'Session Expired' } })
-        //     );
-        //   } else if (statusCode !== 404 && statusCode !== undefined && statusCode < 500) {
-        //     // generic client level errors, like 400 validation not silent
-        //     toast.error(message || 'An error occurred.');
-        //   } else if (statusCode === undefined || statusCode >= 500) {
-        //     toast.error(message || 'A network or server error occurred.');
-        //   }
       }
     }
     // }

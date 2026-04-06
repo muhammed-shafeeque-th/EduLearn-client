@@ -17,9 +17,20 @@ export function hasErrorMessage(obj: unknown): obj is { error: { message: string
     typeof (obj as { error: { message?: unknown } }).error.message === 'string'
   );
 }
-export function hasErrorWithDetails(
+export function hasErrorCode(obj: unknown): obj is { error: { code: string } } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'error' in obj &&
+    typeof (obj as { error?: unknown }).error === 'object' &&
+    (obj as { error: { code?: unknown } }).error !== null &&
+    'code' in (obj as { error: { code?: unknown } }).error &&
+    typeof (obj as { error: { code: string } }).error.code === 'string'
+  );
+}
+export function isApiErrorResponse(
   obj: unknown
-): obj is { error: { details: ErrorDetail[]; message: string } } {
+): obj is { error: { details: ErrorDetail[]; message: string; code: string } } {
   return (
     typeof obj === 'object' &&
     obj !== null &&
@@ -28,6 +39,8 @@ export function hasErrorWithDetails(
     (obj as { error: { message?: unknown } }).error !== null &&
     'message' in (obj as { error: { message?: unknown } }).error &&
     typeof (obj as { error: { message?: unknown } }).error.message === 'string' &&
+    'code' in (obj as { error: { code?: unknown } }).error &&
+    typeof (obj as { error: { code: string } }).error.code === 'string' &&
     'details' in (obj as { error: { details?: unknown } }).error &&
     Array.isArray((obj as { error: { details?: unknown } }).error.details)
     //  && (obj as { error: { details?: unknown } }).error.details.every((detail) => {
@@ -78,7 +91,7 @@ export function hasMessage(obj: unknown): obj is { message: string } {
 
 export function normalizeRequestConfig(
   error: AxiosError
-): (RequestOptions & { _retry?: boolean; _retryCount?: number }) | null {
+): (RequestOptions & { _retry?: boolean; _retryCount?: number; _csrfRetry?: boolean }) | null {
   if (!error.config) return null;
 
   // Create a shallow copy of config without spreading incompatible signal types
@@ -92,5 +105,6 @@ export function normalizeRequestConfig(
     },
     _retry: (error.config as { _retry?: boolean })?._retry ?? false,
     _retryCount: (error.config as { _retryCount?: number })?._retryCount ?? 0,
+    _csrfRetry: (error.config as { _csrfRetry?: boolean })?._csrfRetry ?? false,
   };
 }
