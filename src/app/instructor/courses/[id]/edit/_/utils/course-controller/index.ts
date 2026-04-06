@@ -1,7 +1,7 @@
 import { UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
-import { courseService } from '@/services/course.service';
+import { courseService } from '@/services/course';
 import type {
-  Section,
+  Module,
   Lesson,
   Quiz,
   CurriculumFormData,
@@ -16,7 +16,7 @@ import { CourseOp, OpResult } from './types';
 import { getErrorMessage } from '@/lib/utils';
 import { CurriculumSnapshot } from './utils/curriculum-snapshot';
 
-type TempSection = Section & { _tempId: string };
+type TempModule = Module & { _tempId: string };
 type TempLesson = Lesson & { _tempId: string };
 type TempQuiz = Quiz & { _tempId: string };
 
@@ -29,7 +29,7 @@ export interface CourseControllerConfig {
   courseId: string;
   basicForm: UseFormReturn<BasicInfoFormData>;
   advancedForm: UseFormReturn<AdvancedInfoFormData>;
-  sectionsArray: UseFieldArrayReturn<CurriculumFormData, 'sections'>;
+  modulesArray: UseFieldArrayReturn<CurriculumFormData, 'modules'>;
   curriculumForm: UseFormReturn<CurriculumFormData>;
   onSuccess?: (message: string) => void;
   onSettled?: () => void;
@@ -110,105 +110,100 @@ export class CourseController {
   }
 
   /**
-   * Create a new section
+   * Create a new module
    */
-  createSection(data: Omit<Section, 'id'>): TempSection {
-    const tempId = generateTempId('section');
-    const sections = this.config.curriculumForm.getValues('sections') || [];
-    const order = sections.length;
+  createModule(data: Omit<Module, 'id'>): TempModule {
+    const tempId = generateTempId('module');
+    const modules = this.config.curriculumForm.getValues('modules') || [];
+    const order = modules.length;
 
-    const section: Section = {
+    const $module: Module = {
       ...data,
       id: tempId,
       lessons: data.lessons || [],
       order,
     };
 
-    this.config.sectionsArray.append(section, { shouldFocus: true });
+    this.config.modulesArray.append($module, { shouldFocus: true });
 
     this.queue.push({
-      type: 'SECTION_CREATE',
+      type: 'MODULE_CREATE',
       tempId,
-      data: section,
-      order: section.order,
+      data: $module,
+      order: $module.order,
     });
 
-    return { ...section, _tempId: tempId };
+    return { ...$module, _tempId: tempId };
   }
 
   /**
-   * Update an existing section field
+   * Update an existing module field
    */
-  updateSectionField<T extends keyof Section>(
-    sectionIndex: number,
-    key: T,
-    value: Section[T]
-  ): void {
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIndex}`);
-    if (!section) return;
+  updateModuleField<T extends keyof Module>(moduleIndex: number, key: T, value: Module[T]): void {
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIndex}`);
+    if (!$module) return;
 
-    this.config.curriculumForm.setValue(
-      `sections.${sectionIndex}.${key}` as const,
-      value as never,
-      { shouldDirty: true, shouldValidate: true }
-    );
-    const sectionId = section.id;
+    this.config.curriculumForm.setValue(`modules.${moduleIndex}.${key}` as const, value as never, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    const moduleId = $module.id;
 
-    if (!isTempId(sectionId)) {
+    if (!isTempId(moduleId)) {
       this.queue.push({
-        type: 'SECTION_UPDATE',
-        id: sectionId,
+        type: 'MODULE_UPDATE',
+        id: moduleId,
         data: { [key]: value },
       });
     } else {
-      this.updatePendingCreate('SECTION_CREATE', sectionId, { [key]: value });
+      this.updatePendingCreate('MODULE_CREATE', moduleId, { [key]: value });
     }
   }
 
   /**
-   * Delete a section
+   * Delete a module
    */
-  deleteSection(sectionIdx: number): void {
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
-    this.config.sectionsArray.remove(sectionIdx);
+  deleteModule(moduleIdx: number): void {
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
+    this.config.modulesArray.remove(moduleIdx);
 
-    if (section && !isTempId(section.id)) {
+    if ($module && !isTempId($module.id)) {
       this.queue.push({
-        type: 'SECTION_DELETE',
-        id: section.id,
+        type: 'MODULE_DELETE',
+        id: $module.id,
       });
-    } else if (section) {
-      this.removePendingCreate('SECTION_CREATE', section.id);
+    } else if ($module) {
+      this.removePendingCreate('MODULE_CREATE', $module.id);
     }
   }
 
   /**
-   * Reorder sections
+   * Reorder modules
    */
-  reorderSections(from: number, to: number): void {
-    this.config.sectionsArray.move(from, to);
-    const sectionId = this.config.curriculumForm.getValues(`sections.${from}`).id;
-    if (!sectionId || isTempId(sectionId)) return;
+  reorderModules(from: number, to: number): void {
+    this.config.modulesArray.move(from, to);
+    const moduleId = this.config.curriculumForm.getValues(`modules.${from}`).id;
+    if (!moduleId || isTempId(moduleId)) return;
     this.queue.push({
-      type: 'SECTION_REORDER',
-      id: sectionId,
+      type: 'MODULE_REORDER',
+      id: moduleId,
       newOrder: to,
     });
   }
 
-  createLesson(sectionIdx: number, data: Omit<Lesson, 'id'>): TempLesson {
+  createLesson(moduleIdx: number, data: Omit<Lesson, 'id'>): TempLesson {
     const tempId = generateTempId('lesson');
-    const lessonsPath = `sections.${sectionIdx}.lessons` as const;
+    const lessonsPath = `modules.${moduleIdx}.lessons` as const;
 
-    const allSections = this.config.curriculumForm.getValues('sections');
-    const currentSection = allSections[sectionIdx];
+    const allModules = this.config.curriculumForm.getValues('modules');
+    const currentModule = allModules[moduleIdx];
 
-    if (!currentSection) {
-      console.error(`Section index ${sectionIdx} not found in form data.`);
-      throw new Error('Target section not found');
+    if (!currentModule) {
+      console.error(`Module index ${moduleIdx} not found in form data.`);
+      throw new Error('Target module not found');
     }
 
-    const sectionId = currentSection.id;
+    const moduleId = currentModule.id;
 
     const lessons: Lesson[] = this.config.curriculumForm.getValues(lessonsPath) ?? [];
 
@@ -225,7 +220,7 @@ export class CourseController {
 
     this.queue.push({
       type: 'LESSON_CREATE',
-      sectionId,
+      moduleId,
       tempId,
       data: lesson,
       order: lessons.length,
@@ -238,22 +233,22 @@ export class CourseController {
    * Update an existing lesson field
    */
   updateLessonField<T extends keyof Lesson>(
-    sectionIdx: number,
+    moduleIdx: number,
     lessonIdx: number,
     key: T,
     value: Lesson[T]
   ): void {
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
-    if (!section) throw new Error('section does exist');
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
+    if (!$module) throw new Error('module does exist');
 
-    const path = `sections.${sectionIdx}.lessons.${lessonIdx}.${key}` as const;
+    const path = `modules.${moduleIdx}.lessons.${lessonIdx}.${key}` as const;
     this.config.curriculumForm.setValue(path, value as never, {
       shouldDirty: true,
       shouldValidate: true,
     });
 
     const lesson = this.config.curriculumForm.getValues(
-      `sections.${sectionIdx}.lessons.${lessonIdx}`
+      `modules.${moduleIdx}.lessons.${lessonIdx}`
     );
 
     if (!lesson) return;
@@ -261,7 +256,7 @@ export class CourseController {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lesson.id,
-        sectionId: section.id,
+        moduleId: module.id,
         data: { [key]: value },
       });
     } else {
@@ -269,14 +264,14 @@ export class CourseController {
     }
   }
   /**
-   * Update the entire content of an existing lesson in a section.
+   * Update the entire content of an existing lesson in a module.
    * Performs a shallow merge with any existing content (for partial updates).
    */
-  updateLessonContent(sectionIdx: number, lessonIdx: number, updates: Partial<Content>): void {
-    const path = `sections.${sectionIdx}.lessons.${lessonIdx}.content` as const;
+  updateLessonContent(moduleIdx: number, lessonIdx: number, updates: Partial<Content>): void {
+    const path = `modules.${moduleIdx}.lessons.${lessonIdx}.content` as const;
 
     const lesson = this.config.curriculumForm.getValues(
-      `sections.${sectionIdx}.lessons.${lessonIdx}`
+      `modules.${moduleIdx}.lessons.${lessonIdx}`
     );
     if (!lesson) return;
 
@@ -291,13 +286,13 @@ export class CourseController {
     });
 
     const lessonId = lesson.id;
-    const sectionId = this.config.curriculumForm.getValues(`sections.${sectionIdx}`).id;
+    const moduleId = this.config.curriculumForm.getValues(`modules.${moduleIdx}`).id;
 
     if (!isTempId(lessonId)) {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lessonId,
-        sectionId: sectionId,
+        moduleId: moduleId,
         data: { content: mergedContent },
       });
     } else {
@@ -305,14 +300,14 @@ export class CourseController {
     }
   }
   /**
-   * Remove all content from a lesson in a section.
+   * Remove all content from a lesson in a module.
    * This sets the lesson content field to undefined (deletes content object).
    */
-  removeLessonContent(sectionIdx: number, lessonIdx: number): void {
-    const path = `sections.${sectionIdx}.lessons.${lessonIdx}.content` as const;
+  removeLessonContent(moduleIdx: number, lessonIdx: number): void {
+    const path = `modules.${moduleIdx}.lessons.${lessonIdx}.content` as const;
 
     const lesson = this.config.curriculumForm.getValues(
-      `sections.${sectionIdx}.lessons.${lessonIdx}`
+      `modules.${moduleIdx}.lessons.${lessonIdx}`
     );
     if (!lesson) return;
 
@@ -322,13 +317,13 @@ export class CourseController {
     });
 
     const lessonId = lesson.id;
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
 
     if (!isTempId(lessonId)) {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lessonId,
-        sectionId: section.id,
+        moduleId: module.id,
         data: { content: undefined },
       });
     } else {
@@ -340,13 +335,13 @@ export class CourseController {
    * Add new content to the specified lesson, generating a temporary id.
    * Overwrites any existing content on the lesson.
    */
-  addLessonContent(sectionIdx: number, lessonIdx: number, content: Omit<Content, 'id'>): void {
+  addLessonContent(moduleIdx: number, lessonIdx: number, content: Omit<Content, 'id'>): void {
     const newContent: Content = {
       ...content,
       id: generateTempId('content'),
     };
 
-    const path = `sections.${sectionIdx}.lessons.${lessonIdx}.content` as const;
+    const path = `modules.${moduleIdx}.lessons.${lessonIdx}.content` as const;
 
     this.config.curriculumForm.setValue(path, newContent as never, {
       shouldDirty: true,
@@ -354,18 +349,18 @@ export class CourseController {
     });
 
     const lesson = this.config.curriculumForm.getValues(
-      `sections.${sectionIdx}.lessons.${lessonIdx}`
+      `modules.${moduleIdx}.lessons.${lessonIdx}`
     );
     if (!lesson) return;
 
     const lessonId = lesson.id;
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
 
     if (!isTempId(lessonId)) {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lessonId,
-        sectionId: section.id,
+        moduleId: module.id,
         data: { content: newContent },
       });
     } else {
@@ -376,13 +371,13 @@ export class CourseController {
   /**
    * Delete a lesson
    */
-  deleteLesson(sectionIndex: number, lessonIndex: number): void {
-    const lessonsPath = `sections.${sectionIndex}.lessons` as const;
+  deleteLesson(moduleIndex: number, lessonIndex: number): void {
+    const lessonsPath = `modules.${moduleIndex}.lessons` as const;
     const lessons = [...(this.config.curriculumForm.getValues(lessonsPath) || [])];
 
     const [removed] = lessons.splice(lessonIndex, 1);
 
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIndex}`);
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIndex}`);
     this.config.curriculumForm.setValue(lessonsPath, lessons, { shouldDirty: true });
 
     if (removed) {
@@ -390,7 +385,7 @@ export class CourseController {
         this.queue.push({
           type: 'LESSON_DELETE',
           id: removed.id,
-          sectionId: section.id,
+          moduleId: module.id,
         });
       } else {
         this.removePendingCreate('LESSON_CREATE', removed.id);
@@ -399,10 +394,10 @@ export class CourseController {
   }
 
   /**
-   * Reorder lessons within a section
+   * Reorder lessons within a module
    */
-  reorderLessons(sectionIdx: number, from: number, to: number): void {
-    const lessonsPath = `sections.${sectionIdx}.lessons` as const;
+  reorderLessons(moduleIdx: number, from: number, to: number): void {
+    const lessonsPath = `modules.${moduleIdx}.lessons` as const;
     const lessons = [...(this.config.curriculumForm.getValues(lessonsPath) || [])];
 
     if (from < 0 || from >= lessons.length || to < 0 || to >= lessons.length) return;
@@ -414,13 +409,13 @@ export class CourseController {
 
     const lessonOrder = lessons.filter((l) => !isTempId(l.id)).map((l) => l.order);
 
-    const section = this.config.sectionsArray.fields[sectionIdx];
-    const sectionId = section.id;
+    const $module = this.config.modulesArray.fields[moduleIdx];
+    const moduleId = module.id;
 
-    if (!isTempId(sectionId) && lessonOrder.length === lessons.length) {
+    if (!isTempId(moduleId) && lessonOrder.length === lessons.length) {
       this.queue.push({
         type: 'LESSON_REORDER',
-        sectionId,
+        moduleId,
         id: movedLesson.id,
         newOrder: lessonOrder,
       });
@@ -428,28 +423,28 @@ export class CourseController {
   }
 
   /**
-   * Create a quiz for a section (using section array index for target)
+   * Create a quiz for a module (using module array index for target)
    */
-  createQuiz(sectionIdx: number, data: Omit<Quiz, 'id'>): TempQuiz {
+  createQuiz(moduleIdx: number, data: Omit<Quiz, 'id'>): TempQuiz {
     const tempId = generateTempId('quiz');
     const quiz: Quiz = {
       ...data,
       id: tempId,
     };
 
-    const currentSection = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
-    if (!currentSection) throw new Error(`Section at index ${sectionIdx} not found`);
+    const currentModule = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
+    if (!currentModule) throw new Error(`Module at index ${moduleIdx} not found`);
 
-    const sectionId = currentSection.id;
+    const moduleId = currentModule.id;
 
-    this.config.curriculumForm.setValue(`sections.${sectionIdx}.quiz`, quiz, {
+    this.config.curriculumForm.setValue(`modules.${moduleIdx}.quiz`, quiz, {
       shouldDirty: true,
       shouldValidate: true,
     });
 
     this.queue.push({
       type: 'QUIZ_CREATE',
-      sectionId,
+      moduleId,
       tempId,
       data: quiz,
     });
@@ -458,25 +453,25 @@ export class CourseController {
   }
 
   /**
-   * Update a quiz (using section array index for target)
+   * Update a quiz (using module array index for target)
    */
   updateQuizField<T extends keyof Quiz>(
-    sectionIdx: number,
+    moduleIdx: number,
     quizId: string,
     key: T,
     value: Quiz[T]
   ): void {
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
-    if (!section) return;
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
+    if (!module) return;
 
-    const sectionId = section.id;
-    const quiz = this.config.curriculumForm.getValues(`sections.${sectionIdx}.quiz`);
+    const moduleId = module.id;
+    const quiz = this.config.curriculumForm.getValues(`modules.${moduleIdx}.quiz`);
 
     if (!quiz || quiz.id !== quizId) return;
 
     const updatedQuiz = { ...quiz, [key]: value };
 
-    this.config.curriculumForm.setValue(`sections.${sectionIdx}.quiz`, updatedQuiz, {
+    this.config.curriculumForm.setValue(`modules.${moduleIdx}.quiz`, updatedQuiz, {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -485,7 +480,7 @@ export class CourseController {
       this.queue.push({
         type: 'QUIZ_UPDATE',
         id: quizId,
-        sectionId,
+        moduleId,
         data: { [key]: value },
       });
     } else {
@@ -493,24 +488,24 @@ export class CourseController {
     }
   }
   /**
-   * Safely update the `questions` array of a quiz within a section.
+   * Safely update the `questions` array of a quiz within a module.
    * Only supports updating the entire questions array.
-   * @param sectionIdx The index of the section within the form.
+   * @param moduleIdx The index of the module within the form.
    * @param quizId The id of the quiz to update.
    * @param questions The new questions array to replace the current one.
    */
-  updateQuizQuestionField(sectionIdx: number, quizId: string, questions: Quiz['questions']): void {
-    const section = this.config.curriculumForm.getValues(`sections.${sectionIdx}`);
-    if (!section) return;
+  updateQuizQuestionField(moduleIdx: number, quizId: string, questions: Quiz['questions']): void {
+    const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
+    if (!module) return;
 
-    const sectionId = section.id;
+    const moduleId = module.id;
 
-    const quiz = this.config.curriculumForm.getValues(`sections.${sectionIdx}.quiz`);
+    const quiz = this.config.curriculumForm.getValues(`modules.${moduleIdx}.quiz`);
     if (!quiz || quiz.id !== quizId) return;
 
     const updatedQuiz = { ...quiz, questions };
 
-    this.config.curriculumForm.setValue(`sections.${sectionIdx}.quiz`, updatedQuiz, {
+    this.config.curriculumForm.setValue(`modules.${moduleIdx}.quiz`, updatedQuiz, {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -519,7 +514,7 @@ export class CourseController {
       this.queue.push({
         type: 'QUIZ_UPDATE',
         id: quizId,
-        sectionId,
+        moduleId,
         data: { questions },
       });
     } else {
@@ -528,14 +523,14 @@ export class CourseController {
   }
 
   /**
-   * Delete a quiz (using section array index for target)
+   * Delete a quiz (using module array index for target)
    */
-  deleteQuiz(sectionIdx: number, quizId: string): void {
-    const section = this.config.sectionsArray.fields[sectionIdx];
-    if (!section) return;
-    const sectionId = section.id;
+  deleteQuiz(moduleIdx: number, quizId: string): void {
+    const $module = this.config.modulesArray.fields[moduleIdx];
+    if (!module) return;
+    const moduleId = module.id;
 
-    this.config.curriculumForm.setValue(`sections.${sectionIdx}.quiz`, undefined, {
+    this.config.curriculumForm.setValue(`modules.${moduleIdx}.quiz`, undefined, {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -544,7 +539,7 @@ export class CourseController {
       this.queue.push({
         type: 'QUIZ_DELETE',
         id: quizId,
-        sectionId,
+        moduleId,
       });
     } else {
       this.removePendingCreate('QUIZ_CREATE', quizId);
@@ -702,7 +697,11 @@ export class CourseController {
       curriculum: this.config.curriculumForm,
     };
 
-    return await formMap[form].trigger();
+    const isFormValid = await formMap[form].trigger();
+    const errors = formMap[form].formState?.errors;
+    console.log(`Errors of ${form} : ` + JSON.stringify(errors, null, 2));
+
+    return isFormValid;
   }
 
   /**
@@ -745,7 +744,7 @@ export class CourseController {
   }
 
   private updatePendingCreate(
-    type: 'SECTION_CREATE' | 'LESSON_CREATE' | 'QUIZ_CREATE',
+    type: 'MODULE_CREATE' | 'LESSON_CREATE' | 'QUIZ_CREATE',
     tempId: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updates: any
@@ -757,7 +756,7 @@ export class CourseController {
   }
 
   private removePendingCreate(
-    type: 'SECTION_CREATE' | 'LESSON_CREATE' | 'QUIZ_CREATE',
+    type: 'MODULE_CREATE' | 'LESSON_CREATE' | 'QUIZ_CREATE',
     tempId: string
   ): void {
     this.queue.removeCreateOp((op) => op.type === type && 'tempId' in op && op.tempId === tempId);

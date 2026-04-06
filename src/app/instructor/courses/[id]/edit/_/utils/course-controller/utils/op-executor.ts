@@ -6,7 +6,7 @@ import { getErrorMessage } from '@/lib/utils';
 import {
   buildCoursePayload,
   buildLessonPayload,
-  buildSectionPayload,
+  buildModulePayload,
   mapToQuizPayload,
 } from './helpers';
 import { CurriculumSnapshot } from './curriculum-snapshot';
@@ -16,14 +16,14 @@ import { CurriculumSnapshot } from './curriculum-snapshot';
  */
 export class OperationExecutor {
   private idMapping: IdMapping = {
-    sections: new Map(),
+    modules: new Map(),
     lessons: new Map(),
     quizzes: new Map(),
   };
 
   constructor(
     private courseId: string,
-    private courseService: typeof import('@/services/course.service').courseService,
+    private courseService: typeof import('@/services/_/course.service').courseService,
     private readonly snapshotFactory: () => CurriculumSnapshot
   ) {}
 
@@ -109,9 +109,9 @@ export class OperationExecutor {
     ops: Extract<CourseOp, { type: string & `${string}_CREATE` }>[],
     queue: OperationQueue
   ): Promise<void> {
-    // Sections must be serial
-    const sectionCreates = ops.filter((op) => op.type === 'SECTION_CREATE');
-    for (const op of sectionCreates) {
+    // Modules must be serial
+    const moduleCreates = ops.filter((op) => op.type === 'MODULE_CREATE');
+    for (const op of moduleCreates) {
       try {
         await this.executeCreate(op, queue);
       } catch (error) {
@@ -120,7 +120,7 @@ export class OperationExecutor {
     }
 
     // Lessons/Quizzes parallel
-    const childrenCreates = ops.filter((op) => op.type !== 'SECTION_CREATE');
+    const childrenCreates = ops.filter((op) => op.type !== 'MODULE_CREATE');
     await Promise.all(
       childrenCreates.map(async (op) => {
         try {
@@ -160,24 +160,24 @@ export class OperationExecutor {
     queue: OperationQueue
   ): Promise<void> {
     // Only delete if it's a real server ID
-    if (op.type === 'SECTION_DELETE' && isServerId(op.id)) {
-      await this.courseService.deleteSection(this.courseId, op.id);
+    if (op.type === 'MODULE_DELETE' && isServerId(op.id)) {
+      await this.courseService.deleteModule(this.courseId, op.id);
       queue.addResult({
         success: true,
         op,
         error: undefined,
       });
     } else if (op.type === 'LESSON_DELETE' && isServerId(op.id)) {
-      const sectionId = resolveId(op.sectionId, this.idMapping.sections);
-      await this.courseService.deleteLesson(this.courseId, sectionId, op.id);
+      const moduleId = resolveId(op.moduleId, this.idMapping.modules);
+      await this.courseService.deleteLesson(this.courseId, moduleId, op.id);
       queue.addResult({
         success: true,
         op,
         error: undefined,
       });
     } else if (op.type === 'QUIZ_DELETE' && isServerId(op.id)) {
-      const sectionId = resolveId(op.sectionId, this.idMapping.sections);
-      await this.courseService.deleteQuiz(this.courseId, sectionId, op.id);
+      const moduleId = resolveId(op.moduleId, this.idMapping.modules);
+      await this.courseService.deleteQuiz(this.courseId, moduleId, op.id);
       queue.addResult({
         success: true,
         op,
@@ -195,27 +195,27 @@ export class OperationExecutor {
   ): Promise<void> {
     const snapshot = this.snapshotFactory();
 
-    if (op.type === 'SECTION_CREATE') {
-      const payload = buildSectionPayload(op.data);
-      const result = await this.courseService.createSection(this.courseId, payload);
+    if (op.type === 'MODULE_CREATE') {
+      const payload = buildModulePayload(op.data);
+      const result = await this.courseService.createModule(this.courseId, payload);
 
       if (result.success && result.data?.id) {
-        this.idMapping.sections.set(op.tempId, result.data.id);
+        this.idMapping.modules.set(op.tempId, result.data.id);
         queue.addResult({ success: true, op, newId: result.data.id });
       } else {
         queue.addResult({ success: false, op, error: result.message });
       }
     } else if (op.type === 'LESSON_CREATE') {
-      const sectionServerId = resolveId(op.sectionId, this.idMapping.sections);
-      const lesson = snapshot.getLesson(op.sectionId, op.tempId);
+      const moduleServerId = resolveId(op.moduleId, this.idMapping.modules);
+      const lesson = snapshot.getLesson(op.moduleId, op.tempId);
 
       if (!lesson) {
-        console.warn(`Lesson ${op.tempId} not found in section ${op.sectionId} snapshot`);
+        console.warn(`Lesson ${op.tempId} not found in module ${op.moduleId} snapshot`);
         return;
       }
 
       const payload = buildLessonPayload(lesson);
-      const result = await this.courseService.createLesson(this.courseId, sectionServerId, payload);
+      const result = await this.courseService.createLesson(this.courseId, moduleServerId, payload);
 
       if (result.success && result.data?.id) {
         this.idMapping.lessons.set(op.tempId, result.data.id);
@@ -224,16 +224,16 @@ export class OperationExecutor {
         queue.addResult({ success: false, op, error: result.message });
       }
     } else if (op.type === 'QUIZ_CREATE') {
-      const sectionServerId = resolveId(op.sectionId, this.idMapping.sections);
-      const quiz = snapshot.getQuiz(op.sectionId);
+      const moduleServerId = resolveId(op.moduleId, this.idMapping.modules);
+      const quiz = snapshot.getQuiz(op.moduleId);
 
       if (!quiz) {
-        console.warn(`Quiz not found in section ${op.sectionId} snapshot`);
+        console.warn(`Quiz not found in module ${op.moduleId} snapshot`);
         return;
       }
 
       const payload = mapToQuizPayload(quiz);
-      const result = await this.courseService.createQuiz(this.courseId, sectionServerId, payload);
+      const result = await this.courseService.createQuiz(this.courseId, moduleServerId, payload);
 
       if (result.success && result.data?.id) {
         this.idMapping.quizzes.set(op.tempId, result.data.id);
@@ -249,48 +249,43 @@ export class OperationExecutor {
     queue: OperationQueue
   ): Promise<void> {
     const snapshot = this.snapshotFactory();
-    if (op.type === 'SECTION_UPDATE') {
-      const fullSection = snapshot.getSection(op.id);
-      console.log('Recieved full section :' + JSON.stringify(fullSection, null, 2));
+    if (op.type === 'MODULE_UPDATE') {
+      const fullModule = snapshot.getModule(op.id);
+      console.log('Recieved full module :' + JSON.stringify(fullModule, null, 2));
 
-      if (!fullSection) return;
-      const payload = buildSectionPayload(fullSection);
-      const result = await this.courseService.updateSection(this.courseId, op.id, payload);
+      if (!fullModule) return;
+      const payload = buildModulePayload(fullModule);
+      const result = await this.courseService.updateModule(this.courseId, op.id, payload);
       queue.addResult({
         success: result.success,
         op,
         error: result.success ? undefined : result.message,
       });
     } else if (op.type === 'LESSON_UPDATE') {
-      const sectionId = resolveId(op.sectionId, this.idMapping.sections);
+      const moduleId = resolveId(op.moduleId, this.idMapping.modules);
 
       const snapshot = this.snapshotFactory();
-      const fullLesson = snapshot.getLesson(sectionId, op.id);
+      const fullLesson = snapshot.getLesson(moduleId, op.id);
 
       if (!fullLesson) return;
 
       const payload = buildLessonPayload(fullLesson); // FULL LESSON
-      const result = await this.courseService.updateLesson(
-        this.courseId,
-        sectionId,
-        op.id,
-        payload
-      );
+      const result = await this.courseService.updateLesson(this.courseId, moduleId, op.id, payload);
       queue.addResult({
         success: result.success,
         op,
         error: result.success ? undefined : result.message,
       });
     } else if (op.type === 'QUIZ_UPDATE') {
-      const sectionId = resolveId(op.sectionId, this.idMapping.sections);
+      const moduleId = resolveId(op.moduleId, this.idMapping.modules);
 
       const snapshot = this.snapshotFactory();
-      const quiz = snapshot.getQuiz(sectionId);
+      const quiz = snapshot.getQuiz(moduleId);
 
       if (!quiz) return;
 
       const payload = mapToQuizPayload(quiz);
-      const result = await this.courseService.updateQuiz(this.courseId, sectionId, op.id, payload);
+      const result = await this.courseService.updateQuiz(this.courseId, moduleId, op.id, payload);
       queue.addResult({
         success: result.success,
         op,

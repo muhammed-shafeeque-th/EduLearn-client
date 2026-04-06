@@ -1,4 +1,4 @@
-import { Lesson, Quiz, Section } from '../schemas/curriculum-schema';
+import { Lesson, Quiz, Module } from '../schemas/curriculum-schema';
 import { hasChanged } from './change-detector';
 
 export type ChangeType = 'create' | 'update' | 'delete';
@@ -6,32 +6,32 @@ export type ChangeType = 'create' | 'update' | 'delete';
 export interface EntityChange<T> {
   type: ChangeType;
   data: T;
-  parentId?: string; // for lessons/quizzes inside a section
+  parentId?: string; // for lessons/quizzes inside a module
 }
 
 export interface CurriculumChanges {
-  sections: EntityChange<Section>[];
+  modules: EntityChange<Module>[];
   lessons: EntityChange<Lesson>[];
   quizzes: EntityChange<Quiz>[];
 }
 
 export function detectCurriculumChanges(
-  originalSections: Section[],
-  currentSections: Section[]
+  originalModules: Module[],
+  currentModules: Module[]
 ): CurriculumChanges {
-  const sectionChanges: EntityChange<Section>[] = [];
+  const moduleChanges: EntityChange<Module>[] = [];
   const lessonChanges: EntityChange<Lesson>[] = [];
   const quizChanges: EntityChange<Quiz>[] = [];
 
-  const origMap = new Map(originalSections.map((s) => [s.id, s]));
+  const origMap = new Map(originalModules.map((s) => [s.id, s]));
 
   // Handle create + update
-  for (const curr of currentSections) {
+  for (const curr of currentModules) {
     const orig = origMap.get(curr.id);
     if (!orig) {
-      sectionChanges.push({ type: 'create', data: curr });
+      moduleChanges.push({ type: 'create', data: curr });
     } else if (hasChanged(orig, curr, ['title', 'description'])) {
-      sectionChanges.push({ type: 'update', data: curr });
+      moduleChanges.push({ type: 'update', data: curr });
     }
 
     // Lessons
@@ -77,12 +77,12 @@ export function detectCurriculumChanges(
     }
   }
 
-  // Handle deletes for sections
-  for (const orig of originalSections) {
-    if (!currentSections.find((s) => s.id === orig.id)) {
-      sectionChanges.push({ type: 'delete', data: orig });
+  // Handle deletes for modules
+  for (const orig of originalModules) {
+    if (!currentModules.find((s) => s.id === orig.id)) {
+      moduleChanges.push({ type: 'delete', data: orig });
     }
   }
 
-  return { sections: sectionChanges, lessons: lessonChanges, quizzes: quizChanges };
+  return { modules: moduleChanges, lessons: lessonChanges, quizzes: quizChanges };
 }
