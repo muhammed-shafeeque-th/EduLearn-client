@@ -39,10 +39,10 @@ const DEFAULT_ADVANCED_VALUES = {
 };
 
 const DEFAULT_CURRICULUM_VALUES = {
-  sections: [
+  modules: [
     {
-      id: `section_${Date.now()}`,
-      title: 'Section 1: Introduction',
+      id: `module_${Date.now()}`,
+      title: 'Module 1: Introduction',
       description: '',
       lessons: [],
       quiz: undefined,

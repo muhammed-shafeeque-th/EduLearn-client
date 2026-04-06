@@ -2,7 +2,8 @@
 import React from 'react';
 import { UseFormReturn, Controller } from 'react-hook-form';
 import { BasicInfoFormData } from '../schemas/course-schemas';
-import { categories, subCategories, languages, levels, durationUnits } from '../utils/constants';
+import { languages, levels, durationUnits } from '../utils/constants';
+import { useCategories } from '@/states/server/category';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
@@ -38,6 +39,11 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({
   const selectedCategory = watch('category');
   const titleLength = watch('title')?.length || 0;
   const subtitleLength = watch('subTitle')?.length || 0;
+
+  const { categories: fetchedCategories } = useCategories();
+  const categories = (fetchedCategories || []).map((c) => c.name);
+  const selectedCategoryObj = (fetchedCategories || []).find((c) => c.name === selectedCategory);
+  const dynamicSubCategories = selectedCategoryObj?.subcategories?.map((s) => s.name) || [];
 
   return (
     <div className="bg-card rounded-xl shadow-sm border border-border p-8 space-y-10">
@@ -164,7 +170,7 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
                     {selectedCategory &&
-                      subCategories[selectedCategory]?.map((subCat) => (
+                      dynamicSubCategories.map((subCat) => (
                         <SelectItem key={subCat} value={subCat} className="rounded-lg">
                           {subCat}
                         </SelectItem>

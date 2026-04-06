@@ -5,7 +5,15 @@
 
 import React, { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, HelpCircle, Move, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  Plus,
+  HelpCircle,
+  Trash2,
+  AlertCircle,
+  CheckCircle,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { generateId } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -16,20 +24,20 @@ import { Badge } from '@/components/ui/badge';
 import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 
 interface QuizBuilderProps {
-  sectionIndex: number;
+  moduleIndex: number;
   courseId: string;
   className?: string;
 }
 
 export const QuizBuilder: React.FC<QuizBuilderProps> = React.memo(
-  ({ sectionIndex, className = '' }) => {
+  ({ moduleIndex, className = '' }) => {
     const {
       control,
       register,
       formState: { errors },
     } = useFormContext();
 
-    const quizPath = `sections.${sectionIndex}.quiz`;
+    const quizPath = `modules.${moduleIndex}.quiz`;
 
     const {
       fields: questions,
@@ -44,8 +52,8 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = React.memo(
     const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
 
     // Focus error extraction to only relevant parts
-    const sectionErrors = (errors.sections as any)?.[sectionIndex];
-    const quizError = sectionErrors?.quiz;
+    const moduleErrors = (errors.modules as any)?.[moduleIndex];
+    const quizError = moduleErrors?.quiz;
 
     const titleError = quizError?.title?.message;
     const descriptionError = quizError?.description?.message;
@@ -163,12 +171,12 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = React.memo(
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`randomize-${sectionIndex}`}
+                    id={`randomize-${moduleIndex}`}
                     {...register(`${quizPath}.randomizeQuestions`)}
                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary shadow-sm"
                   />
                   <label
-                    htmlFor={`randomize-${sectionIndex}`}
+                    htmlFor={`randomize-${moduleIndex}`}
                     className="text-xs font-medium text-foreground/80 cursor-pointer"
                   >
                     Randomize
@@ -178,12 +186,12 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = React.memo(
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`showResults-${sectionIndex}`}
+                    id={`showResults-${moduleIndex}`}
                     {...register(`${quizPath}.showResults`)}
                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary shadow-sm"
                   />
                   <label
-                    htmlFor={`showResults-${sectionIndex}`}
+                    htmlFor={`showResults-${moduleIndex}`}
                     className="text-xs font-medium text-foreground/80 cursor-pointer"
                   >
                     Show Results
@@ -193,12 +201,12 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = React.memo(
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`requiredQuiz-${sectionIndex}`}
+                    id={`requiredQuiz-${moduleIndex}`}
                     {...register(`${quizPath}.isRequired`)}
                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary shadow-sm"
                   />
                   <label
-                    htmlFor={`requiredQuiz-${sectionIndex}`}
+                    htmlFor={`requiredQuiz-${moduleIndex}`}
                     className="text-xs font-medium text-foreground/80 cursor-pointer"
                   >
                     Required
@@ -273,7 +281,7 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = React.memo(
                     key={question.id}
                     id={question.id}
                     index={index}
-                    sectionIndex={sectionIndex}
+                    moduleIndex={moduleIndex}
                     isActive={activeQuestion === question.id}
                     onToggle={() =>
                       setActiveQuestion(activeQuestion === question.id ? null : question.id)
@@ -300,7 +308,7 @@ QuizBuilder.displayName = 'QuizBuilder';
 interface QuestionEditorProps {
   id: string;
   index: number;
-  sectionIndex: number;
+  moduleIndex: number;
   isActive: boolean;
   onToggle: () => void;
   onRemove: () => void;
@@ -313,7 +321,7 @@ interface QuestionEditorProps {
 const QuestionEditor: React.FC<QuestionEditorProps> = React.memo(
   ({
     index,
-    sectionIndex,
+    moduleIndex,
     isActive,
     onToggle,
     onRemove,
@@ -323,7 +331,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = React.memo(
     questionError,
   }) => {
     const { control, register, getValues } = useFormContext();
-    const questionPath = `sections.${sectionIndex}.quiz.questions.${index}`;
+    const questionPath = `modules.${moduleIndex}.quiz.questions.${index}`;
 
     // Target watches to minimize rerenders
     const questionTitle = useWatch({ control, name: `${questionPath}.question` });
@@ -420,7 +428,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = React.memo(
                 }}
                 className="h-5 w-8 hover:text-primary hover:bg-primary/10 disabled:opacity-20"
               >
-                <Move className="w-3 h-3 rotate-180" />
+                <ArrowUp className="w-3 h-3 rotate-180" />
               </Button>
               <Button
                 variant="ghost"
@@ -432,7 +440,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = React.memo(
                 }}
                 className="h-5 w-8 hover:text-primary hover:bg-primary/10 disabled:opacity-20"
               >
-                <Move className="w-3 h-3" />
+                <ArrowDown className="w-3 h-3" />
               </Button>
             </div>
             <Button
@@ -610,12 +618,12 @@ const QuestionEditor: React.FC<QuestionEditorProps> = React.memo(
                       <div className="flex items-center space-x-2 bg-muted/30 h-11 px-3 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
                         <input
                           type="checkbox"
-                          id={`req-${index}-${sectionIndex}`}
+                          id={`req-${index}-${moduleIndex}`}
                           {...register(`${questionPath}.required`)}
                           className="h-4 w-4 rounded border-border text-primary focus:ring-primary shadow-xs"
                         />
                         <label
-                          htmlFor={`req-${index}-${sectionIndex}`}
+                          htmlFor={`req-${index}-${moduleIndex}`}
                           className="text-[10px] font-black uppercase tracking-tight text-foreground/80 cursor-pointer"
                         >
                           Required

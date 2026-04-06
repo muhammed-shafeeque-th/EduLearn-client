@@ -28,7 +28,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 
 interface LessonEditorProps {
   lessonIndex: number;
-  sectionIndex: number;
+  moduleIndex: number;
   courseId: string;
   onRemove: () => void;
   onMove: (direction: 'up' | 'down') => void;
@@ -44,7 +44,7 @@ interface LessonEditorProps {
 
 export const LessonEditor = ({
   lessonIndex,
-  sectionIndex,
+  moduleIndex,
   courseId,
   onRemove,
   onMove,
@@ -53,7 +53,7 @@ export const LessonEditor = ({
   lessonError,
 }: LessonEditorProps) => {
   const { control, register, setValue, trigger } = useFormContext();
-  const lessonName = `sections.${sectionIndex}.lessons.${lessonIndex}`;
+  const lessonName = `modules.${moduleIndex}.lessons.${lessonIndex}`;
   const lesson = useWatch({ control, name: lessonName });
 
   const [isExpanded, setIsExpanded] = useState(false);
