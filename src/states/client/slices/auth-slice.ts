@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { authService } from '@/services/auth.service';
+import { authService } from '@/services/auth';
 import { AuthUser, ResendOTPRequest, VerifyOTPRequest } from '@/types/auth';
 import { LoginCredentials } from '@/types/auth';
 import { AuthResponse, RegisterData } from '@/types/auth';
@@ -13,6 +13,7 @@ import {
 } from '@/lib/utils';
 import { authLocalStoreKey } from '@/lib/constants';
 import { clientRefreshApi } from '@/lib/auth/client-refresh';
+import { clearCsrfToken, fetchCsrfToken } from '@/services/base-service/csrf';
 
 export type AuthStatus = 'unknown' | 'authenticated' | 'unauthenticated';
 
@@ -82,24 +83,27 @@ export const resendOtp = createAsyncThunk(
   }
 );
 
+/**
+ * initCsrf — fetches and caches the CSRF token from the server.
+ *
+ * Must be dispatched:
+ *   1. On app start (inside restoreCredentials)
+ *   2. After login / OTP verify if you want to eagerly pre-warm
+ *
+ * The BaseService request interceptor also fetches it lazily before the first
+ * POST, but calling initCsrf upfront ensures the token is ready immediately.
+ */
+export const initCsrf = createAsyncThunk('auth/initCsrf', async () => {
+  await fetchCsrfToken();
+});
+
 export const restoreCredentials = createAsyncThunk(
   'auth/restoreCredentials',
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      // const token = getFromLocalStorage(authLocalStoreKey);
-
-      // if (!token) {
-      // No token, try refreshing immediately
+      // Pre-warm CSRF token so it is ready before any POST/PATCH/DELETE fires
+      dispatch(initCsrf());
       return await dispatch(refreshToken()).unwrap();
-      // }
-
-      // if (isTokenExpired(token)) {
-      //   // Expired token, request refresh
-      //   return await dispatch(refreshToken()).unwrap();
-      // }
-
-      // // Valid token, just return it so we can apply
-      // return { data: { token }, success: true };
     } catch (error) {
       return rejectWithValue(getErrorMessage(error, 'Failed to restore credentials'));
     }
@@ -109,8 +113,12 @@ export const restoreCredentials = createAsyncThunk(
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
     await authService.logout();
+    // Invalidate the CSRF token cache — prevents reuse across sessions
+    clearCsrfToken();
     return true;
   } catch (error) {
+    // Even if the server call fails, clear the local CSRF cache
+    clearCsrfToken();
     return rejectWithValue(getErrorMessage(error, 'Failed to logout'));
   }
 });
@@ -345,7 +353,7 @@ function mapToAuthUser(data: any): AuthUser | null {
 
   return {
     email: data.email,
-    role: data.role,
+    roles: data.roles,
     userId: data.userId,
     id: data.userId,
     username: data.username,
