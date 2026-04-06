@@ -324,6 +324,7 @@ export const MessageBubble = memo(function MessageBubble({
 
   // Render
   return (
+    // eslint-disable-next-line jsx-a11y/role-supports-aria-props, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <div
       className={cn(
         'flex gap-2 transition-all duration-200',
@@ -438,7 +439,7 @@ export const MessageBubble = memo(function MessageBubble({
         )}
 
         {/* Quick Reactions (on hover or when menu is open) */}
-        {(isHovered || menuOpen) && !isSelectionMode && (
+        {/* {(isHovered || menuOpen) && !isSelectionMode && (
           <div
             className={cn(
               'absolute top-0 flex items-center gap-1 bg-background/95 backdrop-blur-md border border-border rounded-full shadow-xl p-1 animate-in fade-in slide-in-from-bottom-2 z-10',
@@ -462,10 +463,10 @@ export const MessageBubble = memo(function MessageBubble({
                   {emoji}
                 </button>
               );
-            })}
+            })} */}
 
-            {/* More Options Dropdown */}
-            <DropdownMenu onOpenChange={setMenuOpen}>
+        {/* More Options Dropdown */}
+        {/* <DropdownMenu onOpenChange={setMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -476,18 +477,18 @@ export const MessageBubble = memo(function MessageBubble({
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align={isOwn ? 'end' : 'start'} className="w-48">
-                {/* {onReply && (
+              <DropdownMenuContent align={isOwn ? 'end' : 'start'} className="w-48"> */}
+        {/* {onReply && (
                   <DropdownMenuItem onClick={() => onReply(message)}>
                     <Reply className="w-4 h-4 mr-2" />
                     Reply
                   </DropdownMenuItem>
                 )} */}
-                <DropdownMenuItem onClick={handleCopyMessage}>
+        {/* <DropdownMenuItem onClick={handleCopyMessage}>
                   <Copy className="w-4 h-4 mr-2" />
                   Copy Text
-                </DropdownMenuItem>
-                {/*<DropdownMenuItem onClick={() => toast.info('Forward feature')}>
+                </DropdownMenuItem> */}
+        {/*<DropdownMenuItem onClick={() => toast.info('Forward feature')}>
                   <Forward className="w-4 h-4 mr-2" />
                   Forward
                 </DropdownMenuItem>
@@ -497,7 +498,7 @@ export const MessageBubble = memo(function MessageBubble({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 */}
-                {isOwn && onEdit && (
+        {/* {isOwn && onEdit && (
                   <DropdownMenuItem onClick={() => onEdit(message)}>
                     <Edit2 className="w-4 h-4 mr-2" />
                     Edit
@@ -515,7 +516,7 @@ export const MessageBubble = memo(function MessageBubble({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        )}
+        )} */}
 
         {/* Selection Checkbox (for selection mode) */}
         {isSelectionMode && (

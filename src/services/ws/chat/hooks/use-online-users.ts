@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 import { getSocketService, SocketService } from '../socket.service';
 
 export function useOnlineUsers() {

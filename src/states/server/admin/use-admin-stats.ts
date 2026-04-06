@@ -2,10 +2,10 @@
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { adminService } from '@/services/admin.service';
-import { InstructorCoursesStats, InstructorsStats, UsersStats } from '@/services/user.service';
+import { adminService, CategoriesStats } from '@/services/admin';
+import { InstructorCoursesStats, InstructorsStats, UsersStats } from '@/services/user';
 import { ApiResponse } from '@/types/api-response';
-import { CourseAnalytics } from '@/services/course.service';
+import { CourseAnalytics } from '@/services/course';
 
 function getApiDataOrNull<T>(data: ApiResponse<T> | undefined | null): T | null {
   return !!data && data.success ? data.data : null;
@@ -176,6 +176,45 @@ export function useInstructorsStats(
   >({
     queryKey: QUERY_KEYS.users.instructorsStats(),
     queryFn: ({ signal }) => adminService.getInstructorsStats({ signal }),
+    staleTime: options?.staleTime ?? 10 * 60 * 1000,
+    enabled: options?.enabled ?? true,
+    meta: {
+      errorMessage: 'Failed to load instructors stats',
+    },
+    ...options,
+    select: options?.select ?? getApiDataOrNull,
+  });
+
+  return {
+    stats: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    query,
+  };
+}
+export function useCategoriesStats(
+  options?: Omit<
+    UseQueryOptions<
+      ApiResponse<CategoriesStats>,
+      Error,
+      CategoriesStats | null,
+      ReturnType<typeof QUERY_KEYS.categories.categoriesStats>
+    >,
+    'queryKey' | 'queryFn'
+  > & {
+    enabled: boolean;
+  }
+) {
+  const query = useQuery<
+    ApiResponse<CategoriesStats>,
+    Error,
+    CategoriesStats | null,
+    ReturnType<typeof QUERY_KEYS.categories.categoriesStats>
+  >({
+    queryKey: QUERY_KEYS.categories.categoriesStats(),
+    queryFn: ({ signal }) => adminService.getCategoriesStats({ signal }),
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled: options?.enabled ?? true,
     meta: {

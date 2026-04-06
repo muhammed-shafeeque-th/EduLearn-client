@@ -1,11 +1,12 @@
-export type UserRole = 'admin' | 'instructor' | 'student';
+import { UserRole } from '@/types/auth';
+import { Permissions } from './permissions';
 
 export interface AuthUser {
   id: string;
   name: string;
   email?: string;
-  role: UserRole;
-  permissions?: string[];
+  roles: UserRole[];
+  permissions: string[];
   // orgId, tenantId, flags, etc.
 }
 
@@ -18,7 +19,7 @@ export interface AuthContext<Params, Resource> {
   resource?: Resource;
 }
 
-export interface RequireAuthOptions<Params, Resource> {
+export interface AuthGuardOptions<Params, Resource> {
   /** Redirect if user is NOT authenticated */
   redirectTo?: string;
 
@@ -52,14 +53,14 @@ export interface RequireAuthOptions<Params, Resource> {
   roles?: UserRole[];
 
   /** Required permissions */
-  permissions?: string[];
+  permissions?: Permissions[];
 
   /**
    * Provide a custom getUser callback to fetch the current user.
    * Useful for advanced scenarios like multi-auth, tests, or non-standard flows.
    * If not provided, defaults to the built-in getCurrentUser.
    */
-  getUser?: <T extends AuthUser>() => Promise<T | null>;
+  getUser?: () => Promise<AuthUser | null>;
 
   /**
    * Custom authorization condition

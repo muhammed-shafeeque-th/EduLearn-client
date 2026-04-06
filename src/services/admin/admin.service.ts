@@ -1,137 +1,31 @@
+import { BaseService, BaseServiceOptions, RequestOptions } from '../base-service';
 import { config } from '@/lib/config';
-
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
-
-import { authAdminRefresh, getAdminAuthToken } from '@/lib/auth/auth-client-apis';
-
 import { ApiResponse } from '@/types/api-response';
-import { AuthResponse } from '@/types/auth';
-import { User, UserProfileUpdatePayload, InstructorMeta, UserMeta } from '@/types/user';
-import { Course } from '@/types/course';
 import {
+  CategoriesStats,
+  EnrollmentTrend,
+  GrowthTrend,
+  LoginCredentials,
+  PaginationParams,
+  RevenueStats,
+  SystemOverview,
+  UsersParams,
+  buildQueryParams,
+} from './admin.types';
+import { InstructorMeta, User, UserMeta, UserProfileUpdatePayload } from '@/types/user';
+import { AuthResponse } from '@/types/auth';
+import {
+  getPaginationParams,
   InstructorCoursesStats,
   InstructorsStats,
   InstructorStats,
   UsersStats,
-} from './user.service';
-import { CourseAnalytics } from './course.service';
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-export interface SystemOverview {
-  totalUsers: number;
-  activeInstructors: number;
-  totalCourses: number;
-  monthlyRevenue: number;
-}
-export type RevenueStats = {
-  month: number;
-  revenue: number;
-}[];
-
-export type EnrollmentTrend = {
-  month: number;
-  enrollments: number;
-}[];
-export interface GrowthTrend {
-  trend: {
-    month: number;
-    count: number;
-  }[];
-}
-
-export interface PaginationParams {
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  pageSize?: number;
-}
-export interface UsersFilters {
-  name?: string;
-  email?: string;
-  search?: string;
-  role?: string;
-}
-export type UsersParams = UsersFilters & PaginationParams;
-
-function buildQueryParams(params: UsersParams | Partial<UsersParams> = {}): URLSearchParams {
-  const searchParams = new URLSearchParams();
-  if (params.name) searchParams.set('name', params.name);
-  if (params.email) searchParams.set('email', params.email);
-  if (params.search) searchParams.set('search', params.search);
-  if (params.role) searchParams.set('role', params.role);
-  if (params.sortBy) searchParams.set('sortBy', params.sortBy);
-  if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder!);
-  if (typeof params.page !== 'undefined') searchParams.set('page', params.page.toString());
-  if (typeof params.pageSize !== 'undefined')
-    searchParams.set('pageSize', params.pageSize.toString());
-  return searchParams;
-}
-
-export interface IAdminService {
-  updateUser(
-    userId: string,
-    data: Partial<UserProfileUpdatePayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<User>>;
-  logout(options?: RequestOptions): Promise<ApiResponse<void>>;
-
-  login(
-    credentials: LoginCredentials,
-    options?: RequestOptions
-  ): Promise<ApiResponse<AuthResponse>>;
-  getUsers(
-    params?: Partial<UsersParams>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<UserMeta[]>>;
-  getInstructors(
-    params: PaginationParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<InstructorMeta[]>>;
-  getUser(userId: string, options?: RequestOptions): Promise<ApiResponse<User>>;
-  blockUser(userId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
-  unBlockUser(userId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
-  deleteUser(userId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
-  publishCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-  unPublishCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-  deleteCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
-
-  getSystemOverview(options?: RequestOptions): Promise<ApiResponse<SystemOverview>>;
-  getRevenueStats(year?: string, options?: RequestOptions): Promise<ApiResponse<RevenueStats>>;
-  getEnrollmentTrend(
-    year?: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<EnrollmentTrend>>;
-  getUserGrowthTrend(year?: string, options?: RequestOptions): Promise<ApiResponse<GrowthTrend>>;
-  getInstructorGrowthTrend(
-    year?: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<GrowthTrend>>;
-  getInstructorStats(
-    instructorId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<InstructorStats>>;
-  getInstructorCoursesStats(
-    instructorId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<InstructorCoursesStats>>;
-  getInstructorCourseStats(
-    instructorId: string,
-    courseId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseAnalytics>>;
-
-  getCourseAnalytics(
-    instructorId: string,
-    courseId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseAnalytics>>;
-
-  getInstructorsStats(options?: RequestOptions): Promise<ApiResponse<InstructorsStats>>;
-  getUsersStats(options?: RequestOptions): Promise<ApiResponse<UsersStats>>;
-}
+} from '../user';
+import { CourseAnalytics } from '../course';
+import { Course, CourseMeta } from '@/types/course';
+import { authAdminRefresh, getAdminAuthToken } from '@/lib/auth/auth-client-apis';
+import { IAdminService } from './admin.service.interface';
+import { Category, CreateCategoryPayload, UpdateCategoryPayload } from '@/types/category';
 
 export class AdminService extends BaseService implements IAdminService {
   constructor({
@@ -192,12 +86,29 @@ export class AdminService extends BaseService implements IAdminService {
     return this.get<ApiResponse<User>>(`/users/${userId}`, options);
   }
 
-  public async blockUser(userId: string, options?: RequestOptions): Promise<ApiResponse<void>> {
-    return this.patch<ApiResponse<void>>(`/admin/users/${userId}/block`, {}, options);
+  public async blockAccount(userId: string, options?: RequestOptions): Promise<ApiResponse<void>> {
+    return this.patch<ApiResponse<void>>(`/admin/users/${userId}/block-account`, {}, options);
   }
 
-  public async unBlockUser(userId: string, options?: RequestOptions): Promise<ApiResponse<void>> {
-    return this.patch<ApiResponse<void>>(`/admin/users/${userId}/unblock`, {}, options);
+  public async unblockAccount(
+    userId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<void>> {
+    return this.patch<ApiResponse<void>>(`/admin/users/${userId}/unblock-account`, {}, options);
+  }
+
+  public async blockInstructor(
+    instructorId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<void>> {
+    return this.patch<ApiResponse<void>>(`/admin/instructors/${instructorId}/block`, {}, options);
+  }
+
+  public async unblockInstructor(
+    instructorId: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<void>> {
+    return this.patch<ApiResponse<void>>(`/admin/instructors/${instructorId}/unblock`, {}, options);
   }
 
   public async deleteUser(userId: string, options?: RequestOptions): Promise<ApiResponse<void>> {
@@ -249,7 +160,7 @@ export class AdminService extends BaseService implements IAdminService {
     options?: RequestOptions
   ): Promise<ApiResponse<InstructorCoursesStats>> {
     return this.get<ApiResponse<InstructorCoursesStats>>(
-      `/users/instructors/${instructorId}/courses/stats`,
+      `/instructors/${instructorId}/courses/stats`,
       options
     );
   }
@@ -259,7 +170,7 @@ export class AdminService extends BaseService implements IAdminService {
     options?: RequestOptions
   ): Promise<ApiResponse<CourseAnalytics>> {
     return this.get<ApiResponse<CourseAnalytics>>(
-      `/users/instructors/${instructorId}/courses/${courseId}/stats`,
+      `/instructors/${instructorId}/courses/${courseId}/stats`,
       options
     );
   }
@@ -270,7 +181,7 @@ export class AdminService extends BaseService implements IAdminService {
     options?: RequestOptions
   ): Promise<ApiResponse<CourseAnalytics>> {
     return this.get<ApiResponse<CourseAnalytics>>(
-      `/users/instructors/${instructorId}/courses/${courseId}/stats`,
+      `/instructors/${instructorId}/courses/${courseId}/stats`,
       options
     );
   }
@@ -294,19 +205,60 @@ export class AdminService extends BaseService implements IAdminService {
     instructorId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<InstructorStats>> {
-    return this.get<ApiResponse<InstructorStats>>(
-      `/users/instructors/${instructorId}/stats`,
-      options
-    );
+    return this.get<ApiResponse<InstructorStats>>(`/instructors/${instructorId}/stats`, options);
   }
 
   public async getInstructorsStats(
     options?: RequestOptions
   ): Promise<ApiResponse<InstructorsStats>> {
-    return this.get<ApiResponse<InstructorsStats>>(`/users/instructors/stats`, options);
+    return this.get<ApiResponse<InstructorsStats>>(`/instructors/stats`, options);
   }
   public async getUsersStats(options?: RequestOptions): Promise<ApiResponse<UsersStats>> {
     return this.get<ApiResponse<UsersStats>>(`/users/stats`, options);
+  }
+
+  getCoursesByInstructor(
+    instructorId: string,
+    params?: PaginationParams,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CourseMeta[]>> {
+    const pageParams = getPaginationParams(params);
+    return this.get<ApiResponse<CourseMeta[]>>(`courses/instructor/${instructorId}`, {
+      ...options,
+      params: pageParams,
+    });
+  }
+
+  // Category
+
+  async createCategory(
+    data: CreateCategoryPayload,
+    options?: RequestOptions
+  ): Promise<ApiResponse<Category>> {
+    return this.post<ApiResponse<Category>>('/courses/categories', data, options);
+  }
+
+  async updateCategory(
+    id: string,
+    data: UpdateCategoryPayload,
+    options?: RequestOptions
+  ): Promise<ApiResponse<Category>> {
+    return this.patch<ApiResponse<Category>>(`/courses/categories/${id}`, data, options);
+  }
+
+  async deleteCategory(id: string, options?: RequestOptions): Promise<ApiResponse<void>> {
+    return this.delete<ApiResponse<void>>(`/courses/categories/${id}`, options);
+  }
+  async getCategoriesStats(options?: RequestOptions): Promise<ApiResponse<CategoriesStats>> {
+    return this.get<ApiResponse<CategoriesStats>>(`/courses/categories/stats`, options);
+  }
+
+  async toggleCategoryStatus(id: string, options?: RequestOptions): Promise<ApiResponse<Category>> {
+    return this.patch<ApiResponse<Category>>(
+      `/courses/categories/${id}/toggle-status`,
+      {},
+      options
+    );
   }
 
   static create(serviceOptions: BaseServiceOptions) {

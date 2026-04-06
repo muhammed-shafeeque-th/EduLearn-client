@@ -298,6 +298,18 @@ export function ChatsPageContent({ chatId, role }: ChatsPageContentProps) {
     },
     [archiveChat]
   );
+  const handlePinChat = useCallback(
+    async (chatId: string) => {
+      try {
+        const success = await pinChat(chatId);
+        if (!success) return toast.error('Failed to update chat state ');
+        toast.success('Chat to state updated');
+      } catch {
+        toast.error('Failed to update chat state ');
+      }
+    },
+    [pinChat]
+  );
 
   //  Loading / error states
 
@@ -366,7 +378,7 @@ export function ChatsPageContent({ chatId, role }: ChatsPageContentProps) {
               onSelectChat={handleSelectChat}
               onlineUsers={new Set(onlineUsers)}
               currentUser={currentUser}
-              onPin={pinChat}
+              onPin={handlePinChat}
               onMute={muteChat}
               onArchive={handleArchiveChat}
               onDelete={deleteChat}

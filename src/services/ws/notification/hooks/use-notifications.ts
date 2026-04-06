@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Notification, NotificationFilters } from '@/types/notification';
-import { notificationService } from '@/services/notification.service';
+import { notificationService } from '@/services/notification';
 import { useNotificationWebSocket } from './use-websocket';
 import { config } from '@/lib/config';
 import {

@@ -7,7 +7,7 @@ import type {
   SignedVideoUrlResponse,
   EnrollmentDetail,
 } from '@/types/enrollment/enrollment.type';
-import { enrollmentService } from '@/services/enrollment.service';
+import { enrollmentService } from '@/services/enrollment';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
@@ -19,7 +19,7 @@ export function useEnrollmentProgress(enrollmentId: string) {
   const queryClient = useQueryClient();
 
   const authUser = useAuthUserSelector();
-
+  const isEnabled = !!authUser?.userId && !!enrollmentId;
   // QUERIES
 
   /**
@@ -32,6 +32,7 @@ export function useEnrollmentProgress(enrollmentId: string) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     retry: 2,
+    enabled: isEnabled,
     refetchOnMount: false, // Don't refetch on remount within stale time
     refetchOnWindowFocus: false, // Don't refetch on focus
   });
@@ -44,6 +45,7 @@ export function useEnrollmentProgress(enrollmentId: string) {
     queryKey: QUERY_KEYS.enrollment.progress(enrollmentId),
     queryFn: ({ signal }) => enrollmentService.getEnrollmentProgress(enrollmentId, { signal }),
     staleTime: 30_000, // 30 seconds
+    enabled: isEnabled,
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
     // refetchOnMount: 'always', // Always get fresh progress on mount

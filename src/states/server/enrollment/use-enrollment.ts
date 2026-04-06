@@ -1,16 +1,17 @@
 'use client';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { EnrollmentParams, enrollmentService } from '@/services/enrollment.service';
+import { EnrollmentParams, enrollmentService } from '@/services/enrollment';
 import { useAuthUserSelector } from '@/states/client';
 
 export function useEnrollment(id: string, options?: { enabled?: boolean }) {
   const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId && !!id && (options?.enabled ?? true);
 
   return useQuery({
     queryKey: QUERY_KEYS.enrollment.detail(authUser?.userId || 'current', id),
     queryFn: ({ signal }) => enrollmentService.getEnrollment(id, { signal }),
-    enabled: !!id && (options?.enabled ?? true),
+    enabled: isEnabled,
     staleTime: 5 * 60 * 1000, // 5 minutes for individual courses
     meta: {
       errorMessage: 'Failed to load enrollment details',
@@ -22,10 +23,12 @@ export function useEnrollment(id: string, options?: { enabled?: boolean }) {
 }
 export function useEnrollments(params: Partial<EnrollmentParams>, options?: { enabled?: boolean }) {
   const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId && (options?.enabled ?? true);
+
   return useQuery({
     queryKey: QUERY_KEYS.enrollment.list(authUser?.userId || 'current', params),
     queryFn: ({ signal }) => enrollmentService.getEnrollments(params, { signal }),
-    enabled: options?.enabled ?? true,
+    enabled: isEnabled,
     staleTime: 5 * 60 * 1000, // 5 minutes for individual courses
     meta: {
       errorMessage: 'Failed to load enrollment details',
@@ -38,6 +41,7 @@ export function useEnrollments(params: Partial<EnrollmentParams>, options?: { en
 
 export function useUserEnrollmentIds(options?: { enabled?: boolean }) {
   const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId && (options?.enabled ?? true);
   return useQuery({
     queryKey: QUERY_KEYS.enrollment.ids(authUser?.userId || 'current'),
     queryFn: async ({ signal }) => {
@@ -47,7 +51,7 @@ export function useUserEnrollmentIds(options?: { enabled?: boolean }) {
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
-    enabled: options?.enabled ?? true,
+    enabled: isEnabled,
   });
 }
 
@@ -61,11 +65,13 @@ export function useIsEnrolled(courseId: string) {
 
 export function useEnrollmentInfinite(params: Partial<Omit<EnrollmentParams, 'page'>> = {}) {
   const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId;
   return useInfiniteQuery({
     queryKey: QUERY_KEYS.enrollment.list(authUser?.userId || 'current', {}),
     queryFn: ({ pageParam = 1, signal }) =>
       enrollmentService.getEnrollments({ ...params, page: pageParam }, { signal }),
     initialPageParam: 1,
+    enabled: isEnabled,
     getNextPageParam: (lastPage) =>
       lastPage.success && lastPage.pagination?.hasNext ? lastPage.pagination.page + 1 : undefined,
     getPreviousPageParam: (firstPage) =>
