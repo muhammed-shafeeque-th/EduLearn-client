@@ -16,13 +16,19 @@ export async function getUser(): Promise<AuthPayload | null> {
 
   try {
     const payload = verifyAccessToken(token as string);
-    if (typeof payload !== 'object' || !payload || !('userId' in payload) || !('role' in payload)) {
+    if (
+      typeof payload !== 'object' ||
+      !payload ||
+      !('userId' in payload) ||
+      !('roles' in payload)
+    ) {
       return null;
     }
     return {
       id: payload.userId,
       name: payload.username,
-      role: payload.role,
+      roles: payload.roles || [],
+      permissions: payload.permissions || [],
       email: payload.email,
     } as AuthPayload;
   } catch {
@@ -30,14 +36,20 @@ export async function getUser(): Promise<AuthPayload | null> {
     if (!refreshed || !refreshed?.token) return null;
 
     const payload = verifyAccessToken(refreshed.token as string);
-    if (typeof payload !== 'object' || !payload || !('userId' in payload) || !('role' in payload)) {
+    if (
+      typeof payload !== 'object' ||
+      !payload ||
+      !('userId' in payload) ||
+      !('roles' in payload)
+    ) {
       return null;
     }
 
     return {
       id: payload.userId,
       name: payload.username,
-      role: payload.role,
+      roles: payload.roles || [],
+      permissions: payload.permissions || [],
       email: payload.email,
     } as AuthPayload;
   }
