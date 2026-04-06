@@ -32,7 +32,7 @@ interface QuizError {
 
 interface QuizBuilderProps {
   control: Control<CurriculumFormData>;
-  sectionIndex: number;
+  moduleIndex: number;
   controller: CourseControllerAPI;
   quizError?: QuizError;
   className?: string;
@@ -45,22 +45,22 @@ function getErrorMessage(err: QuizFieldError | any) {
 
 export const QuizBuilder: React.FC<QuizBuilderProps> = ({
   control,
-  sectionIndex,
+  moduleIndex,
   controller,
   quizError,
   className = '',
 }) => {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
 
-  const section = useWatch({
+  const $module = useWatch({
     control,
-    name: `sections.${sectionIndex}`,
+    name: `modules.${moduleIndex}`,
   });
 
   // Always use a stable, default quiz object for new quizzes
   const quiz: Quiz = useMemo(
     () =>
-      section.quiz || {
+      $module.quiz || {
         id: generateId(),
         title: '',
         description: '',
@@ -72,7 +72,7 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
         showResults: true,
         isRequired: false,
       },
-    [section.quiz]
+    [$module.quiz]
   );
 
   // De-structure errors for easy referencing
@@ -89,9 +89,9 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
   const handleUpdateQuizField = useCallback(
     <K extends keyof Quiz>(field: K, value: Quiz[K]) => {
       if (!quiz?.id) return;
-      controller.updateQuizField(sectionIndex, quiz.id, field, value);
+      controller.updateQuizField(moduleIndex, quiz.id, field, value);
     },
-    [controller, sectionIndex, quiz]
+    [controller, moduleIndex, quiz]
   );
 
   // Unused features removed: add/deleteQuiz (Quiz always present for editing UX)
@@ -99,9 +99,9 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
   const handleQuizQuestionsUpdate = useCallback(
     (updatedQuestions: QuizQuestion[]) => {
       if (!quiz?.id) return;
-      controller.updateQuizField(sectionIndex, quiz.id, 'questions', updatedQuestions);
+      controller.updateQuizField(moduleIndex, quiz.id, 'questions', updatedQuestions);
     },
-    [controller, sectionIndex, quiz]
+    [controller, moduleIndex, quiz]
   );
 
   // Add question: uses minimal correct structure and always expands it for edit
@@ -306,10 +306,10 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
               checked={!!quiz.isRequired}
               onChange={(e) => handleUpdateQuizField('isRequired', e.target.checked)}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-              aria-label="Required to complete section"
+              aria-label="Required to complete $module"
             />
             <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Required to complete section
+              Required to complete $module
             </span>
           </Label>
         </div>

@@ -221,9 +221,9 @@ export const lessonSchema = z.object({
   order: z.number().min(0, 'Order cannot be negative').default(0),
 });
 
-export const sectionSchema = z.object({
-  id: nonEmptyString('Section ID'),
-  title: longString('Section title', 3, 100),
+export const moduleSchema = z.object({
+  id: nonEmptyString('Module ID'),
+  title: longString('Module title', 3, 100),
   description: z.string().max(2000, 'Description cannot exceed 2000 characters').optional(),
   lessons: z
     .array(lessonSchema, { required_error: 'Lessons are required' })
@@ -234,10 +234,10 @@ export const sectionSchema = z.object({
 });
 
 export const curriculumSchema = z.object({
-  sections: z
-    .array(sectionSchema, { required_error: 'Sections are required' })
-    .min(2, 'At least two sections required')
-    .max(100, 'Maximum 100 sections allowed'),
+  modules: z
+    .array(moduleSchema, { required_error: 'Modules are required' })
+    .min(2, 'At least two modules required')
+    .max(100, 'Maximum 100 modules allowed'),
   totalDuration: z.number().min(0, 'Total duration cannot be negative').optional(),
   totalLessons: z.number().min(0, 'Total lessons cannot be negative').optional(),
   totalQuizzes: z.number().min(0, 'Total quizzes cannot be negative').optional(),
@@ -247,5 +247,5 @@ export type Content = z.infer<typeof contentSchema>;
 export type QuizQuestion = z.infer<typeof quizQuestionSchema>;
 export type Quiz = z.infer<typeof quizSchema>;
 export type Lesson = z.infer<typeof lessonSchema>;
-export type Section = z.infer<typeof sectionSchema>;
+export type Module = z.infer<typeof moduleSchema>;
 export type CurriculumFormData = z.infer<typeof curriculumSchema>;

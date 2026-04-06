@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import LoadingScreen from '@/components/ui/loading-screen';
-import { requireAuth } from '@/lib/auth/require-auth';
+import { authGuard } from '@/lib/auth/auth-guard';
 import { notFound, redirect } from 'next/navigation';
 import { fetchServerCourseById } from '@/lib/server-apis';
 
@@ -52,7 +52,7 @@ export default async function InstructorCourseLayout({
     return notFound();
   }
 
-  await requireAuth({
+  await authGuard({
     roles: ['instructor'],
     redirectTo: '/auth/login',
     condition(user, ctx) {

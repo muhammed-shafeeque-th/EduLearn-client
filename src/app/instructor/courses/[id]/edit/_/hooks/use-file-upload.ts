@@ -10,7 +10,7 @@ import {
   MultipartUploadResponse,
   PresignedUrlResponse,
   mediaService,
-} from '@/services/media.service';
+} from '@/services/media';
 
 interface UploadState {
   isUploading: boolean;

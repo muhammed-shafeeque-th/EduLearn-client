@@ -2,12 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { courseService } from '@/services/course.service';
 import { getServerSession } from 'next-auth';
+import { serverCourseService } from '@/services/server-service-clients';
 
 // Validation schemas
-const sectionSchema = z.object({
-  title: z.string().min(1, 'Section title is required'),
+const moduleSchema = z.object({
+  title: z.string().min(1, 'Module title is required'),
   description: z.string().optional(),
   order: z.number(),
   isPublished: z.boolean().default(false),
@@ -60,7 +60,7 @@ async function verifyCourseOwnership(courseId: string) {
     throw new Error('Unauthorized');
   }
 
-  const course = await courseService.getCourseById(courseId);
+  const course = await serverCourseService.getCourseById(courseId);
   if (!course.success || !course.data) {
     throw new Error('Course not found');
   }
@@ -72,13 +72,13 @@ async function verifyCourseOwnership(courseId: string) {
   return course.data;
 }
 
-// Section Actions
-export async function createSectionAction(courseId: string, data: z.infer<typeof sectionSchema>) {
+// Module Actions
+export async function createModuleAction(courseId: string, data: z.infer<typeof moduleSchema>) {
   try {
     await verifyCourseOwnership(courseId);
 
-    const validatedData = sectionSchema.parse(data);
-    const result = await courseService.createSection(courseId, validatedData);
+    const validatedData = moduleSchema.parse(data);
+    const result = await serverCourseService.createModule(courseId, validatedData);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -91,15 +91,15 @@ export async function createSectionAction(courseId: string, data: z.infer<typeof
   }
 }
 
-export async function updateSectionAction(
+export async function updateModuleAction(
   courseId: string,
-  sectionId: string,
-  data: Partial<z.infer<typeof sectionSchema>>
+  moduleId: string,
+  data: Partial<z.infer<typeof moduleSchema>>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const result = await courseService.updateSection(courseId, sectionId, data);
+    const result = await serverCourseService.updateModule(courseId, moduleId, data);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -112,11 +112,11 @@ export async function updateSectionAction(
   }
 }
 
-export async function deleteSectionAction(courseId: string, sectionId: string) {
+export async function deleteModuleAction(courseId: string, moduleId: string) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const result = await courseService.deleteSection(courseId, sectionId);
+    const result = await serverCourseService.deleteModule(courseId, moduleId);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -129,16 +129,16 @@ export async function deleteSectionAction(courseId: string, sectionId: string) {
   }
 }
 
-export async function reorderSectionsAction(
+export async function reorderModulesAction(
   courseId: string,
-  sectionOrders: Array<{ id: string; order: number }>
+  moduleOrders: Array<{ id: string; order: number }>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    // Batch update section orders
-    const updatePromises = sectionOrders.map(({ id, order }) =>
-      courseService.updateSection(courseId, id, { order })
+    // Batch update module orders
+    const updatePromises = moduleOrders.map(({ id, order }) =>
+      serverCourseService.updateModule(courseId, id, { order })
     );
 
     const results = await Promise.allSettled(updatePromises);
@@ -147,7 +147,7 @@ export async function reorderSectionsAction(
     if (failedUpdates.length > 0) {
       return {
         success: false,
-        error: `Failed to reorder ${failedUpdates.length} section(s)`,
+        error: `Failed to reorder ${failedUpdates.length} module(s)`,
       };
     }
 
@@ -163,14 +163,14 @@ export async function reorderSectionsAction(
 // Lesson Actions
 export async function createLessonAction(
   courseId: string,
-  sectionId: string,
+  moduleId: string,
   data: z.infer<typeof lessonSchema>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
     const validatedData = lessonSchema.parse(data);
-    const result = await courseService.createLesson(courseId, sectionId, validatedData);
+    const result = await serverCourseService.createLesson(courseId, moduleId, validatedData);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -185,14 +185,14 @@ export async function createLessonAction(
 
 export async function updateLessonAction(
   courseId: string,
-  sectionId: string,
+  moduleId: string,
   lessonId: string,
   data: Partial<z.infer<typeof lessonSchema>>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const result = await courseService.updateLesson(courseId, sectionId, lessonId, data);
+    const result = await serverCourseService.updateLesson(courseId, moduleId, lessonId, data);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -205,11 +205,11 @@ export async function updateLessonAction(
   }
 }
 
-export async function deleteLessonAction(courseId: string, sectionId: string, lessonId: string) {
+export async function deleteLessonAction(courseId: string, moduleId: string, lessonId: string) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const result = await courseService.deleteLesson(courseId, sectionId, lessonId);
+    const result = await serverCourseService.deleteLesson(courseId, moduleId, lessonId);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -224,7 +224,7 @@ export async function deleteLessonAction(courseId: string, sectionId: string, le
 
 export async function reorderLessonsAction(
   courseId: string,
-  sectionId: string,
+  moduleId: string,
   lessonOrders: Array<{ id: string; order: number }>
 ) {
   try {
@@ -232,7 +232,7 @@ export async function reorderLessonsAction(
 
     // Batch update lesson orders
     const updatePromises = lessonOrders.map(({ id, order }) =>
-      courseService.updateLesson(courseId, sectionId, id, { order })
+      serverCourseService.updateLesson(courseId, moduleId, id, { order })
     );
 
     const results = await Promise.allSettled(updatePromises);
@@ -255,14 +255,14 @@ export async function reorderLessonsAction(
 // Quiz Actions
 export async function createQuizAction(
   courseId: string,
-  sectionId: string,
+  moduleId: string,
   data: z.infer<typeof quizSchema>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
     const validatedData = quizSchema.parse(data);
-    const result = await courseService.createQuiz(courseId, sectionId, validatedData);
+    const result = await serverCourseService.createQuiz(courseId, moduleId, validatedData);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -277,14 +277,14 @@ export async function createQuizAction(
 
 export async function updateQuizAction(
   courseId: string,
-  sectionId: string,
+  moduleId: string,
   quizId: string,
   data: Partial<z.infer<typeof quizSchema>>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const result = await courseService.updateQuiz(courseId, sectionId, quizId, data);
+    const result = await serverCourseService.updateQuiz(courseId, moduleId, quizId, data);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -297,11 +297,11 @@ export async function updateQuizAction(
   }
 }
 
-export async function deleteQuizAction(courseId: string, sectionId: string, quizId: string) {
+export async function deleteQuizAction(courseId: string, moduleId: string, quizId: string) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const result = await courseService.deleteQuiz(courseId, sectionId, quizId);
+    const result = await serverCourseService.deleteQuiz(courseId, moduleId, quizId);
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
@@ -317,14 +317,14 @@ export async function deleteQuizAction(courseId: string, sectionId: string, quiz
 // Batch Operations
 export async function batchCreateLessonsAction(
   courseId: string,
-  sectionId: string,
+  moduleId: string,
   lessons: Array<z.infer<typeof lessonSchema>>
 ) {
   try {
     // await verifyCourseOwnership(courseId);
 
     const createPromises = lessons.map((lesson) =>
-      courseService.createLesson(courseId, sectionId, lesson)
+      serverCourseService.createLesson(courseId, moduleId, lesson)
     );
 
     const results = await Promise.allSettled(createPromises);
@@ -350,29 +350,29 @@ export async function validateCurriculumAction(courseId: string) {
   try {
     // await verifyCourseOwnership(courseId);
 
-    const course = await courseService.getCourseById(courseId);
+    const course = await serverCourseService.getCourseById(courseId);
     if (!course.success || !course.data) {
       throw new Error('Course not found');
     }
 
     const errors: string[] = [];
 
-    // Validate sections
-    if (!course.data.sections || course.data.sections.length === 0) {
-      errors.push('At least one section is required');
+    // Validate modules
+    if (!course.data.modules || course.data.modules.length === 0) {
+      errors.push('At least one module is required');
     }
 
     // Validate lessons
     const totalLessons =
-      course.data.sections?.reduce((sum, section) => sum + (section.lessons?.length || 0), 0) || 0;
+      course.data.modules?.reduce((sum, module) => sum + (module.lessons?.length || 0), 0) || 0;
 
     if (totalLessons < 3) {
       errors.push('At least 3 lessons are recommended');
     }
 
     // Check for lessons without content
-    const lessonsWithoutContent = course.data.sections?.some((section) =>
-      section.lessons?.some((lesson) => !lesson.contentType)
+    const lessonsWithoutContent = course.data.modules?.some((module) =>
+      module.lessons?.some((lesson) => !lesson.contentType)
     );
 
     if (lessonsWithoutContent) {
