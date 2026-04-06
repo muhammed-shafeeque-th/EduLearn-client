@@ -76,8 +76,8 @@ export function CourseDetailStats({ course }: CourseDetailStatsProps) {
       icon: TrendingUp,
     },
     {
-      label: 'Sections',
-      value: course.curriculum.sections.toString(),
+      label: 'Modules',
+      value: course.curriculum.modules.toString(),
       icon: BookOpen,
     },
     {

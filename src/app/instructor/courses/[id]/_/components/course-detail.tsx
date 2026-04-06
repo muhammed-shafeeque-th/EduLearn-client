@@ -75,33 +75,33 @@ function StatCard({
 }
 
 export function CourseDetail({ course }: CourseDetailProps) {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) => {
+  const toggleModule = (moduleId: string) => {
+    setExpandedModules((prev) => {
       const next = new Set(prev);
-      if (next.has(sectionId)) {
-        next.delete(sectionId);
+      if (next.has(moduleId)) {
+        next.delete(moduleId);
       } else {
-        next.add(sectionId);
+        next.add(moduleId);
       }
       return next;
     });
   };
 
   const stats = useMemo(() => {
-    const totalLessons = course.sections.reduce((sum, s) => sum + s.lessons.length, 0);
-    const totalQuizzes = course.sections.reduce((sum, s) => sum + (s.quiz ? 1 : 0), 0);
-    const publishedSections = course.sections.filter((s) => s.isPublished).length;
-    const publishedLessons = course.sections.reduce(
+    const totalLessons = course.modules.reduce((sum, s) => sum + s.lessons.length, 0);
+    const totalQuizzes = course.modules.reduce((sum, s) => sum + (s.quiz ? 1 : 0), 0);
+    const publishedModules = course.modules.filter((s) => s.isPublished).length;
+    const publishedLessons = course.modules.reduce(
       (sum, s) => sum + s.lessons.filter((l) => l.isPublished).length,
       0
     );
     const completionRate =
       totalLessons > 0 ? Math.round((publishedLessons / totalLessons) * 100) : 0;
 
-    return { totalLessons, totalQuizzes, publishedSections, publishedLessons, completionRate };
-  }, [course.sections]);
+    return { totalLessons, totalQuizzes, publishedModules, publishedLessons, completionRate };
+  }, [course.modules]);
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -123,8 +123,8 @@ export function CourseDetail({ course }: CourseDetailProps) {
   const qualityChecks = useMemo(
     () => [
       {
-        label: 'Course has sections',
-        completed: course.sections.length > 0,
+        label: 'Course has modules',
+        completed: course.modules.length > 0,
         required: true,
       },
       {
@@ -133,8 +133,8 @@ export function CourseDetail({ course }: CourseDetailProps) {
         required: true,
       },
       {
-        label: 'All sections have lessons',
-        completed: course.sections.every((s) => s.lessons.length > 0),
+        label: 'All modules have lessons',
+        completed: course.modules.every((s) => s.lessons.length > 0),
         required: true,
       },
       {
@@ -148,7 +148,7 @@ export function CourseDetail({ course }: CourseDetailProps) {
         required: false,
       },
     ],
-    [course.sections, stats]
+    [course.modules, stats]
   );
 
   const completedChecks = qualityChecks.filter((c) => c.completed).length;
@@ -190,7 +190,7 @@ export function CourseDetail({ course }: CourseDetailProps) {
         />
         <StatCard
           title="Content"
-          value={`${course.sections.length} sections`}
+          value={`${course.modules.length} modules`}
           subtitle={`${stats.totalLessons} lessons · ${stats.totalQuizzes} quizzes`}
           icon={BookOpen}
           color="text-violet-600"
@@ -216,9 +216,12 @@ export function CourseDetail({ course }: CourseDetailProps) {
                 </h4>
                 <ul className="space-y-2">
                   {course.learningOutcomes.map((outcome, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-muted-foreground min-w-0"
+                    >
                       <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>{outcome}</span>
+                      <span className="break-words">{outcome}</span>
                     </li>
                   ))}
                 </ul>
@@ -234,9 +237,12 @@ export function CourseDetail({ course }: CourseDetailProps) {
                 </h4>
                 <ul className="space-y-2">
                   {course.requirements.map((req, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-muted-foreground min-w-0"
+                    >
                       <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{req}</span>
+                      <span className="break-words">{req}</span>
                     </li>
                   ))}
                 </ul>
@@ -252,9 +258,12 @@ export function CourseDetail({ course }: CourseDetailProps) {
                 </h4>
                 <ul className="space-y-2">
                   {course.targetAudience.map((audience, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-muted-foreground min-w-0"
+                    >
                       <Users className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                      <span>{audience}</span>
+                      <span className="break-words">{audience}</span>
                     </li>
                   ))}
                 </ul>
@@ -314,7 +323,7 @@ export function CourseDetail({ course }: CourseDetailProps) {
               <DetailItem
                 icon={BookOpen}
                 label="Published Content"
-                value={`${stats.publishedSections}/${course.sections.length} sections`}
+                value={`${stats.publishedModules}/${course.modules.length} modules`}
               />
             </div>
 
@@ -356,67 +365,67 @@ export function CourseDetail({ course }: CourseDetailProps) {
           <CardTitle className="text-lg">Course Curriculum</CardTitle>
         </CardHeader>
         <CardContent>
-          {course.sections.length === 0 ? (
+          {course.modules.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
               <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p className="text-sm">No sections added yet. Start building your curriculum.</p>
+              <p className="text-sm">No modules added yet. Start building your curriculum.</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {course.sections.map((section, sectionIndex) => (
+              {course.modules.map((module, moduleIndex) => (
                 <motion.div
-                  key={section.id}
+                  key={module.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: sectionIndex * 0.05 }}
+                  transition={{ delay: moduleIndex * 0.05 }}
                   className="border rounded-lg overflow-hidden"
                 >
-                  {/* Section Header */}
+                  {/* Module Header */}
                   <button
                     type="button"
                     className="flex items-center justify-between w-full p-4 bg-muted/40 hover:bg-muted/60 transition-colors text-left"
-                    onClick={() => toggleSection(section.id)}
-                    aria-expanded={expandedSections.has(section.id)}
-                    aria-controls={`section-content-${section.id}`}
+                    onClick={() => toggleModule(module.id)}
+                    aria-expanded={expandedModules.has(module.id)}
+                    aria-controls={`module-content-${module.id}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full text-sm font-bold">
-                        {sectionIndex + 1}
+                        {moduleIndex + 1}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-foreground">{section.title}</h3>
+                        <h3 className="font-semibold text-foreground">{module.title}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {section.lessons.length} lessons
-                          {section.quiz && ' · 1 quiz'}
+                          {module.lessons.length} lessons
+                          {module.quiz && ' · 1 quiz'}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Badge variant={section.isPublished ? 'default' : 'secondary'}>
-                        {section.isPublished ? 'Published' : 'Draft'}
+                      <Badge variant={module.isPublished ? 'default' : 'secondary'}>
+                        {module.isPublished ? 'Published' : 'Draft'}
                       </Badge>
                       <ChevronDown
                         className={cn(
                           'w-4 h-4 text-muted-foreground transition-transform',
-                          expandedSections.has(section.id) && 'rotate-180'
+                          expandedModules.has(module.id) && 'rotate-180'
                         )}
                       />
                     </div>
                   </button>
 
-                  {/* Section Content */}
+                  {/* Module Content */}
                   <AnimatePresence>
-                    {expandedSections.has(section.id) && (
+                    {expandedModules.has(module.id) && (
                       <motion.div
-                        id={`section-content-${section.id}`}
+                        id={`module-content-${module.id}`}
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         className="border-t bg-background"
                       >
                         <div className="p-4 space-y-2">
-                          {section.lessons.map((lesson, lessonIndex) => (
+                          {module.lessons.map((lesson, lessonIndex) => (
                             <div
                               key={lesson.id}
                               className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors"
@@ -542,11 +551,11 @@ function DetailItem({
   valueClass?: string;
 }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 min-w-0">
       <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={cn('text-sm font-medium text-foreground', valueClass)}>{value}</p>
+        <p className={cn('text-sm font-medium text-foreground break-words', valueClass)}>{value}</p>
       </div>
     </div>
   );
