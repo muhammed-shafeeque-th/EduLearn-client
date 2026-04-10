@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Section } from '../_/curriculum-schema';
+import { Module } from '../_/curriculum-schema';
 
 interface ContentValidationResult {
   isValid: boolean;
@@ -12,7 +12,7 @@ interface ContentValidationResult {
     location?: string;
   }[];
   stats: {
-    totalSections: number;
+    totalModules: number;
     totalLessons: number;
     totalContent: number;
     totalDuration: number;
@@ -21,20 +21,20 @@ interface ContentValidationResult {
   };
 }
 
-export const useContentValidation = (sections: Section[]): ContentValidationResult => {
+export const useContentValidation = (modules: Module[]): ContentValidationResult => {
   return useMemo(() => {
     const issues: ContentValidationResult['issues'] = [];
     let completionScore = 0;
 
     // Calculate stats
     const stats = {
-      totalSections: sections.length,
-      totalLessons: sections.reduce((sum, s) => sum + s.lessons.length, 0),
-      totalContent: sections.reduce(
+      totalModules: modules.length,
+      totalLessons: modules.reduce((sum, s) => sum + s.lessons.length, 0),
+      totalContent: modules.reduce(
         (sum, s) => sum + s.lessons.reduce((lSum, l) => lSum + l.content.length, 0),
         0
       ),
-      totalDuration: sections.reduce(
+      totalDuration: modules.reduce(
         (sum, s) =>
           sum +
           s.lessons.reduce(
@@ -47,47 +47,47 @@ export const useContentValidation = (sections: Section[]): ContentValidationResu
       uploadsComplete: true,
     };
 
-    // Validate sections
-    if (sections.length === 0) {
+    // Validate modules
+    if (modules.length === 0) {
       issues.push({
         type: 'error',
-        message: 'At least one section is required',
+        message: 'At least one module is required',
       });
     } else {
       completionScore += 20;
     }
 
-    sections.forEach((section, sectionIndex) => {
-      const sectionLocation = `Section ${sectionIndex + 1}`;
+    modules.forEach((module, moduleIndex) => {
+      const moduleLocation = `Module ${moduleIndex + 1}`;
 
-      // Section validation
-      if (!section.name?.trim()) {
+      // Module validation
+      if (!module.name?.trim()) {
         issues.push({
           type: 'error',
-          message: 'Section name is required',
-          location: sectionLocation,
+          message: 'Module name is required',
+          location: moduleLocation,
         });
       }
 
-      if (section.lessons.length === 0) {
+      if (module.lessons.length === 0) {
         issues.push({
           type: 'error',
           message: 'At least one lesson is required',
-          location: sectionLocation,
+          location: moduleLocation,
         });
       }
 
-      if (!section.description?.trim()) {
+      if (!module.description?.trim()) {
         issues.push({
           type: 'suggestion',
-          message: 'Consider adding a section description',
-          location: sectionLocation,
+          message: 'Consider adding a module description',
+          location: moduleLocation,
         });
       }
 
       // Lesson validation
-      section.lessons.forEach((lesson, lessonIndex) => {
-        const lessonLocation = `${sectionLocation} > Lesson ${lessonIndex + 1}`;
+      module.lessons.forEach((lesson, lessonIndex) => {
+        const lessonLocation = `${moduleLocation} > Lesson ${lessonIndex + 1}`;
 
         if (!lesson.name?.trim()) {
           issues.push({
@@ -202,7 +202,7 @@ export const useContentValidation = (sections: Section[]): ContentValidationResu
       });
     }
 
-    const hasQuizzes = sections.some(
+    const hasQuizzes = modules.some(
       (s) => s.quiz || s.lessons.some((l) => l.content.some((c) => c.type === 'quiz'))
     );
 
@@ -219,5 +219,5 @@ export const useContentValidation = (sections: Section[]): ContentValidationResu
       issues,
       stats,
     };
-  }, [sections]);
+  }, [modules]);
 };

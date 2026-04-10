@@ -24,7 +24,7 @@ interface LessonFieldError {
 interface LessonEditorProps {
   control: Control<CurriculumFormData>;
   lessonIndex: number;
-  sectionIndex: number;
+  moduleIndex: number;
   courseId: string;
   controller: CourseControllerAPI;
   canMoveUp: boolean;
@@ -35,7 +35,7 @@ interface LessonEditorProps {
 export const LessonEditor = ({
   control,
   lessonIndex,
-  sectionIndex,
+  moduleIndex,
   courseId,
   controller,
   canMoveUp,
@@ -47,9 +47,9 @@ export const LessonEditor = ({
   const [showContentModal, setShowContentModal] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
-  // Watch section and lesson for controller operations
-  // const section = useWatch({ control, name: `sections.${sectionIndex}` });
-  const lesson = useWatch({ control, name: `sections.${sectionIndex}.lessons.${lessonIndex}` });
+  // Watch module and lesson for controller operations
+  // const module = useWatch({ control, name: `modules.${moduleIndex}` });
+  const lesson = useWatch({ control, name: `modules.${moduleIndex}.lessons.${lessonIndex}` });
 
   // Extract field-specific errors safely
   const titleError = lessonError?.title?.message ?? '';
@@ -67,84 +67,84 @@ export const LessonEditor = ({
 
   /**
    * Updates a single field in the lesson. Only triggers when value is changed.
-   * Sends sectionIndex and lessonIndex as required by controller handler.
+   * Sends moduleIndex and lessonIndex as required by controller handler.
    */
   const handleFieldUpdate = useCallback(
     async <T extends keyof Lesson>(field: T, value: Lesson[T]) => {
       if (!lesson) return;
       if (lesson[field] === value) return;
-      // Controller expects: sectionIdx, lessonIdx, field, value
-      await controller.updateLessonField(sectionIndex, lessonIndex, field, value);
+      // Controller expects: moduleIdx, lessonIdx, field, value
+      await controller.updateLessonField(moduleIndex, lessonIndex, field, value);
     },
-    [controller, sectionIndex, lessonIndex, lesson]
+    [controller, moduleIndex, lessonIndex, lesson]
   );
 
   /**
    * Add new content to the lesson (content gets a generated id).
-   * Sends sectionIndex, lessonIndex as required by controller handler.
+   * Sends moduleIndex, lessonIndex as required by controller handler.
    */
   const handleAddContent = useCallback(
     async (content: Omit<Content, 'id'>) => {
       if (!lesson) return;
 
-      // Controller expects: sectionIdx, lessonIdx, content
-      await controller.addLessonContent(sectionIndex, lessonIndex, content);
+      // Controller expects: moduleIdx, lessonIdx, content
+      await controller.addLessonContent(moduleIndex, lessonIndex, content);
       setShowContentModal(false);
     },
-    [controller, sectionIndex, lessonIndex, lesson]
+    [controller, moduleIndex, lessonIndex, lesson]
   );
 
   /**
    * Updates existing content in the lesson (in-place merge).
-   * Passes sectionIndex, lessonIndex, updates as required.
+   * Passes moduleIndex, lessonIndex, updates as required.
    */
   const handleUpdateContent = useCallback(
     async (updates: Partial<Content>) => {
       if (!lesson?.content) return;
-      // Controller expects: sectionIdx, lessonIdx, updates
-      await controller.updateLessonContent(sectionIndex, lessonIndex, updates);
+      // Controller expects: moduleIdx, lessonIdx, updates
+      await controller.updateLessonContent(moduleIndex, lessonIndex, updates);
     },
-    [controller, sectionIndex, lessonIndex, lesson]
+    [controller, moduleIndex, lessonIndex, lesson]
   );
 
   /**
-   * Moves the lesson up or down within its section.
-   * Passes sectionIndex, lessonIndex, direction.
+   * Moves the lesson up or down within its module.
+   * Passes moduleIndex, lessonIndex, direction.
    */
   const handleMoveLesson = useCallback(
     (direction: 'up' | 'down') => {
       if (!lesson) return;
       const newIdx = direction === 'up' ? lessonIndex - 1 : lessonIndex + 1;
-      // Controller expects: sectionIdx, fromLessonIdx, toLessonIdx
-      controller.reorderLessons(sectionIndex, lessonIndex, newIdx);
+      // Controller expects: moduleIdx, fromLessonIdx, toLessonIdx
+      controller.reorderLessons(moduleIndex, lessonIndex, newIdx);
     },
-    [controller, sectionIndex, lessonIndex, lesson]
+    [controller, moduleIndex, lessonIndex, lesson]
   );
 
   /**
    * Deletes the lesson after confirmation.
-   * Passes sectionIndex, lessonIndex to the controller as required.
+   * Passes moduleIndex, lessonIndex to the controller as required.
    */
   const handleDeleteLesson = useCallback(() => {
     if (!lesson) return;
     const confirmed = window.confirm(`Delete "${lesson.title}"? This cannot be undone.`);
     if (confirmed) {
-      // Controller expects: sectionIdx, lessonIdx
-      controller.deleteLesson(sectionIndex, lessonIndex);
+      // Controller expects: moduleIdx, lessonIdx
+      controller.deleteLesson(moduleIndex, lessonIndex);
     }
-  }, [controller, sectionIndex, lessonIndex, lesson]);
+  }, [controller, moduleIndex, lessonIndex, lesson]);
 
   /**
    * Deletes content from the lesson after confirmation.
-   * Passes sectionIndex, lessonIndex to the controller as required.
+   * Passes moduleIndex, lessonIndex to the controller as required.
    */
   const handleDeleteContent = useCallback(async () => {
     if (!lesson) return;
     if (window.confirm('Delete lesson content? This cannot be undone.')) {
-      // Controller expects: sectionIdx, lessonIdx
-      await controller.updateLessonContent(sectionIndex, lessonIndex, {});
+      // Controller expects: moduleIdx, lessonIdx
+      await controller.updateLessonContent(moduleIndex, lessonIndex, {});
     }
-  }, [controller, sectionIndex, lessonIndex, lesson]);
+  }, [controller, moduleIndex, lessonIndex, lesson]);
 
   // Accessibility: generate a unique id for use in ARIA attributes
   const lessonHeaderId = lesson?.id ? `lesson-header-${lesson.id}` : undefined;

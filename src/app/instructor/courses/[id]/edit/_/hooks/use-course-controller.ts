@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import { CourseController, CourseControllerConfig } from '../utils/course-controller';
 import type {
-  Section,
+  Module,
   Lesson,
   Quiz,
   CurriculumFormData,
@@ -39,7 +39,7 @@ export interface UseCourseControllerProps {
   basicForm: UseFormReturn<BasicInfoFormData>;
   advancedForm: UseFormReturn<AdvancedInfoFormData>;
   curriculumForm: UseFormReturn<CurriculumFormData>;
-  sectionsArray: UseFieldArrayReturn<CurriculumFormData, 'sections'>;
+  modulesArray: UseFieldArrayReturn<CurriculumFormData, 'modules'>;
 }
 
 export function useCourseController(props: UseCourseControllerProps) {
@@ -116,46 +116,46 @@ export function useCourseController(props: UseCourseControllerProps) {
     }
   }, [controller]);
 
-  // SECTION OPERATIONS
-  const createSection = useCallback(
-    (data: Omit<Section, 'id'>) => {
-      debug('createSection - called', data);
-      const ret = controller.createSection(data);
-      debug('createSection - return', ret);
+  // MODULE OPERATIONS
+  const createModule = useCallback(
+    (data: Omit<Module, 'id'>) => {
+      debug('createModule - called', data);
+      const ret = controller.createModule(data);
+      debug('createModule - return', ret);
       return ret;
     },
     [controller]
   );
 
-  const updateSectionField = useCallback(
-    <T extends keyof Section>(sectionIdx: number, key: T, value: Section[T]): void => {
-      debug('updateSectionField - called', { sectionIdx, key, value });
-      controller.updateSectionField(sectionIdx, key, value);
+  const updateModuleField = useCallback(
+    <T extends keyof Module>(moduleIdx: number, key: T, value: Module[T]): void => {
+      debug('updateModuleField - called', { moduleIdx, key, value });
+      controller.updateModuleField(moduleIdx, key, value);
     },
     [controller]
   );
 
-  const deleteSection = useCallback(
-    (sectionIdx: number) => {
-      debug('deleteSection - called', sectionIdx);
-      controller.deleteSection(sectionIdx);
+  const deleteModule = useCallback(
+    (moduleIdx: number) => {
+      debug('deleteModule - called', moduleIdx);
+      controller.deleteModule(moduleIdx);
     },
     [controller]
   );
 
-  const reorderSections = useCallback(
+  const reorderModules = useCallback(
     (fromIndex: number, toIndex: number) => {
-      debug('reorderSections - called', { fromIndex, toIndex });
-      controller.reorderSections(fromIndex, toIndex);
+      debug('reorderModules - called', { fromIndex, toIndex });
+      controller.reorderModules(fromIndex, toIndex);
     },
     [controller]
   );
 
   // LESSON OPERATIONS
   const createLesson = useCallback(
-    (sectionIdx: number, data: Omit<Lesson, 'id'>) => {
-      debug('createLesson - called', { sectionIdx, data });
-      const ret = controller.createLesson(sectionIdx, data);
+    (moduleIdx: number, data: Omit<Lesson, 'id'>) => {
+      debug('createLesson - called', { moduleIdx, data });
+      const ret = controller.createLesson(moduleIdx, data);
       debug('createLesson - return', ret);
       return ret;
     },
@@ -164,72 +164,72 @@ export function useCourseController(props: UseCourseControllerProps) {
 
   const updateLessonField = useCallback(
     <T extends keyof Lesson>(
-      sectionIdx: number,
+      moduleIdx: number,
       lessonIdx: number,
       key: T,
       value: Lesson[T]
     ): void => {
-      debug('updateLessonField - called', { sectionIdx, lessonIdx, key, value });
-      controller.updateLessonField(sectionIdx, lessonIdx, key, value);
+      debug('updateLessonField - called', { moduleIdx, lessonIdx, key, value });
+      controller.updateLessonField(moduleIdx, lessonIdx, key, value);
     },
     [controller]
   );
 
   const addLessonContent = useCallback(
-    (sectionIdx: number, lessonIdx: number, content: Omit<Content, 'id'>): void => {
-      debug('addLessonContent - called', { sectionIdx, lessonIdx, content });
-      controller.addLessonContent(sectionIdx, lessonIdx, content);
+    (moduleIdx: number, lessonIdx: number, content: Omit<Content, 'id'>): void => {
+      debug('addLessonContent - called', { moduleIdx, lessonIdx, content });
+      controller.addLessonContent(moduleIdx, lessonIdx, content);
     },
     [controller]
   );
 
   const updateLessonContent = useCallback(
-    (sectionIdx: number, lessonIdx: number, updates: Partial<Content>): void => {
-      debug('updateLessonContent - called', { sectionIdx, lessonIdx, updates });
-      controller.updateLessonContent(sectionIdx, lessonIdx, updates);
+    (moduleIdx: number, lessonIdx: number, updates: Partial<Content>): void => {
+      debug('updateLessonContent - called', { moduleIdx, lessonIdx, updates });
+      controller.updateLessonContent(moduleIdx, lessonIdx, updates);
     },
     [controller]
   );
   const removeLessonContent = useCallback(
-    (sectionIdx: number, lessonIdx: number): void => {
-      debug('removeLessonContent - called', { sectionIdx, lessonIdx });
-      controller.removeLessonContent(sectionIdx, lessonIdx);
+    (moduleIdx: number, lessonIdx: number): void => {
+      debug('removeLessonContent - called', { moduleIdx, lessonIdx });
+      controller.removeLessonContent(moduleIdx, lessonIdx);
     },
     [controller]
   );
   // const updateLessonContent = useCallback(
   //   <T extends keyof Lesson['content']>(
-  //     sectionIdx: number,
+  //     moduleIdx: number,
   //     lessonIdx: number,
   //     key: T,
   //     value: Lesson['content'][T]
   //   ): void => {
-  //     controller.updateLessonContent(sectionIdx, lessonIdx, key, value);
+  //     controller.updateLessonContent(moduleIdx, lessonIdx, key, value);
   //   },
   //   [controller]
   // );
 
   const deleteLesson = useCallback(
-    (sectionIdx: number, lessonIdx: number) => {
-      debug('deleteLesson - called', { sectionIdx, lessonIdx });
-      controller.deleteLesson(sectionIdx, lessonIdx);
+    (moduleIdx: number, lessonIdx: number) => {
+      debug('deleteLesson - called', { moduleIdx, lessonIdx });
+      controller.deleteLesson(moduleIdx, lessonIdx);
     },
     [controller]
   );
 
   const reorderLessons = useCallback(
-    (sectionIdx: number, fromIdx: number, toIdx: number) => {
-      debug('reorderLessons - called', { sectionIdx, fromIdx, toIdx });
-      controller.reorderLessons(sectionIdx, fromIdx, toIdx);
+    (moduleIdx: number, fromIdx: number, toIdx: number) => {
+      debug('reorderLessons - called', { moduleIdx, fromIdx, toIdx });
+      controller.reorderLessons(moduleIdx, fromIdx, toIdx);
     },
     [controller]
   );
 
   // QUIZ OPERATIONS
   const createQuiz = useCallback(
-    (sectionIdx: number, data: Omit<Quiz, 'id'>) => {
-      debug('createQuiz - called', { sectionIdx, data });
-      const ret = controller.createQuiz(sectionIdx, data);
+    (moduleIdx: number, data: Omit<Quiz, 'id'>) => {
+      debug('createQuiz - called', { moduleIdx, data });
+      const ret = controller.createQuiz(moduleIdx, data);
       debug('createQuiz - return', ret);
       return ret;
     },
@@ -237,17 +237,17 @@ export function useCourseController(props: UseCourseControllerProps) {
   );
 
   const updateQuizField = useCallback(
-    <T extends keyof Quiz>(sectionIdx: number, quizId: string, key: T, value: Quiz[T]): void => {
-      debug('updateQuizField - called', { sectionIdx, quizId, key, value });
-      controller.updateQuizField(sectionIdx, quizId, key, value);
+    <T extends keyof Quiz>(moduleIdx: number, quizId: string, key: T, value: Quiz[T]): void => {
+      debug('updateQuizField - called', { moduleIdx, quizId, key, value });
+      controller.updateQuizField(moduleIdx, quizId, key, value);
     },
     [controller]
   );
 
   const deleteQuiz = useCallback(
-    (sectionIdx: number, quizId: string) => {
-      debug('deleteQuiz - called', { sectionIdx, quizId });
-      controller.deleteQuiz(sectionIdx, quizId);
+    (moduleIdx: number, quizId: string) => {
+      debug('deleteQuiz - called', { moduleIdx, quizId });
+      controller.deleteQuiz(moduleIdx, quizId);
     },
     [controller]
   );
@@ -378,11 +378,11 @@ export function useCourseController(props: UseCourseControllerProps) {
     // Basic operations
     saveBasicAdvanced,
 
-    // Section operations
-    createSection,
-    updateSectionField,
-    deleteSection,
-    reorderSections,
+    // Module operations
+    createModule,
+    updateModuleField,
+    deleteModule,
+    reorderModules,
 
     // Lesson operations
     createLesson,

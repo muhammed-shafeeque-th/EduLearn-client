@@ -59,7 +59,7 @@ export interface Lesson {
   };
 }
 
-export interface Section {
+export interface Module {
   id: string;
   title: string;
   description?: string;

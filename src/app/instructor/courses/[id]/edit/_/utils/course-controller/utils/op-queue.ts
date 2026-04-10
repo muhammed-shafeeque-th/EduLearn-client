@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CourseOp, CurriculumOp, OpResult } from '../types';
 
-type EntityKey = `section:${string}` | `lesson:${string}` | `quiz:${string}`;
+type EntityKey = `module:${string}` | `lesson:${string}` | `quiz:${string}`;
 type Listener = (size: number) => void;
 
 /**
@@ -112,11 +112,11 @@ export class OperationQueue {
 
   private getEntityKey(op: CourseOp): EntityKey | null {
     switch (op.type) {
-      case 'SECTION_CREATE':
-      case 'SECTION_UPDATE':
-      case 'SECTION_DELETE':
-      case 'SECTION_REORDER':
-        return `section:${'tempId' in op ? op.tempId : op.id}`;
+      case 'MODULE_CREATE':
+      case 'MODULE_UPDATE':
+      case 'MODULE_DELETE':
+      case 'MODULE_REORDER':
+        return `module:${'tempId' in op ? op.tempId : op.id}`;
 
       case 'LESSON_CREATE':
       case 'LESSON_UPDATE':

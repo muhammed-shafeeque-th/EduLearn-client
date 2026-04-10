@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 type ExtractedError = {
   path: string;
   message: string;
-  sectionIndex?: number;
+  moduleIndex?: number;
   lessonIndex?: number;
   quizIndex?: number;
 };
@@ -18,7 +18,7 @@ export function useExtractZodErrors(errors: any) {
     function extractErrors(
       obj: ErrorObject,
       path: string[] = [],
-      sectionIndex?: number,
+      moduleIndex?: number,
       lessonIndex?: number,
       quizIndex?: number
     ) {
@@ -29,7 +29,7 @@ export function useExtractZodErrors(errors: any) {
         extractedErrors.push({
           path: path.join(' → '),
           message: obj.message,
-          sectionIndex,
+          moduleIndex,
           lessonIndex,
           quizIndex,
         });
@@ -39,18 +39,18 @@ export function useExtractZodErrors(errors: any) {
       for (const [key, value] of Object.entries(obj)) {
         if (!value || key === 'message') continue;
 
-        // Handle arrays like sections, lessons, questions
+        // Handle arrays like modules, lessons, questions
         if (Array.isArray(value)) {
           value.forEach((child, idx) => {
-            let newSectionIndex = sectionIndex;
+            let newModuleIndex = moduleIndex;
             let newLessonIndex = lessonIndex;
             let newQuizIndex = quizIndex;
             const newPath = [...path];
 
             switch (key) {
-              case 'sections':
-                newSectionIndex = idx;
-                newPath.push(`Section ${idx + 1}`);
+              case 'modules':
+                newModuleIndex = idx;
+                newPath.push(`Module ${idx + 1}`);
                 break;
               case 'lessons':
                 newLessonIndex = idx;
@@ -65,7 +65,7 @@ export function useExtractZodErrors(errors: any) {
                 break;
             }
 
-            extractErrors(child, newPath, newSectionIndex, newLessonIndex, newQuizIndex);
+            extractErrors(child, newPath, newModuleIndex, newLessonIndex, newQuizIndex);
           });
           continue;
         }
@@ -85,23 +85,23 @@ export function useExtractZodErrors(errors: any) {
             newPath.push(key.charAt(0).toUpperCase() + key.slice(1));
           }
 
-          extractErrors(value, newPath, sectionIndex, lessonIndex, quizIndex);
+          extractErrors(value, newPath, moduleIndex, lessonIndex, quizIndex);
         }
       }
     }
 
-    /**  Handle Section-level errors **/
-    const sectionErrors = Array.isArray(errors.sections) ? (errors.sections as ErrorObject[]) : [];
+    /**  Handle Module-level errors **/
+    const moduleErrors = Array.isArray(errors.modules) ? (errors.modules as ErrorObject[]) : [];
 
-    sectionErrors.forEach((sectionError, sectionIndex) => {
-      extractErrors(sectionError, [`Section ${sectionIndex + 1}`], sectionIndex);
+    moduleErrors.forEach((moduleError, moduleIndex) => {
+      extractErrors(moduleError, [`Module ${moduleIndex + 1}`], moduleIndex);
     });
 
     /**  Handle root-level errors **/
     const rootMessage =
-      errors?.sections?.root?.message ??
+      errors?.modules?.root?.message ??
       errors?.message ??
-      (typeof errors.sections === 'string' ? errors.sections : null);
+      (typeof errors.modules === 'string' ? errors.modules : null);
 
     if (rootMessage) {
       extractedErrors.push({

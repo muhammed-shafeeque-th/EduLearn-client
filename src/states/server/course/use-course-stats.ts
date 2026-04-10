@@ -2,8 +2,8 @@
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { courseService } from '@/services/course.service';
-import { CourseAnalytics, CoursesStats } from '@/services/course.service';
+import { courseService } from '@/services/course';
+import { CourseAnalytics, CoursesStats } from '@/services/course';
 
 /**
  * Hook to fetch analytics for a specific course.

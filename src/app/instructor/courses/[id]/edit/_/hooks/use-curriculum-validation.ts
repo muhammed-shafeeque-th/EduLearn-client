@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CurriculumFormData } from '../_/curriculum-schema';
+import { CurriculumFormData } from '../../_/schemas/curriculum-schema';
 import { validateCurriculumData } from '../utils/curriculum-utils';
 import { toast } from 'sonner';
 
@@ -25,7 +25,7 @@ export const useCurriculumValidation = (form: UseFormReturn<CurriculumFormData>)
       });
 
       // Set form-level error
-      setError('sections', {
+      setError('modules', {
         type: 'manual',
         message: 'Please fix the curriculum errors before proceeding',
       });
@@ -34,24 +34,24 @@ export const useCurriculumValidation = (form: UseFormReturn<CurriculumFormData>)
     return isValid;
   }, [watch, setError, clearErrors]);
 
-  const validateSection = useCallback(
-    (sectionIndex: number): boolean => {
-      const sections = watch('sections');
-      const section = sections?.[sectionIndex];
+  const validateModule = useCallback(
+    (moduleIndex: number): boolean => {
+      const modules = watch('modules');
+      const $module = modules?.[moduleIndex];
 
-      if (!section) return false;
+      if (!$module) return false;
 
       const errors: string[] = [];
 
-      if (!section.name?.trim()) {
-        errors.push('Section name is required');
+      if (!$module.name?.trim()) {
+        errors.push('Module name is required');
       }
 
-      if (!section.lessons || section.lessons.length === 0) {
+      if (!$module.lessons || $module.lessons.length === 0) {
         errors.push('At least one lesson is required');
       }
 
-      section.lessons?.forEach((lesson, lessonIndex) => {
+      $module.lessons?.forEach((lesson, lessonIndex) => {
         if (!lesson.name?.trim()) {
           errors.push(`Lesson ${lessonIndex + 1}: Name is required`);
         }
@@ -72,9 +72,9 @@ export const useCurriculumValidation = (form: UseFormReturn<CurriculumFormData>)
   );
 
   const validateLesson = useCallback(
-    (sectionIndex: number, lessonIndex: number): boolean => {
-      const sections = watch('sections');
-      const lesson = sections?.[sectionIndex]?.lessons?.[lessonIndex];
+    (moduleIndex: number, lessonIndex: number): boolean => {
+      const modules = watch('modules');
+      const lesson = modules?.[moduleIndex]?.lessons?.[lessonIndex];
 
       if (!lesson) return false;
 
@@ -110,7 +110,7 @@ export const useCurriculumValidation = (form: UseFormReturn<CurriculumFormData>)
 
   return {
     validateCurriculum,
-    validateSection,
+    validateModule,
     validateLesson,
   };
 };

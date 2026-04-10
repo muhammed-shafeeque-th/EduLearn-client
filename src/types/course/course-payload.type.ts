@@ -43,7 +43,7 @@ export type LessonType = 'video' | 'document' | 'slides' | 'audio' | 'quiz' | 'a
 
 export type CoursePayload = BasicInfoRequestPayload & AdvancedInfoRequestPayload;
 
-export interface SectionPayload {
+export interface ModulePayload {
   title: string;
   description: string | undefined;
   order: number;
@@ -64,7 +64,7 @@ export type Quiz = {
 };
 
 export type CurriculumRequestPayload = {
-  sections: SectionPayload[];
+  modules: ModulePayload[];
   totalDuration?: number | undefined;
   totalLessons?: number | undefined;
   totalQuizzes?: number | undefined;
@@ -155,7 +155,7 @@ export interface LessonPayload {
   };
 }
 
-// type SectionPayload = {
+// type ModulePayload = {
 //   id: string;
 //   title: string;
 //   order: number;

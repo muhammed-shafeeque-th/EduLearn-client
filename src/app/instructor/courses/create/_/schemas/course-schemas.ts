@@ -95,8 +95,8 @@ export const basicInfoSchema = z
       invalid_type_error: 'Invalid level',
     }),
     duration: durationSchema,
-    price: positiveNumber.default(0.1),
-    discountPrice: z.number().min(0).optional(),
+    price: positiveNumber.default(1),
+    discountPrice: z.number().min(1).optional(),
     currency: z.enum(['INR', 'USD', 'EUR']).default('INR'),
   })
   .refine((data) => !data.discountPrice || data.discountPrice < data.price, {

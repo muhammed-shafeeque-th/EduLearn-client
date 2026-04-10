@@ -103,6 +103,7 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
   }, [course.title, course.description]);
 
   const handleExport = useCallback(async () => {
+    return toast.info({ title: 'Coming soon' });
     setIsExporting(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -248,7 +249,7 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
                 )}
 
                 {/* Description */}
-                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed text-wrap">
                   {course.description?.length && course.description.length > 300
                     ? `${course.description.slice(0, 300)}...`
                     : course.description}
@@ -326,13 +327,13 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
                       <Share2 className="w-4 h-4 mr-2" />
                       Share Course
                     </DropdownMenuItem> */}
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={handleExport}
                       disabled={isExporting || isAnyActionLoading || !canEdit}
                     >
                       <Download className="w-4 h-4 mr-2" />
                       {isExporting ? 'Exporting...' : 'Export Data'}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuSeparator />
 
                     {canPublish && (

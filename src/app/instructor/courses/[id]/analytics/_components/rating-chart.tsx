@@ -2,6 +2,7 @@
 
 import { Star } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useMemo } from 'react';
 
 interface RatingChartProps {
   averageRating: number;
@@ -10,6 +11,9 @@ interface RatingChartProps {
 }
 
 export function RatingChart({ averageRating, ratingsBreakdown, totalRatings }: RatingChartProps) {
+  const total = useMemo(() => {
+    return Object.values(ratingsBreakdown).reduce((acc, rating) => acc + Number(rating), 0);
+  }, [ratingsBreakdown]);
   return (
     <div className="space-y-4">
       {/* Rating Summary */}
@@ -32,7 +36,7 @@ export function RatingChart({ averageRating, ratingsBreakdown, totalRatings }: R
           </div>
         </div>
         <div className="text-sm text-muted-foreground">
-          {totalRatings.toLocaleString()} {totalRatings === 1 ? 'rating' : 'ratings'}
+          {total.toLocaleString()} {total === 1 ? 'rating' : 'ratings'}
         </div>
       </div>
 

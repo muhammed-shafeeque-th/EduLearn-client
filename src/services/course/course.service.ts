@@ -1,14 +1,10 @@
-import { BaseService, BaseServiceOptions, RequestOptions } from './base-service';
-import { config } from '@/lib/config';
-import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
-
 import { ApiResponse } from '@/types/api-response';
 import { Review } from '@/types/review';
 
 import {
   Course,
-  Section,
-  SectionPayload,
+  Module,
+  ModulePayload,
   Lesson,
   LessonPayload,
   Quiz,
@@ -22,232 +18,17 @@ import {
   CheckCourseTitleResponse,
   CoursePayload,
 } from '@/types/course/course-payload.type';
-
-export interface CourseFilters {
-  search?: string;
-  category?: string;
-  level?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  rating?: number;
-}
-
-export interface CourseAnalytics {
-  courseId: string;
-  totalStudents: number;
-  completionRate: number;
-  averageProgress: number;
-  averageRating: number;
-  totalRatings: number;
-  revenueThisMonth: number;
-  revenueLastMonth: number;
-  revenueTotal: number;
-  ratingsBreakdown: Record<1 | 2 | 3 | 4 | 5, number>;
-  enrollmentTrend: {
-    month: number;
-    enrollments: number;
-  }[];
-}
-
-export interface CoursesStats {
-  totalCourses: number;
-  totalStudents: number;
-  averageRating: number;
-  totalRevenue: number;
-}
-
-export type CourseSortBy = 'title' | 'price' | 'rating' | 'created_at';
-
-export interface PaginationParams {
-  sortBy?: CourseSortBy;
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  pageSize?: number;
-}
-
-export type CourseParams = CourseFilters & PaginationParams;
-
-function getPaginationParams(
-  params?: PaginationParams | Partial<PaginationParams>
-): URLSearchParams {
-  const searchParams = new URLSearchParams();
-
-  if (params?.sortBy) searchParams.set('sortBy', params.sortBy);
-  if (params?.sortOrder) searchParams.set('sortOrder', params.sortOrder);
-  searchParams.set('page', params?.page?.toString() || '1');
-  searchParams.set('pageSize', params?.pageSize?.toString() || '10');
-
-  return searchParams;
-}
-
-export interface ICourseService {
-  getCourses(
-    filters?: Partial<CourseParams>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseMeta[]>>;
-
-  getCourseAnalytics(
-    courseId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseAnalytics>>;
-
-  getCoursesStats(options?: RequestOptions): Promise<ApiResponse<CoursesStats>>;
-
-  getCourseById(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-
-  getCourseBySlug(slug: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-
-  createCourse(
-    data: Partial<BasicInfoRequestPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Course>>;
-
-  updateCourse(
-    courseId: string,
-    data: Partial<CoursePayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Course>>;
-
-  publishCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-  unPublishCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-
-  deleteCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<void>>;
-
-  getRelatedCourses(
-    courseId: string,
-    params?: PaginationParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseMeta[]>>;
-
-  getSectionById(
-    courseId: string,
-    sectionId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Section>>;
-
-  getSections(courseId: string, options?: RequestOptions): Promise<ApiResponse<Section[]>>;
-
-  createSection(
-    courseId: string,
-    data: Partial<SectionPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Section>>;
-
-  updateSection(
-    courseId: string,
-    sectionId: string,
-    data: Partial<SectionPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Section>>;
-
-  deleteSection(
-    courseId: string,
-    sectionId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<void>>;
-
-  getLessons(
-    courseId: string,
-    sectionId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Lesson[]>>;
-
-  getLessonById(
-    courseId: string,
-    sectionId: string,
-    lessonId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Lesson>>;
-
-  createLesson(
-    courseId: string,
-    sectionId: string,
-    data: Partial<LessonPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Lesson>>;
-
-  updateLesson(
-    courseId: string,
-    sectionId: string,
-    lessonId: string,
-    data: Partial<LessonPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Lesson>>;
-
-  deleteLesson(
-    courseId: string,
-    sectionId: string,
-    lessonId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<void>>;
-
-  getQuizzes(
-    courseId: string,
-    sectionId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Quiz[]>>;
-
-  getQuizById(
-    courseId: string,
-    sectionId: string,
-    quizId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Quiz>>;
-
-  createQuiz(
-    courseId: string,
-    sectionId: string,
-    data: Partial<QuizPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Quiz>>;
-
-  updateQuiz(
-    courseId: string,
-    sectionId: string,
-    quizId: string,
-    data: Partial<QuizPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Quiz>>;
-
-  deleteQuiz(
-    courseId: string,
-    sectionId: string,
-    quizId: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<void>>;
-
-  getCourseReviews(
-    courseId: string,
-    params?: PaginationParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Review[]>>;
-
-  getCoursesByInstructor(
-    instructorId: string,
-    params?: PaginationParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseMeta[]>>;
-
-  enrollInCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-
-  getFeaturedCourses(
-    params?: PaginationParams,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CourseMeta[]>>;
-
-  checkCourseTitle(
-    params: CheckCourseTitleRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<CheckCourseTitleResponse>>;
-
-  duplicateCourse(
-    sourceCourseId: string,
-    data?: Partial<BasicInfoRequestPayload>,
-    options?: RequestOptions
-  ): Promise<ApiResponse<Course>>;
-
-  archiveCourse(courseId: string, options?: RequestOptions): Promise<ApiResponse<Course>>;
-}
+import { BaseService, BaseServiceOptions, RequestOptions } from '../base-service';
+import {
+  CourseAnalytics,
+  CourseParams,
+  CoursesStats,
+  getPaginationParams,
+  PaginationParams,
+} from './course.type';
+import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
+import { config } from '@/lib/config';
+import { ICourseService } from './course.service.interface';
 
 export class CourseService extends BaseService implements ICourseService {
   constructor({
@@ -350,71 +131,71 @@ export class CourseService extends BaseService implements ICourseService {
     });
   }
 
-  getSectionById(
+  getModuleById(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     options?: RequestOptions
-  ): Promise<ApiResponse<Section>> {
-    return this.get<ApiResponse<Section>>(`/${courseId}/sections/${sectionId}`, options);
+  ): Promise<ApiResponse<Module>> {
+    return this.get<ApiResponse<Module>>(`/${courseId}/modules/${moduleId}`, options);
   }
 
-  getSections(courseId: string, options?: RequestOptions): Promise<ApiResponse<Section[]>> {
-    return this.get<ApiResponse<Section[]>>(`/${courseId}/sections`, options);
+  getModules(courseId: string, options?: RequestOptions): Promise<ApiResponse<Module[]>> {
+    return this.get<ApiResponse<Module[]>>(`/${courseId}/modules`, options);
   }
 
-  createSection(
+  createModule(
     courseId: string,
-    data: Partial<SectionPayload>,
+    data: Partial<ModulePayload>,
     options?: RequestOptions
-  ): Promise<ApiResponse<Section>> {
-    return this.post<ApiResponse<Section>>(`/${courseId}/sections`, data, options);
+  ): Promise<ApiResponse<Module>> {
+    return this.post<ApiResponse<Module>>(`/${courseId}/modules`, data, options);
   }
 
-  updateSection(
+  updateModule(
     courseId: string,
-    sectionId: string,
-    data: Partial<SectionPayload>,
+    moduleId: string,
+    data: Partial<ModulePayload>,
     options?: RequestOptions
-  ): Promise<ApiResponse<Section>> {
-    return this.patch<ApiResponse<Section>>(`/${courseId}/sections/${sectionId}`, data, options);
+  ): Promise<ApiResponse<Module>> {
+    return this.patch<ApiResponse<Module>>(`/${courseId}/modules/${moduleId}`, data, options);
   }
 
-  deleteSection(
+  deleteModule(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<void>> {
-    return this.delete<ApiResponse<void>>(`/${courseId}/sections/${sectionId}`, options);
+    return this.delete<ApiResponse<void>>(`/${courseId}/modules/${moduleId}`, options);
   }
 
   getLessons(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<Lesson[]>> {
-    return this.get<ApiResponse<Lesson[]>>(`/${courseId}/sections/${sectionId}/lessons`, options);
+    return this.get<ApiResponse<Lesson[]>>(`/${courseId}/modules/${moduleId}/lessons`, options);
   }
 
   getLessonById(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     lessonId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<Lesson>> {
     return this.get<ApiResponse<Lesson>>(
-      `/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      `/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
       options
     );
   }
 
   createLesson(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     data: Partial<LessonPayload>,
     options?: RequestOptions
   ): Promise<ApiResponse<Lesson>> {
     return this.post<ApiResponse<Lesson>>(
-      `/${courseId}/sections/${sectionId}/lessons`,
+      `/${courseId}/modules/${moduleId}/lessons`,
       data,
       options
     );
@@ -422,13 +203,13 @@ export class CourseService extends BaseService implements ICourseService {
 
   updateLesson(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     lessonId: string,
     data: Partial<LessonPayload>,
     options?: RequestOptions
   ): Promise<ApiResponse<Lesson>> {
     return this.patch<ApiResponse<Lesson>>(
-      `/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      `/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
       data,
       options
     );
@@ -436,58 +217,54 @@ export class CourseService extends BaseService implements ICourseService {
 
   deleteLesson(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     lessonId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<void>> {
     return this.delete<ApiResponse<void>>(
-      `/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      `/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
       options
     );
   }
 
   getQuizzes(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<Quiz[]>> {
-    return this.get<ApiResponse<Quiz[]>>(`/${courseId}/sections/${sectionId}/quizzes`, options);
+    return this.get<ApiResponse<Quiz[]>>(`/${courseId}/modules/${moduleId}/quizzes`, options);
   }
 
   getQuizById(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     quizId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<Quiz>> {
     return this.get<ApiResponse<Quiz>>(
-      `/${courseId}/sections/${sectionId}/quizzes/${quizId}`,
+      `/${courseId}/modules/${moduleId}/quizzes/${quizId}`,
       options
     );
   }
 
   createQuiz(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     data: Partial<QuizPayload>,
     options?: RequestOptions
   ): Promise<ApiResponse<Quiz>> {
-    return this.post<ApiResponse<Quiz>>(
-      `/${courseId}/sections/${sectionId}/quizzes`,
-      data,
-      options
-    );
+    return this.post<ApiResponse<Quiz>>(`/${courseId}/modules/${moduleId}/quizzes`, data, options);
   }
 
   updateQuiz(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     quizId: string,
     data: Partial<QuizPayload>,
     options?: RequestOptions
   ): Promise<ApiResponse<Quiz>> {
     return this.patch<ApiResponse<Quiz>>(
-      `/${courseId}/sections/${sectionId}/quizzes/${quizId}`,
+      `/${courseId}/modules/${moduleId}/quizzes/${quizId}`,
       data,
       options
     );
@@ -495,12 +272,12 @@ export class CourseService extends BaseService implements ICourseService {
 
   deleteQuiz(
     courseId: string,
-    sectionId: string,
+    moduleId: string,
     quizId: string,
     options?: RequestOptions
   ): Promise<ApiResponse<void>> {
     return this.delete<ApiResponse<void>>(
-      `/${courseId}/sections/${sectionId}/quizzes/${quizId}`,
+      `/${courseId}/modules/${moduleId}/quizzes/${quizId}`,
       options
     );
   }

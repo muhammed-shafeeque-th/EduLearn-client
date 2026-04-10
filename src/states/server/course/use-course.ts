@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { courseService } from '@/services/course.service';
+import { courseService } from '@/services/course';
 
 /**
  * Hook to fetch and mutate a single course by ID, including publish, unpublish, and delete actions.

@@ -68,7 +68,7 @@ function CartSummarySkeleton() {
       <div className="p-6 space-y-4">
         <div className="h-6 w-32 bg-muted rounded animate-pulse" />
 
-        {/* Coupon section */}
+        {/* Coupon module */}
         <div className="space-y-2">
           <div className="h-4 w-24 bg-muted rounded animate-pulse" />
           <div className="flex gap-2">

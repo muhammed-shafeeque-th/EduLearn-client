@@ -2,7 +2,8 @@
 import React from 'react';
 import { UseFormReturn, FieldErrors, FieldError } from 'react-hook-form';
 import { BasicInfoFormData } from '../schemas/course-schemas';
-import { categories, subCategories, languages, levels, durationUnits } from '../utils/constants';
+import { languages, levels, durationUnits } from '../utils/constants';
+import { useCategories } from '@/states/server/category';
 import { Label } from '@/components/ui/label';
 import { Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,11 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({ form }
   const subtitleLength = watch('subTitle')?.length || 0;
   const subCategory = watch('subCategory');
   const topics = watch('topics') || [];
+
+  const { categories: fetchedCategories } = useCategories();
+  const categories = (fetchedCategories || []).map((c) => c.name);
+  const selectedCategoryObj = (fetchedCategories || []).find((c) => c.name === selectedCategory);
+  const dynamicSubCategories = selectedCategoryObj?.subcategories?.map((s) => s.name) || [];
 
   // Error helpers for nested duration fields and topics
   const durationValueError = getNestedError(errors, 'duration.value');
@@ -127,7 +133,7 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({ form }
             >
               <option value="">Select...</option>
               {selectedCategory &&
-                subCategories[selectedCategory]?.map((subCat) => (
+                dynamicSubCategories.map((subCat) => (
                   <option key={subCat} value={subCat}>
                     {subCat}
                   </option>

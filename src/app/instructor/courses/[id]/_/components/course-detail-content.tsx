@@ -70,7 +70,7 @@ export function CourseDetailContent({ course }: CourseDetailContentProps) {
               <div className="text-center py-12 text-muted-foreground">
                 <p>Curriculum management will be implemented here</p>
                 <p className="text-sm mt-2">
-                  This would show sections, lessons, and content management
+                  This would show modules, lessons, and content management
                 </p>
               </div>
             </CardContent>

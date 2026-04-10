@@ -4,7 +4,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { courseService } from '@/services/course.service';
+import { courseService } from '@/services/course';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage, sleep } from '@/lib/utils';
 import { useAbortController } from './use-abort-controller';
@@ -29,7 +29,7 @@ interface ValidationState {
 
 interface SubmissionError {
   id: string;
-  section: string;
+  module: string;
   message: string;
   retryable: boolean;
   operation?: () => Promise<void>;
@@ -134,7 +134,7 @@ export function useCourseData({
   const router = useRouter();
   const { signal, abort } = useAbortController();
   const submissionErrorsRef = useRef<SubmissionError[]>([]);
-  const sectionIdMapRef = useRef<Map<string, string>>(new Map());
+  const moduleIdMapRef = useRef<Map<string, string>>(new Map());
 
   // Track unsaved changes via form state
   const isBasicDirty = basicForm.formState.isDirty;
@@ -239,7 +239,7 @@ export function useCourseData({
             const msg = getErrorMessage(result.reason);
             submissionErrorsRef.current.push({
               id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-              section: 'Curriculum',
+              module: 'Curriculum',
               message: msg,
               retryable: isRetryableFromMessage(msg),
               operation: getOperation?.(item, idx),
@@ -328,44 +328,44 @@ export function useCourseData({
   }, [collectCoursePayload, hasUnsavedChanges, saveFormData, signal]);
 
   /**
-   * Handles curriculum batch creation process (sections, lessons, quizzes)
+   * Handles curriculum batch creation process (modules, lessons, quizzes)
    */
   const submitCurriculum = useCallback(
     async (courseId: string) => {
       setIsLoading(true);
       submissionErrorsRef.current = [];
-      sectionIdMapRef.current.clear();
+      moduleIdMapRef.current.clear();
       try {
         const curriculum = curriculumForm.getValues();
 
-        // Step : Create sections
+        // Step : Create modules
         await processBatch(
-          curriculum.sections || [],
-          async (section) => {
+          curriculum.modules || [],
+          async (module) => {
             if (signal.aborted) throw new Error('Operation cancelled');
             const response = await executeWithRetry(
               () =>
-                courseService.createSection(courseId, {
-                  title: section.title,
-                  description: section.description,
-                  order: section.order ?? 0,
-                  isPublished: section.isPublished,
+                courseService.createModule(courseId, {
+                  title: module.title,
+                  description: module.description,
+                  order: module.order ?? 0,
+                  isPublished: module.isPublished,
                 }),
-              `Section: ${section.title}`
+              `Module: ${module.title}`
             );
             if (response?.success && response.data?.id) {
-              sectionIdMapRef.current.set(section.id, response.data.id);
+              moduleIdMapRef.current.set(module.id, response.data.id);
             } else {
-              throw new Error(response?.message || 'Failed to create section');
+              throw new Error(response?.message || 'Failed to create module');
             }
           },
           undefined,
-          (section) => async () => {
-            const response = await courseService.createSection(courseId, {
-              title: section.title,
-              description: section.description,
-              order: section.order ?? 0,
-              isPublished: section.isPublished,
+          (module) => async () => {
+            const response = await courseService.createModule(courseId, {
+              title: module.title,
+              description: module.description,
+              order: module.order ?? 0,
+              isPublished: module.isPublished,
             });
             if (!response.success) throw new Error(response.message || 'Failed');
           }
@@ -373,26 +373,26 @@ export function useCourseData({
 
         // Step : Create lessons
         const lessonEntries =
-          (curriculum.sections || []).flatMap((section) => {
-            const sectionId = sectionIdMapRef.current.get(section.id);
-            if (!sectionId) return [];
-            return (section.lessons || []).map((lesson) => ({ lesson, sectionId }));
+          (curriculum.modules || []).flatMap((module) => {
+            const moduleId = moduleIdMapRef.current.get(module.id);
+            if (!moduleId) return [];
+            return (module.lessons || []).map((lesson) => ({ lesson, moduleId }));
           }) || [];
         await processBatch(
           lessonEntries,
-          async ({ lesson, sectionId }) => {
+          async ({ lesson, moduleId }) => {
             if (signal.aborted) throw new Error('Operation cancelled');
             await executeWithRetry(
-              () => courseService.createLesson(courseId, sectionId, mapToLessonPayload(lesson)),
+              () => courseService.createLesson(courseId, moduleId, mapToLessonPayload(lesson)),
               `Lesson: ${lesson.title}`
             );
           },
           undefined,
           (entry) => async () => {
-            const { lesson, sectionId } = entry;
+            const { lesson, moduleId } = entry;
             const response = await courseService.createLesson(
               courseId,
-              sectionId,
+              moduleId,
               mapToLessonPayload(lesson)
             );
             if (!response.success) throw new Error(response.message || 'Failed');
@@ -401,30 +401,30 @@ export function useCourseData({
 
         // Step : Create quizzes
         const quizEntries =
-          (curriculum.sections || [])
+          (curriculum.modules || [])
             .filter((s) => s.quiz)
-            .flatMap((section) => {
-              const sectionId = sectionIdMapRef.current.get(section.id);
-              if (!sectionId) return [];
-              return [{ quiz: section.quiz, sectionId }];
+            .flatMap((module) => {
+              const moduleId = moduleIdMapRef.current.get(module.id);
+              if (!moduleId) return [];
+              return [{ quiz: module.quiz, moduleId }];
             }) || [];
         await processBatch(
           quizEntries,
-          async ({ quiz, sectionId }) => {
+          async ({ quiz, moduleId }) => {
             if (signal.aborted) throw new Error('Operation cancelled');
             if (!quiz) return;
             await executeWithRetry(
-              () => courseService.createQuiz(courseId, sectionId, mapToQuizPayload(quiz)),
+              () => courseService.createQuiz(courseId, moduleId, mapToQuizPayload(quiz)),
               `Quiz: ${quiz.title}`
             );
           },
           undefined,
           (entry) => async () => {
-            const { quiz, sectionId } = entry;
+            const { quiz, moduleId } = entry;
             if (!quiz) return;
             const response = await courseService.createQuiz(
               courseId,
-              sectionId,
+              moduleId,
               mapToQuizPayload(quiz)
             );
             if (!response.success) throw new Error(response.message || 'Failed');
@@ -457,7 +457,7 @@ export function useCourseData({
         });
         submissionErrorsRef.current.push({
           id: Date.now().toString(),
-          section: 'Curriculum',
+          module: 'Curriculum',
           message: msg,
           retryable: isRetryableFromMessage(msg),
           operation: undefined,
@@ -480,7 +480,7 @@ export function useCourseData({
       if (!validation.basic || !validation.advanced || !validation.curriculum) {
         toast.error({
           title: 'Validation failed',
-          description: 'Please complete all sections',
+          description: 'Please complete all modules',
         });
         return;
       }
@@ -719,7 +719,7 @@ export function useCourseData({
 
       // Clear error and maps
       submissionErrorsRef.current = [];
-      sectionIdMapRef.current.clear();
+      moduleIdMapRef.current.clear();
 
       toast.success({
         title: 'All course data cleared',
@@ -738,7 +738,7 @@ export function useCourseData({
     return () => {
       abort();
       submissionErrorsRef.current = [];
-      sectionIdMapRef.current.clear();
+      moduleIdMapRef.current.clear();
     };
   }, [abort]);
 

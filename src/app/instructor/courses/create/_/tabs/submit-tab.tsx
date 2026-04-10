@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { BasicInfoFormData, AdvancedInfoFormData } from '../schemas/course-schemas';
-import { CurriculumFormData, Section, Lesson } from '../schemas/curriculum-schema';
+import { CurriculumFormData, Module, Lesson } from '../schemas/curriculum-schema';
 import { calculateTotalDuration, formatDuration } from '../utils/curriculum-utils';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,7 @@ import { Switch } from '@/components/ui/switch';
 interface CourseStats {
   totalDuration: number;
   totalLessons: number;
-  totalSections: number;
+  totalModules: number;
   previewContent: number;
 }
 
@@ -92,15 +92,15 @@ function computeCoursePreview(
   const advancedData = advancedForm.getValues();
   const curriculumData = curriculumForm.getValues();
 
-  const sections: Section[] = curriculumData.sections || [];
-  const totalDuration = calculateTotalDuration(sections);
+  const modules: Module[] = curriculumData.modules || [];
+  const totalDuration = calculateTotalDuration(modules);
 
   let totalLessons = 0;
   let previewContent = 0;
-  const totalSections = sections.length;
+  const totalModules = modules.length;
 
-  for (const section of sections) {
-    const lessons: Lesson[] = section.lessons || [];
+  for (const $module of modules) {
+    const lessons: Lesson[] = $module.lessons || [];
     totalLessons += lessons.length;
     for (const lesson of lessons) {
       if (lesson.content && lesson.content.isPreview) {
@@ -116,7 +116,7 @@ function computeCoursePreview(
     stats: {
       totalDuration,
       totalLessons,
-      totalSections,
+      totalModules,
       previewContent,
     },
   } as CoursePreview;
@@ -219,19 +219,19 @@ export const SubmitTab = React.memo(
     const validationItems = useMemo(
       () => [
         {
-          section: 'Basic Information',
+          module: 'Basic Information',
           isValid: validationState.basic,
           items: ['Course title', 'Category & level', 'Duration', 'Pricing'],
         },
         {
-          section: 'Advanced Information',
+          module: 'Advanced Information',
           isValid: validationState.advanced,
           items: ['Description', 'Learning outcomes', 'Target audience'],
         },
         {
-          section: 'Curriculum',
+          module: 'Curriculum',
           isValid: validationState.curriculum,
-          items: ['Sections & lessons', 'Content for lessons'],
+          items: ['Modules & lessons', 'Content for lessons'],
         },
       ],
       [validationState]
@@ -290,7 +290,7 @@ export const SubmitTab = React.memo(
               <div className="grid grid-cols-1 gap-4">
                 {validationItems.map((item, index) => (
                   <motion.div
-                    key={item.section}
+                    key={item.module}
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -311,7 +311,7 @@ export const SubmitTab = React.memo(
                           item.isValid ? 'text-green-900 dark:text-green-100' : 'text-destructive'
                         }`}
                       >
-                        {item.section}
+                        {item.module}
                       </h4>
                     </div>
                     <ul className="space-y-1.5">
@@ -446,8 +446,8 @@ export const SubmitTab = React.memo(
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <PreviewStat
                       icon={BookOpen}
-                      label="Sections"
-                      value={coursePreview.stats.totalSections}
+                      label="Modules"
+                      value={coursePreview.stats.totalModules}
                     />
                     <PreviewStat
                       icon={PlayCircle}
@@ -515,7 +515,7 @@ export const SubmitTab = React.memo(
                     <FileText className="w-8 h-8 text-muted-foreground/30" />
                   </div>
                   <p className="text-sm font-medium text-muted-foreground max-w-[200px]">
-                    Complete all sections to see your course preview
+                    Complete all modules to see your course preview
                   </p>
                 </div>
               )}

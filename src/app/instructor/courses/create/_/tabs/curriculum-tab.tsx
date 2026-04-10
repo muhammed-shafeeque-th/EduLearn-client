@@ -13,8 +13,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useFieldArray, UseFormReturn, useWatch, FormProvider } from 'react-hook-form';
-import { CurriculumFormData, Section } from '../schemas/curriculum-schema';
-import { SectionEditor } from '../components/editors/section-editor';
+import { CurriculumFormData, Module } from '../schemas/curriculum-schema';
+import { ModuleEditor } from '../components/editors/module-editor';
 import { formatDuration, calculateTotalDuration } from '../utils/curriculum-utils';
 import { useExtractZodErrors } from '../hooks/use-extract-error-message';
 import { getDocument } from '@/lib/utils';
@@ -28,12 +28,12 @@ interface CurriculumTabProps {
 }
 
 interface CurriculumStats {
-  totalSections: number;
+  totalModules: number;
   totalLessons: number;
   totalContent: number;
   totalQuizzes: number;
   totalDuration: number;
-  publishedSections: number;
+  publishedModules: number;
   publishedLessons: number;
   completionPercentage: number;
 }
@@ -117,7 +117,7 @@ const ValidationAlert: React.FC<{ errors?: string[]; warnings?: string[] }> = ({
 };
 
 export const CurriculumTab = React.memo(({ curriculumForm, courseId }: CurriculumTabProps) => {
-  const [, setExpandedSections] = useState<Set<string>>(new Set());
+  const [, setExpandedModules] = useState<Set<string>>(new Set());
 
   const {
     control,
@@ -125,52 +125,52 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
   } = curriculumForm;
 
   const {
-    fields: sections,
+    fields: modules,
     append,
     remove,
     move,
   } = useFieldArray({
     control,
-    name: 'sections',
+    name: 'modules',
   });
 
-  const watchedSections = useWatch({ control, name: 'sections', defaultValue: [] });
-  const currentSections = useMemo(() => watchedSections || [], [watchedSections]);
+  const watchedModules = useWatch({ control, name: 'modules', defaultValue: [] });
+  const currentModules = useMemo(() => watchedModules || [], [watchedModules]);
 
   const allErrors = useExtractZodErrors(errors);
 
   const stats: CurriculumStats = useMemo(() => {
     return {
-      totalSections: currentSections.length,
-      totalLessons: currentSections.reduce((sum, s) => sum + (s.lessons?.length || 0), 0),
-      totalContent: currentSections.reduce(
+      totalModules: currentModules.length,
+      totalLessons: currentModules.reduce((sum, s) => sum + (s.lessons?.length || 0), 0),
+      totalContent: currentModules.reduce(
         (sum, s) => sum + (s.lessons?.reduce((lSum, l) => lSum + (l.content ? 1 : 0), 0) || 0),
         0
       ),
-      totalQuizzes: currentSections.filter((s) => s.quiz).length,
-      totalDuration: calculateTotalDuration(currentSections),
-      publishedSections: currentSections.filter((s) => s.isPublished).length,
-      publishedLessons: currentSections.reduce(
+      totalQuizzes: currentModules.filter((s) => s.quiz).length,
+      totalDuration: calculateTotalDuration(currentModules),
+      publishedModules: currentModules.filter((s) => s.isPublished).length,
+      publishedLessons: currentModules.reduce(
         (sum, s) => sum + (s.lessons?.filter((l) => l.isPublished).length || 0),
         0
       ),
       completionPercentage:
-        currentSections.length > 0
+        currentModules.length > 0
           ? Math.round(
-              (currentSections.filter((s) => s.isPublished).length / currentSections.length) * 100
+              (currentModules.filter((s) => s.isPublished).length / currentModules.length) * 100
             )
           : 0,
     };
-  }, [currentSections]);
+  }, [currentModules]);
 
   const validation: ValidationResult = useMemo(() => {
     const vErrors: string[] = [];
     const vWarnings: string[] = [];
 
-    if (stats.totalSections < 1) {
-      vErrors.push('At least 1 section is required');
+    if (stats.totalModules < 1) {
+      vErrors.push('At least 1 module is required');
     }
-    if (stats.totalLessons < 3 && stats.totalSections > 0) {
+    if (stats.totalLessons < 3 && stats.totalModules > 0) {
       vWarnings.push('Courses with at least 3-5 lessons have higher engagement');
     }
     if (stats.totalContent === 0 && stats.totalLessons > 0) {
@@ -184,55 +184,55 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
     };
   }, [stats]);
 
-  const handleAddSection = useCallback(async () => {
-    const newSection: Section = {
-      id: `section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: `Section ${sections.length + 1}`,
+  const handleAddModule = useCallback(async () => {
+    const newModule: Module = {
+      id: `module_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title: `Module ${modules.length + 1}`,
       description: '',
       lessons: [],
       isPublished: true,
-      order: sections.length,
+      order: modules.length,
     };
 
-    append(newSection);
-  }, [sections.length, append]);
+    append(newModule);
+  }, [modules.length, append]);
 
-  const handleRemoveSection = useCallback(
+  const handleRemoveModule = useCallback(
     async (index: number) => {
       remove(index);
     },
     [remove]
   );
 
-  const handleErrorClick = (sectionIndex?: number) => {
-    if (sectionIndex !== undefined) {
-      const sectionId = sections[sectionIndex]?.id;
-      if (sectionId) {
+  const handleErrorClick = (moduleIndex?: number) => {
+    if (moduleIndex !== undefined) {
+      const moduleId = modules[moduleIndex]?.id;
+      if (moduleId) {
         setTimeout(() => {
-          const element = getDocument()?.getElementById(`section-${sectionId}`);
+          const element = getDocument()?.getElementById(`module-${moduleId}`);
           element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
       }
     }
   };
 
-  const handleMoveSection = useCallback(
+  const handleMoveModule = useCallback(
     (index: number, direction: 'up' | 'down') => {
       const newIndex = direction === 'up' ? index - 1 : index + 1;
-      if (newIndex >= 0 && newIndex < sections.length) {
+      if (newIndex >= 0 && newIndex < modules.length) {
         move(index, newIndex);
       }
     },
-    [sections.length, move]
+    [modules.length, move]
   );
 
-  const toggleSectionExpanded = useCallback((sectionId: string) => {
-    setExpandedSections((prev) => {
+  const toggleModuleExpanded = useCallback((moduleId: string) => {
+    setExpandedModules((prev) => {
       const next = new Set(prev);
-      if (next.has(sectionId)) {
-        next.delete(sectionId);
+      if (next.has(moduleId)) {
+        next.delete(moduleId);
       } else {
-        next.add(sectionId);
+        next.add(moduleId);
       }
       return next;
     });
@@ -246,24 +246,24 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
           <div>
             <h2 className="text-2xl font-bold text-foreground">Course Curriculum</h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Design your learning path. Organize your content into logical sections and engaging
+              Design your learning path. Organize your content into logical modules and engaging
               lessons.
             </p>
           </div>
 
           <Button
             size="lg"
-            onClick={handleAddSection}
-            disabled={sections.length >= 100}
+            onClick={handleAddModule}
+            disabled={modules.length >= 100}
             className="rounded-xl h-11 px-6 font-semibold transition-all shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Section
+            Add Module
           </Button>
         </div>
 
         {/* Stats Grid */}
-        {sections.length > 0 && (
+        {modules.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -272,8 +272,8 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
             <div className="md:col-span-3 bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <StatItem
-                  label="Sections"
-                  value={stats.totalSections}
+                  label="Modules"
+                  value={stats.totalModules}
                   icon={BookOpen}
                   color="text-blue-500"
                 />
@@ -326,9 +326,9 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
         {/* Validation Feedback */}
         <ValidationAlert errors={validation.errors} warnings={validation.warnings} />
 
-        {/* Sections Architecture */}
+        {/* Modules Architecture */}
         <div className="space-y-4">
-          {sections.length === 0 ? (
+          {modules.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -341,34 +341,34 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
                 Start Building Your Curriculum
               </h3>
               <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm">
-                Your curriculum is the heart of the learning experience. Add your first section to
+                Your curriculum is the heart of the learning experience. Add your first module to
                 begin.
               </p>
-              <Button size="lg" onClick={handleAddSection} className="rounded-xl h-11 px-8">
-                Create First Section
+              <Button size="lg" onClick={handleAddModule} className="rounded-xl h-11 px-8">
+                Create First Module
               </Button>
             </motion.div>
           ) : (
             <div className="space-y-4 relative">
               <AnimatePresence mode="popLayout" initial={false}>
-                {sections.map((section, index) => (
+                {modules.map((module, index) => (
                   <motion.div
-                    key={section.id}
+                    key={module.id}
                     layout
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    id={`section-${section.id}`}
+                    id={`module-${module.id}`}
                   >
-                    <SectionEditor
-                      sectionIndex={index}
+                    <ModuleEditor
+                      moduleIndex={index}
                       courseId={courseId}
-                      onToggleActive={() => toggleSectionExpanded(section.id)}
-                      onRemove={() => handleRemoveSection(index)}
-                      onMove={(direction) => handleMoveSection(index, direction)}
+                      onToggleActive={() => toggleModuleExpanded(module.id)}
+                      onRemove={() => handleRemoveModule(index)}
+                      onMove={(direction) => handleMoveModule(index, direction)}
                       canMoveUp={index > 0}
-                      canMoveDown={index < sections.length - 1}
+                      canMoveDown={index < modules.length - 1}
                     />
                   </motion.div>
                 ))}
@@ -397,7 +397,7 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
                 {allErrors.map((error, idx) => (
                   <button
                     key={idx}
-                    onClick={() => handleErrorClick(error.sectionIndex)}
+                    onClick={() => handleErrorClick(error.moduleIndex)}
                     className="text-left p-3 rounded-lg bg-destructive/5 border border-destructive/10 hover:border-destructive/30 transition-all group"
                   >
                     <div className="flex justify-between items-start mb-1">
@@ -417,16 +417,16 @@ export const CurriculumTab = React.memo(({ curriculumForm, courseId }: Curriculu
         </AnimatePresence>
 
         {/* Footer Add Section */}
-        {sections.length > 0 && (
+        {modules.length > 0 && (
           <div className="flex justify-center pt-6">
             <Button
               variant="outline"
               size="lg"
-              onClick={handleAddSection}
+              onClick={handleAddModule}
               className="rounded-xl border-dashed border-2 h-14 px-10 text-muted-foreground hover:text-primary hover:border-primary transition-all group"
             >
               <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
-              Add Another Section
+              Add Another Module
             </Button>
           </div>
         )}

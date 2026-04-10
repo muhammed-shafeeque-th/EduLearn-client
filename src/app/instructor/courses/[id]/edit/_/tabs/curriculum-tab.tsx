@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, AlertCircle, Plus, CheckCircle, Save } from 'lucide-react';
 import { useWatch, UseFormReturn } from 'react-hook-form';
 import { CurriculumFormData } from '../schemas/curriculum-schema';
-import { SectionEditor } from '../components/editors/section-editor';
+import { ModuleEditor } from '../components/editors/module-editor';
 import { calculateTotalDuration } from '../utils/curriculum-utils';
 import { CourseControllerAPI } from '../hooks/use-course-controller';
 import { getDocument } from '@/lib/utils';
@@ -17,12 +17,12 @@ interface CurriculumTabProps {
 }
 
 interface CurriculumStats {
-  totalSections: number;
+  totalModules: number;
   totalLessons: number;
   totalContent: number;
   totalQuizzes: number;
   totalDuration: number;
-  publishedSections: number;
+  publishedModules: number;
   publishedLessons: number;
   completionPercentage: number;
 }
@@ -31,7 +31,7 @@ interface ValidationIssue {
   type: 'error' | 'warning';
   path: string;
   message: string;
-  sectionIndex?: number;
+  moduleIndex?: number;
   lessonIndex?: number;
 }
 
@@ -113,7 +113,7 @@ const ValidationAlert: React.FC<{
 };
 
 export const CurriculumTab = ({ curriculumForm, courseId, controller }: CurriculumTabProps) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [showValidation, setShowValidation] = useState(false);
 
   const {
@@ -122,43 +122,43 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
     trigger,
   } = curriculumForm;
 
-  // Watch sections in real-time for stats
-  const watchedSections = useWatch({
+  // Watch modules in real-time for stats
+  const watchedModules = useWatch({
     control,
-    name: 'sections',
+    name: 'modules',
     defaultValue: [],
   });
 
-  const sections = useMemo(() => watchedSections || [], [watchedSections]);
+  const modules = useMemo(() => watchedModules || [], [watchedModules]);
   const pendingCount = useMemo(() => controller.pendingCount, [controller]);
 
   // STATS CALCULATION
 
   const stats: CurriculumStats = useMemo(() => {
-    const totalLessons = sections.reduce((sum, s) => sum + (s.lessons?.length || 0), 0);
-    const totalContent = sections.reduce(
+    const totalLessons = modules.reduce((sum, s) => sum + (s.lessons?.length || 0), 0);
+    const totalContent = modules.reduce(
       (sum, s) => sum + (s.lessons?.reduce((lSum, l) => lSum + (l.content ? 1 : 0), 0) || 0),
       0
     );
-    const totalQuizzes = sections.filter((s) => s.quiz).length;
-    const publishedSections = sections.filter((s) => s.isPublished).length;
-    const publishedLessons = sections.reduce(
+    const totalQuizzes = modules.filter((s) => s.quiz).length;
+    const publishedModules = modules.filter((s) => s.isPublished).length;
+    const publishedLessons = modules.reduce(
       (sum, s) => sum + (s.lessons?.filter((l) => l.isPublished).length || 0),
       0
     );
 
     return {
-      totalSections: sections.length,
+      totalModules: modules.length,
       totalLessons,
       totalContent,
       totalQuizzes,
-      totalDuration: calculateTotalDuration(sections),
-      publishedSections,
+      totalDuration: calculateTotalDuration(modules),
+      publishedModules,
       publishedLessons,
       completionPercentage:
-        sections.length > 0 ? Math.round((publishedSections / sections.length) * 100) : 0,
+        modules.length > 0 ? Math.round((publishedModules / modules.length) * 100) : 0,
     };
-  }, [sections]);
+  }, [modules]);
 
   // VALIDATION
 
@@ -166,11 +166,11 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
     const issues: ValidationIssue[] = [];
 
     // Global validation
-    if (stats.totalSections < 2) {
+    if (stats.totalModules < 2) {
       issues.push({
         type: 'error',
         path: 'Curriculum',
-        message: 'At least 2 sections required',
+        message: 'At least 2 modules required',
       });
     }
 
@@ -198,34 +198,34 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
       });
     }
 
-    // Section-level validation
-    sections.forEach((section, sectionIdx) => {
-      if (!section.title?.trim()) {
+    // Module-level validation
+    modules.forEach((module, moduleIdx) => {
+      if (!module.title?.trim()) {
         issues.push({
           type: 'error',
-          path: `Section ${sectionIdx + 1}`,
+          path: `Module ${moduleIdx + 1}`,
           message: 'Title is required',
-          sectionIndex: sectionIdx,
+          moduleIndex: moduleIdx,
         });
       }
 
-      if (!section.lessons || section.lessons.length === 0) {
+      if (!module.lessons || module.lessons.length === 0) {
         issues.push({
           type: 'error',
-          path: `Section ${sectionIdx + 1}`,
+          path: `Module ${moduleIdx + 1}`,
           message: 'At least one lesson required',
-          sectionIndex: sectionIdx,
+          moduleIndex: moduleIdx,
         });
       }
 
       // Lesson-level validation
-      section.lessons?.forEach((lesson, lessonIdx) => {
+      module.lessons?.forEach((lesson, lessonIdx) => {
         if (!lesson.title?.trim()) {
           issues.push({
             type: 'error',
-            path: `Section ${sectionIdx + 1} → Lesson ${lessonIdx + 1}`,
+            path: `Module ${moduleIdx + 1} → Lesson ${lessonIdx + 1}`,
             message: 'Lesson title required',
-            sectionIndex: sectionIdx,
+            moduleIndex: moduleIdx,
             lessonIndex: lessonIdx,
           });
         }
@@ -233,9 +233,9 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
         if (!lesson.content) {
           issues.push({
             type: 'error',
-            path: `Section ${sectionIdx + 1} → Lesson ${lessonIdx + 1}`,
+            path: `Module ${moduleIdx + 1} → Lesson ${lessonIdx + 1}`,
             message: 'Lesson content required',
-            sectionIndex: sectionIdx,
+            moduleIndex: moduleIdx,
             lessonIndex: lessonIdx,
           });
         }
@@ -243,73 +243,73 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
         if (!lesson.estimatedDuration || lesson.estimatedDuration === 0) {
           issues.push({
             type: 'warning',
-            path: `Section ${sectionIdx + 1} → Lesson ${lessonIdx + 1}`,
+            path: `Module ${moduleIdx + 1} → Lesson ${lessonIdx + 1}`,
             message: 'Estimated duration recommended',
-            sectionIndex: sectionIdx,
+            moduleIndex: moduleIdx,
             lessonIndex: lessonIdx,
           });
         }
       });
 
       // Quiz validation
-      if (section.quiz) {
-        if (!section.quiz.title?.trim()) {
+      if (module.quiz) {
+        if (!module.quiz.title?.trim()) {
           issues.push({
             type: 'error',
-            path: `Section ${sectionIdx + 1} → Quiz`,
+            path: `Module ${moduleIdx + 1} → Quiz`,
             message: 'Quiz title required',
-            sectionIndex: sectionIdx,
+            moduleIndex: moduleIdx,
           });
         }
 
-        if (!section.quiz.questions || section.quiz.questions.length === 0) {
+        if (!module.quiz.questions || module.quiz.questions.length === 0) {
           issues.push({
             type: 'error',
-            path: `Section ${sectionIdx + 1} → Quiz`,
+            path: `Module ${moduleIdx + 1} → Quiz`,
             message: 'At least one question required',
-            sectionIndex: sectionIdx,
+            moduleIndex: moduleIdx,
           });
         }
       }
     });
 
     return issues;
-  }, [sections, stats]);
+  }, [modules, stats]);
 
   // const hasErrors = validationIssues.some((i) => i.type === 'error');
 
-  const handleAddSection = useCallback(() => {
-    const newSection = controller.createSection({
-      title: `Section ${sections.length + 1}`,
+  const handleAddModule = useCallback(() => {
+    const newModule = controller.createModule({
+      title: `Module ${modules.length + 1}`,
       description: '',
       lessons: [],
       isPublished: true,
-      order: sections.length,
+      order: modules.length,
     });
 
-    // Auto-expand new section
-    setExpandedSections((prev) => new Set(prev).add(newSection.id));
+    // Auto-expand new module
+    setExpandedModules((prev) => new Set(prev).add(newModule.id));
 
-    // Scroll to new section
+    // Scroll to new module
     setTimeout(() => {
-      const element = getDocument()?.getElementById(`section-${newSection.id}`);
+      const element = getDocument()?.getElementById(`module-${newModule.id}`);
       element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
-  }, [controller, sections.length]);
+  }, [controller, modules.length]);
 
   const handleValidateAll = useCallback(async () => {
     setShowValidation(true);
-    const isValid = await trigger('sections');
+    const isValid = await trigger('modules');
 
     if (!isValid) {
       // Scroll to first error
       const firstError = validationIssues.find((i) => i.type === 'error');
-      if (firstError?.sectionIndex !== undefined) {
-        const sectionId = sections[firstError.sectionIndex]?.id;
-        if (sectionId) {
-          setExpandedSections((prev) => new Set(prev).add(sectionId));
+      if (firstError?.moduleIndex !== undefined) {
+        const moduleId = modules[firstError.moduleIndex]?.id;
+        if (moduleId) {
+          setExpandedModules((prev) => new Set(prev).add(moduleId));
           setTimeout(() => {
-            const element = getDocument()?.getElementById(`section-${sectionId}`);
+            const element = getDocument()?.getElementById(`module-${moduleId}`);
             element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 100);
         }
@@ -317,41 +317,41 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
     }
 
     return isValid;
-  }, [trigger, validationIssues, sections]);
+  }, [trigger, validationIssues, modules]);
 
   const handleIssueClick = useCallback(
     (issue: ValidationIssue) => {
-      if (issue.sectionIndex !== undefined) {
-        const sectionId = sections[issue.sectionIndex]?.id;
-        if (sectionId) {
-          setExpandedSections((prev) => new Set(prev).add(sectionId));
+      if (issue.moduleIndex !== undefined) {
+        const moduleId = modules[issue.moduleIndex]?.id;
+        if (moduleId) {
+          setExpandedModules((prev) => new Set(prev).add(moduleId));
           setTimeout(() => {
-            const element = getDocument()?.getElementById(`section-${sectionId}`);
+            const element = getDocument()?.getElementById(`module-${moduleId}`);
             element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 100);
         }
       }
     },
-    [sections]
+    [modules]
   );
 
-  const toggleSectionExpanded = useCallback((sectionId: string) => {
-    setExpandedSections((prev) => {
+  const toggleModuleExpanded = useCallback((moduleId: string) => {
+    setExpandedModules((prev) => {
       const next = new Set(prev);
-      if (next.has(sectionId)) {
-        next.delete(sectionId);
+      if (next.has(moduleId)) {
+        next.delete(moduleId);
       } else {
-        next.add(sectionId);
+        next.add(moduleId);
       }
       return next;
     });
   }, []);
 
-  const getSectionError = useCallback(
+  const getModuleError = useCallback(
     (index: number) => {
-      return errors.sections?.[index];
+      return errors.modules?.[index];
     },
-    [errors.sections]
+    [errors.modules]
   );
 
   // RENDER
@@ -367,7 +367,7 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Course Curriculum</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Build your course structure with sections, lessons, and quizzes
+            Build your course structure with modules, lessons, and quizzes
           </p>
         </div>
 
@@ -383,18 +383,18 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
           )}
 
           <button
-            onClick={handleAddSection}
-            disabled={sections.length >= 100}
+            onClick={handleAddModule}
+            disabled={modules.length >= 100}
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-blue-500 text-white rounded-xl hover:from-primary/90 hover:to-blue-600 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             <Plus className="w-5 h-5 mr-2" />
-            Add Section
+            Add Module
           </button>
         </div>
       </motion.div>
 
       {/* Stats Summary */}
-      {/* {sections.length > 0 && (
+      {/* {modules.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -419,9 +419,9 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
-              <p className="text-3xl font-bold text-primary mb-1">{stats.totalSections}</p>
+              <p className="text-3xl font-bold text-primary mb-1">{stats.totalModules}</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Section{stats.totalSections !== 1 ? 's' : ''}
+                Module{stats.totalModules !== 1 ? 's' : ''}
               </p>
             </div>
 
@@ -450,7 +450,7 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
                 Publication Progress
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {stats.publishedSections} / {stats.totalSections} sections
+                {stats.publishedModules} / {stats.totalModules} modules
               </span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
@@ -463,9 +463,9 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
         </motion.div>
       )} */}
 
-      {/* Sections List */}
+      {/* Modules List */}
       <div className="space-y-4">
-        {sections.length === 0 ? (
+        {modules.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -476,39 +476,39 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
               Build Your Curriculum
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Start creating your course by adding sections, lessons, and quizzes. Each section
-              should contain related lessons on a specific topic.
+              Start creating your course by adding modules, lessons, and quizzes. Each module should
+              contain related lessons on a specific topic.
             </p>
             <button
-              onClick={handleAddSection}
+              onClick={handleAddModule}
               className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-lg"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Create First Section
+              Create First Module
             </button>
           </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">
-            {sections.map((section, index) => (
+            {modules.map((module, index) => (
               <motion.div
-                key={section.id}
+                key={module.id}
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
-                id={`section-${section.id}`}
+                id={`module-${module.id}`}
               >
-                <SectionEditor
+                <ModuleEditor
                   controller={controller}
                   control={control}
-                  sectionIndex={index}
+                  moduleIndex={index}
                   courseId={courseId}
-                  isActive={expandedSections.has(section.id)}
-                  onToggleActive={() => toggleSectionExpanded(section.id)}
+                  isActive={expandedModules.has(module.id)}
+                  onToggleActive={() => toggleModuleExpanded(module.id)}
                   canMoveUp={index > 0}
-                  canMoveDown={index < sections.length - 1}
-                  sectionError={getSectionError(index)}
+                  canMoveDown={index < modules.length - 1}
+                  moduleError={getModuleError(index)}
                 />
               </motion.div>
             ))}
@@ -521,25 +521,25 @@ export const CurriculumTab = ({ curriculumForm, courseId, controller }: Curricul
         <ValidationAlert issues={validationIssues} onIssueClick={handleIssueClick} />
       )}
 
-      {/* Add Another Section Button */}
-      {sections.length > 0 && sections.length < 100 && (
+      {/* Add Another Module Button */}
+      {modules.length > 0 && modules.length < 100 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="flex justify-center pt-4"
         >
           <button
-            onClick={handleAddSection}
+            onClick={handleAddModule}
             className="inline-flex items-center px-8 py-4 border-2 border-dashed border-primary/40 dark:border-primary/60 text-primary dark:text-primary-foreground rounded-xl hover:border-primary dark:hover:border-primary-foreground hover:bg-primary/5 dark:hover:bg-primary/10 transition-all font-medium group"
           >
             <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-            Add Another Section
+            Add Another Module
           </button>
         </motion.div>
       )}
 
       {/* Validation Button */}
-      {sections.length > 0 && (
+      {modules.length > 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-end">
           <button
             onClick={handleValidateAll}

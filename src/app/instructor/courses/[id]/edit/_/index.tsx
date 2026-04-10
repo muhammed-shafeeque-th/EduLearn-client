@@ -38,9 +38,9 @@ export const CourseEditor = ({ course }: CourseEditorProps) => {
     removeRequirement,
   } = useCourseForm({ course });
 
-  const sectionsArray = useFieldArray({
+  const modulesArray = useFieldArray({
     control: curriculumForm.control,
-    name: 'sections',
+    name: 'modules',
   });
 
   const controller = useCourseController({
@@ -49,7 +49,7 @@ export const CourseEditor = ({ course }: CourseEditorProps) => {
     basicForm: basicForm as UseFormReturn<BasicInfoFormData>,
     advancedForm,
     curriculumForm: curriculumForm as UseFormReturn<CurriculumFormData>,
-    sectionsArray: sectionsArray as UseFieldArrayReturn<CurriculumFormData, 'sections'>,
+    modulesArray: modulesArray as UseFieldArrayReturn<CurriculumFormData, 'modules'>,
   });
 
   const handleSave = async () => {

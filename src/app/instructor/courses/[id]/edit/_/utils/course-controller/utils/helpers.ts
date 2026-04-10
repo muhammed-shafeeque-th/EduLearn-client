@@ -1,5 +1,5 @@
 import { CoursePayload, QuizPayload } from '@/types/course';
-import { Lesson, Quiz, Section } from '../../../schemas/curriculum-schema';
+import { Lesson, Quiz, Module } from '../../../schemas/curriculum-schema';
 import { AdvancedInfoFormData, BasicInfoFormData } from '../../../schemas/course-schemas';
 
 export function buildCoursePayload(
@@ -30,12 +30,12 @@ export function buildCoursePayload(
   };
 }
 
-export function buildSectionPayload(section: Partial<Section>) {
+export function buildModulePayload(module: Partial<Module>) {
   return {
-    title: section.title,
-    description: section.description,
-    order: section.order,
-    isPublished: section.isPublished,
+    title: module.title,
+    description: module.description,
+    order: module.order,
+    isPublished: module.isPublished,
   };
 }
 

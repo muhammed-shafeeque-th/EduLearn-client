@@ -5,7 +5,7 @@ import CourseCreatorSkeleton from './loading';
 
 export const metadata: Metadata = {
   title: 'Create New Course | Instructor Dashboard ',
-  description: 'Create a new course with sections, lessons, and assessments.',
+  description: 'Create a new course with modules, lessons, and assessments.',
 };
 
 export default function CreateCoursePage() {

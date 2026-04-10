@@ -82,13 +82,13 @@ export const useCourseForm = ({ course }: { course: Course }) => {
   const curriculumDefaults: CurriculumFormData = useMemo(
     () =>
       ({
-        sections: course.sections.map((section) => ({
-          id: section.id,
-          title: section.title,
-          description: section.description,
-          isPublished: !!section.isPublished,
-          order: section.order,
-          lessons: section.lessons.map((lesson) => ({
+        modules: course.modules.map((module) => ({
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          isPublished: !!module.isPublished,
+          order: module.order,
+          lessons: module.lessons.map((lesson) => ({
             id: lesson.id,
             title: lesson.title,
             order: lesson.order,
@@ -109,14 +109,14 @@ export const useCourseForm = ({ course }: { course: Course }) => {
               },
             },
           })),
-          ...(section.quiz
+          ...(module.quiz
             ? {
                 quiz: {
-                  id: section.quiz.id || '',
-                  title: section.quiz.title || '',
-                  description: section.quiz.description || '',
+                  id: module.quiz.id || '',
+                  title: module.quiz.title || '',
+                  description: module.quiz.description || '',
                   questions:
-                    section.quiz.questions.map((question) => ({
+                    module.quiz.questions.map((question) => ({
                       id: generateTempId('question'),
                       type: question.type,
                       question: question.question,
@@ -136,18 +136,18 @@ export const useCourseForm = ({ course }: { course: Course }) => {
                       timeLimit: question.timeLimit ? Number(question.timeLimit) : 0,
                       required: question.required ? Boolean(question.required) : false,
                     })) || '',
-                  timeLimit: section.quiz.timeLimit ? Number(section.quiz.timeLimit) : 10,
-                  passingScore: section.quiz.passingScore ? Number(section.quiz.passingScore) : 70,
-                  maxAttempts: section.quiz.maxAttempts ? Number(section.quiz.maxAttempts) : 3,
-                  randomizeQuestions: section.quiz.randomizeQuestions
-                    ? Boolean(section.quiz.randomizeQuestions)
+                  timeLimit: module.quiz.timeLimit ? Number(module.quiz.timeLimit) : 10,
+                  passingScore: module.quiz.passingScore ? Number(module.quiz.passingScore) : 70,
+                  maxAttempts: module.quiz.maxAttempts ? Number(module.quiz.maxAttempts) : 3,
+                  randomizeQuestions: module.quiz.randomizeQuestions
+                    ? Boolean(module.quiz.randomizeQuestions)
                     : false,
-                  showResults: section.quiz.showResults ? Boolean(section.quiz.showResults) : false,
-                  isRequired: section.quiz.isRequired ? Boolean(section.quiz.isRequired) : false,
+                  showResults: module.quiz.showResults ? Boolean(module.quiz.showResults) : false,
+                  isRequired: module.quiz.isRequired ? Boolean(module.quiz.isRequired) : false,
                 },
               }
             : undefined),
-          // section.quiz,
+          // module.quiz,
         })),
         totalDuration: 0,
         totalLessons: 0,
@@ -231,13 +231,13 @@ export const useCourseForm = ({ course }: { course: Course }) => {
   // });
 
   // const CURRICULUM_DEFAULT: CurriculumFormData = {
-  //   sections: course.sections.map((section) => ({
-  //     id: section.id,
-  //     title: section.title,
-  //     description: section.description,
-  //     isPublished: !!section.isPublished,
-  //     order: section.order,
-  //     lessons: section.lessons.map((lesson) => ({
+  //   modules: course.modules.map((module) => ({
+  //     id: module.id,
+  //     title: module.title,
+  //     description: module.description,
+  //     isPublished: !!module.isPublished,
+  //     order: module.order,
+  //     lessons: module.lessons.map((lesson) => ({
   //       id: lesson.id,
   //       title: lesson.title,
   //       order: lesson.order,
@@ -258,14 +258,14 @@ export const useCourseForm = ({ course }: { course: Course }) => {
   //         },
   //       },
   //     })),
-  //     ...(section.quiz
+  //     ...(module.quiz
   //       ? {
   //           quiz: {
-  //             id: section.quiz.id || '',
-  //             title: section.quiz.title || '',
-  //             description: section.quiz.description || '',
+  //             id: module.quiz.id || '',
+  //             title: module.quiz.title || '',
+  //             description: module.quiz.description || '',
   //             questions:
-  //               section.quiz.questions.map((question) => ({
+  //               module.quiz.questions.map((question) => ({
   //                 id: generateId(),
   //                 type: question.type,
   //                 question: question.question,
@@ -285,18 +285,18 @@ export const useCourseForm = ({ course }: { course: Course }) => {
   //                 timeLimit: question.timeLimit ? Number(question.timeLimit) : 0,
   //                 required: question.required ? Boolean(question.required) : false,
   //               })) || '',
-  //             timeLimit: section.quiz.timeLimit ? Number(section.quiz.timeLimit) : 10,
-  //             passingScore: section.quiz.passingScore ? Number(section.quiz.passingScore) : 70,
-  //             maxAttempts: section.quiz.maxAttempts ? Number(section.quiz.maxAttempts) : 3,
-  //             randomizeQuestions: section.quiz.randomizeQuestions
-  //               ? Boolean(section.quiz.randomizeQuestions)
+  //             timeLimit: module.quiz.timeLimit ? Number(module.quiz.timeLimit) : 10,
+  //             passingScore: module.quiz.passingScore ? Number(module.quiz.passingScore) : 70,
+  //             maxAttempts: module.quiz.maxAttempts ? Number(module.quiz.maxAttempts) : 3,
+  //             randomizeQuestions: module.quiz.randomizeQuestions
+  //               ? Boolean(module.quiz.randomizeQuestions)
   //               : false,
-  //             showResults: section.quiz.showResults ? Boolean(section.quiz.showResults) : false,
-  //             isRequired: section.quiz.isRequired ? Boolean(section.quiz.isRequired) : false,
+  //             showResults: module.quiz.showResults ? Boolean(module.quiz.showResults) : false,
+  //             isRequired: module.quiz.isRequired ? Boolean(module.quiz.isRequired) : false,
   //           },
   //         }
   //       : undefined),
-  //     // section.quiz,
+  //     // module.quiz,
   //   })),
   //   totalDuration: 0,
   //   totalLessons: 0,

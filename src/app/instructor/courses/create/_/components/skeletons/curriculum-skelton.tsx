@@ -15,14 +15,14 @@ export const CurriculumSkeleton: React.FC = () => {
           <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-32 mt-4 sm:mt-0"></div>
         </div>
 
-        {/* Sections */}
+        {/* Modules */}
         <div className="space-y-4">
-          {[...Array(3)].map((_, sectionIndex) => (
+          {[...Array(3)].map((_, moduleIndex) => (
             <div
-              key={sectionIndex}
+              key={moduleIndex}
               className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
             >
-              {/* Section Header */}
+              {/* Module Header */}
               <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-750">
                 <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mr-3"></div>
                 <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded mr-4"></div>
@@ -62,7 +62,7 @@ export const CurriculumSkeleton: React.FC = () => {
           ))}
         </div>
 
-        {/* Add Section Button Skeleton */}
+        {/* Add Module Button Skeleton */}
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg w-full"></div>
         </div>

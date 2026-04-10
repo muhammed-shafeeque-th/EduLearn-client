@@ -18,7 +18,7 @@ interface CoursePreviewData {
   discountPrice?: number;
   currency?: string;
   stats: {
-    totalSections: number;
+    totalModules: number;
     totalLessons: number;
     totalDuration: number;
     previewContent: number;
@@ -109,10 +109,8 @@ export const CoursePreview: React.FC<CoursePreviewProps> = ({ data, className = 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto mb-1" />
-            <p className="text-sm text-gray-600 dark:text-gray-400">Sections</p>
-            <p className="font-semibold text-gray-900 dark:text-white">
-              {data.stats.totalSections}
-            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Modules</p>
+            <p className="font-semibold text-gray-900 dark:text-white">{data.stats.totalModules}</p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <PlayCircle className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto mb-1" />

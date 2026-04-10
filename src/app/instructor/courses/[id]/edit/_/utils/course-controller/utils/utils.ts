@@ -4,7 +4,7 @@ import { EntityId, TempId } from '../types';
  * Check if an ID is a temporary client-side ID
  */
 export function isTempId(id: string): boolean {
-  return id.startsWith('temp_') || id.startsWith('section_') || id.startsWith('lesson_');
+  return id.startsWith('temp_') || id.startsWith('module_') || id.startsWith('lesson_');
 }
 
 /**

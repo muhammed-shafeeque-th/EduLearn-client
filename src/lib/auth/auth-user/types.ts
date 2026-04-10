@@ -1,8 +1,9 @@
-import { UserRole } from '../require-auth/types';
+import { UserRole } from '../auth-guard/types';
 
 export type AuthPayload = {
   id: string;
   name: string;
   email?: string;
-  role: UserRole;
+  roles: UserRole[];
+  permissions: string[];
 };

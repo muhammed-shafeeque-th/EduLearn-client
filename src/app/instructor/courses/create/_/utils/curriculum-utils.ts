@@ -14,26 +14,26 @@ export const formatDuration = (minutes: number): string => {
   return `${hours}h ${remainingMinutes}min`;
 };
 
-export const calculateTotalDuration = (sections: any[]): number => {
-  return sections.reduce((total, section) => {
-    const sectionDuration =
-      section.lessons?.reduce((lessonTotal: number, lesson: any) => {
+export const calculateTotalDuration = (modules: any[]): number => {
+  return modules.reduce((total, module) => {
+    const moduleDuration =
+      module.lessons?.reduce((lessonTotal: number, lesson: any) => {
         const lessonDuration = lesson.content?.duration || 0;
         return lessonTotal + lessonDuration;
       }, 0) || 0;
-    return total + sectionDuration;
+    return total + moduleDuration;
   }, 0);
 };
 
-export const calculateSectionStats = (section: any) => {
-  const lessonCount = section.lessons?.length || 0;
+export const calculateModuleStats = (module: any) => {
+  const lessonCount = module.lessons?.length || 0;
   const totalDuration =
-    section.lessons?.reduce((total: number, lesson: any) => {
+    module.lessons?.reduce((total: number, lesson: any) => {
       return total + (lesson.content?.duration || 0);
     }, 0) || 0;
 
   const contentCount =
-    section.lessons?.reduce((total: number, lesson: any) => {
+    module.lessons?.reduce((total: number, lesson: any) => {
       return total + (lesson.content ? 1 : 0);
     }, 0) || 0;
 
@@ -47,34 +47,34 @@ export const calculateSectionStats = (section: any) => {
 export const validateCurriculumData = (data: any): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
-  if (!data.sections || data.sections.length === 0) {
-    errors.push('At least one section is required');
+  if (!data.modules || data.modules.length === 0) {
+    errors.push('At least one module is required');
     return { isValid: false, errors };
   }
 
-  data.sections?.forEach((section: any, sectionIndex: number) => {
-    if (!section.title?.trim()) {
-      errors.push(`Section ${sectionIndex + 1}: Title is required`);
+  data.modules?.forEach((module: any, moduleIndex: number) => {
+    if (!module.title?.trim()) {
+      errors.push(`Module ${moduleIndex + 1}: Title is required`);
     }
 
-    if (!section.lessons || section.lessons.length === 0) {
-      errors.push(`Section ${sectionIndex + 1}: At least one lesson is required`);
+    if (!module.lessons || module.lessons.length === 0) {
+      errors.push(`Module ${moduleIndex + 1}: At least one lesson is required`);
     } else {
-      section.lessons?.forEach((lesson: any, lessonIndex: number) => {
+      module.lessons?.forEach((lesson: any, lessonIndex: number) => {
         if (!lesson.title?.trim()) {
-          errors.push(`Section ${sectionIndex + 1}, Lesson ${lessonIndex + 1}: Title is required`);
+          errors.push(`Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}: Title is required`);
         }
 
         if (!lesson.content) {
           errors.push(
-            `Section ${sectionIndex + 1}, Lesson ${lessonIndex + 1}: At least one content item is required`
+            `Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}: At least one content item is required`
           );
         }
 
         // Validate content items
         if (lesson.content?.type === 'link' && !lesson.content.url?.trim()) {
           errors.push(
-            `Section ${sectionIndex + 1}, Lesson ${lessonIndex + 1}, Content : File or URL is required`
+            `Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}, Content : File or URL is required`
           );
         }
 
@@ -85,7 +85,7 @@ export const validateCurriculumData = (data: any): { isValid: boolean; errors: s
           !lesson.content.url?.trim()
         ) {
           errors.push(
-            `Section ${sectionIndex + 1}, Lesson ${lessonIndex + 1}, Content : File or URL is required`
+            `Module ${moduleIndex + 1}, Lesson ${lessonIndex + 1}, Content : File or URL is required`
           );
         }
       });
@@ -100,28 +100,28 @@ export const validateCurriculumData = (data: any): { isValid: boolean; errors: s
 
 export const exportCurriculumData = (data: any) => {
   const stats = {
-    totalSections: data.sections?.length || 0,
+    totalModules: data.modules?.length || 0,
     totalLessons:
-      data.sections?.reduce(
-        (total: number, section: any) => total + (section.lessons?.length || 0),
+      data.modules?.reduce(
+        (total: number, module: any) => total + (module.lessons?.length || 0),
         0
       ) || 0,
     totalContent:
-      data.sections?.reduce(
-        (total: number, section: any) =>
+      data.modules?.reduce(
+        (total: number, module: any) =>
           total +
-          (section.lessons?.reduce(
+          (module.lessons?.reduce(
             (lessonTotal: number, lesson: any) => lessonTotal + (lesson.content?.length || 0),
             0
           ) || 0),
         0
       ) || 0,
-    totalDuration: calculateTotalDuration(data.sections || []),
+    totalDuration: calculateTotalDuration(data.modules || []),
     previewContent:
-      data.sections?.reduce(
-        (total: number, section: any) =>
+      data.modules?.reduce(
+        (total: number, module: any) =>
           total +
-          (section.lessons?.reduce(
+          (module.lessons?.reduce(
             (lessonTotal: number, lesson: any) =>
               lessonTotal +
               (lesson.content?.filter((content: any) => content.isPreview).length || 0),

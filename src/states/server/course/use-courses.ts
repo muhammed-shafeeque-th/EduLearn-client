@@ -8,7 +8,7 @@ import {
   keepPreviousData,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { CourseParams, courseService, PaginationParams } from '@/services/course.service';
+import { CourseParams, courseService, PaginationParams } from '@/services/course';
 import { BasicInfoRequestPayload, Course, CoursePayload } from '@/types/course';
 import { RequestOptions } from '@/services/base-service';
 

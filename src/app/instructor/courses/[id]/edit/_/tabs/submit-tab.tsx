@@ -73,12 +73,10 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
         const advancedData = advancedForm.getValues();
         const curriculumData = curriculumForm.getValues();
 
-        const totalDuration = calculateTotalDuration(curriculumData.sections || []);
+        const totalDuration = calculateTotalDuration(curriculumData.modules || []);
         const totalLessons =
-          curriculumData.sections?.reduce(
-            (sum, section) => sum + (section.lessons?.length || 0),
-            0
-          ) || 0;
+          curriculumData.modules?.reduce((sum, module) => sum + (module.lessons?.length || 0), 0) ||
+          0;
 
         setCoursePreview({
           ...basicData,
@@ -87,12 +85,12 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
           stats: {
             totalDuration,
             totalLessons,
-            totalSections: curriculumData.sections?.length || 0,
+            totalModules: curriculumData.modules?.length || 0,
             previewContent:
-              curriculumData.sections?.reduce(
-                (sum, section) =>
+              curriculumData.modules?.reduce(
+                (sum, module) =>
                   sum +
-                  (section.lessons?.reduce(
+                  (module.lessons?.reduce(
                     (lessonSum, lesson) => lessonSum + (lesson.content?.isPreview ? 1 : 0),
                     0
                   ) || 0),
@@ -108,7 +106,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
 
   const validationItems = [
     {
-      section: 'Basic Information',
+      module: 'Basic Information',
       isValid: validationResults.basic,
       items: [
         'Course title',
@@ -119,7 +117,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
       ],
     },
     {
-      section: 'Advanced Information',
+      module: 'Advanced Information',
       isValid: validationResults.advanced,
       items: [
         'Course thumbnail',
@@ -130,11 +128,11 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
       ],
     },
     {
-      section: 'Curriculum',
+      module: 'Curriculum',
       isValid: validationResults.curriculum,
       items: [
-        'At least one section',
-        'At least one lesson per section',
+        'At least one module',
+        'At least one lesson per module',
         'Content for each lesson',
         'Proper naming for all components',
       ],
@@ -146,7 +144,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
 
   // const handleSubmit = () => {
   //   if (!allValid) {
-  //     toast.error('Please complete all required sections before Submitting');
+  //     toast.error('Please complete all required modules before Submitting');
   //     return;
   //   }
   //   if (!pricing.price) {
@@ -180,7 +178,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
 
             {validationItems.map((item, index) => (
               <motion.div
-                key={item.section}
+                key={item.module}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -203,7 +201,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
                         : 'text-red-900 dark:text-red-100'
                     }`}
                   >
-                    {item.section}
+                    {item.module}
                   </h4>
                 </div>
                 <ul className="space-y-1">
@@ -224,7 +222,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
               </motion.div>
             ))}
 
-            {/* Pricing Section */}
+            {/* Pricing Module */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -333,10 +331,10 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
                   <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
                     <div className="flex items-center text-gray-600 dark:text-gray-400 mb-1">
                       <BookOpen className="w-4 h-4 mr-1" />
-                      <span className="text-xs">Sections</span>
+                      <span className="text-xs">Modules</span>
                     </div>
                     <p className="font-semibold text-gray-900 dark:text-white">
-                      {coursePreview.stats.totalSections}
+                      {coursePreview.stats.totalModules}
                     </p>
                   </div>
                   <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
@@ -418,7 +416,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 dark:text-gray-400">
-                  Complete all sections to see course preview
+                  Complete all modules to see course preview
                 </p>
               </div>
             )}
@@ -475,7 +473,7 @@ export const SubmitTab: React.FC<SubmitTabProps> = ({
             ) : (
               <span className="flex items-center text-amber-600 dark:text-amber-400">
                 <AlertCircle className="w-4 h-4 mr-1" />
-                Complete all sections to Submit
+                Complete all modules to Submit
               </span>
             )}
           </div>
