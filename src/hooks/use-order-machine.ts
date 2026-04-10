@@ -4,7 +4,7 @@ import type { ActorRefFrom } from 'xstate';
 
 import { orderMachine, type PaymentProof, type StateValues } from '@/lib/machines/order-machine';
 import type { Order, PlaceOrderPayload } from '@/types/order';
-import type { PaymentProvider } from '@/services/payment.service';
+import { PaymentProvider } from '@/services/payment';
 
 export function useOrderMachine() {
   const orderService: ActorRefFrom<typeof orderMachine> = useActorRef(orderMachine);
