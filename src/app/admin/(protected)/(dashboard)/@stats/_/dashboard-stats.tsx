@@ -42,11 +42,12 @@ const STAT_CONFIG: Array<{
     icon: DollarSign,
     valueFormatter: (v) => {
       const normalizedRevenue = normalizeCurrencyAmount(v);
-      return normalizedRevenue?.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0,
-      });
+      return `₹ ${normalizedRevenue}`;
+      // normalizedRevenue?.toLocaleString('en-US', {
+      //   style: 'currency',
+      //   currency: 'INR',
+      //   maximumFractionDigits: 0,
+      // });
     },
   },
 ];
