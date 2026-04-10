@@ -1,11 +1,14 @@
 import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { enrollmentService } from '@/services/enrollment.service';
+import { enrollmentService } from '@/services/enrollment';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { CertificateData } from '@/types/enrollment/enrollment-certificate.type';
+import { useAuthUserSelector } from '@/states/client';
 
 export function useEnrollmentCertificate(enrollmentId: string) {
   const queryClient = useQueryClient();
+  const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId && !!enrollmentId;
 
   const certificateQuery = useQuery({
     queryKey: QUERY_KEYS.certificates.byEnrollment(enrollmentId),
@@ -23,6 +26,7 @@ export function useEnrollmentCertificate(enrollmentId: string) {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    enabled: isEnabled,
     retry: 1,
   });
 
