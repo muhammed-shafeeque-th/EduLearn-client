@@ -1,5 +1,5 @@
 import { Review } from '../review';
-import { Section } from './course-content.type';
+import { Module } from './course-content.type';
 
 export type CourseStatus = 'draft' | 'published' | 'unpublished' | 'deleted';
 
@@ -34,7 +34,7 @@ export interface Course {
   learningOutcomes: string[];
   targetAudience: string[];
   instructor: Instructor;
-  sections: Section[];
+  modules: Module[];
   completionCertificate?: boolean;
   durationValue: number;
   durationUnit: string;
@@ -71,7 +71,7 @@ export interface CourseMeta {
   deletedAt?: string | undefined;
   price: number;
   noOfLessons: number;
-  noOfSections: number;
+  noOfModules: number;
   noOfQuizzes: number;
   discountPrice?: number | undefined;
   currency?: string | undefined;

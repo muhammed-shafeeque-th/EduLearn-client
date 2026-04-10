@@ -23,7 +23,7 @@ export interface CourseAnalytics {
   }>;
 }
 
-export interface CurriculumSection {
+export interface CurriculumModule {
   id: string;
   title: string;
   duration: string;
@@ -39,7 +39,7 @@ export interface CourseStats {
   views: number;
 }
 
-export interface SyllabusSection {
+export interface SyllabusModule {
   id: string;
   title: string;
   lessonsCount: number;
@@ -84,7 +84,7 @@ export interface Testimonial {
 // export type QuizPayload =
 //   | {
 //       courseId: string | undefined;
-//       sectionId: string;
+//       moduleId: string;
 //       question: string;
 //       explanation: string | undefined;
 //       points: number | undefined;
@@ -96,7 +96,7 @@ export interface Testimonial {
 //     }
 //   | {
 //       courseId: string | undefined;
-//       sectionId: string;
+//       moduleId: string;
 //       question: string;
 //       correctAnswer: string | undefined;
 //       explanation: string | undefined;
