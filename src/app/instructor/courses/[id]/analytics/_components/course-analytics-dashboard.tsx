@@ -18,9 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { RatingChart } from './rating-chart';
 import { EnrollmentTrendChart } from './enrollment-trend-chart';
-import { CourseAnalytics } from '@/types/course';
 import { useCourseAnalytics } from '@/states/server/course/use-course-stats';
 import LoadingScreen from '@/components/ui/loading-screen';
+import { CourseAnalytics } from '@/services/course';
 
 interface CourseAnalyticsDashboardProps {
   courseId: string;
@@ -42,19 +42,21 @@ const MONTH_NAMES = [
   'Dec',
 ];
 
-function normalizeCourseAnalytics(data: Partial<CourseAnalytics>) {
+function normalizeCourseAnalytics(data: Partial<CourseAnalytics>): CourseAnalytics {
   return {
-    courseId: data?.courseId ?? '',
     totalStudents: data?.totalStudents ?? 0,
     completionRate: data?.completionRate ?? 0,
     averageProgress: data?.averageProgress ?? 0,
-    averageRating: data?.averageRating ?? 0,
-    totalRatings: data?.totalRatings ?? 0,
     revenueThisMonth: data?.revenueThisMonth ?? 0,
-    revenueLastMonth: data?.revenueLastMonth ?? 0,
-    revenueTotal: data?.revenueTotal ?? 0,
     ratingsBreakdown: data?.ratingsBreakdown ?? { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
     enrollmentTrend: data?.enrollmentTrend ?? [],
+    averageRating: data?.averageRating ?? 0,
+    certificatesIssued: data?.certificatesIssued ?? 0,
+    engagementRate: data?.engagementRate ?? 0,
+    monthlyRevenue: data?.monthlyRevenue ?? 0,
+    revenueGrowth: data?.revenueGrowth ?? 0,
+    totalRevenue: data?.totalRevenue ?? 0,
+    totalReviews: data?.totalReviews ?? 0,
   };
 }
 
@@ -68,24 +70,23 @@ export function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDashboardP
     completionRate,
     averageProgress,
     averageRating,
-    totalRatings,
     revenueThisMonth,
-    revenueLastMonth,
-    revenueTotal,
     ratingsBreakdown,
     enrollmentTrend,
+    revenueGrowth,
+    totalRevenue,
+    totalReviews,
   } = analytics;
 
-  // Compute revenue month-over-month growth
-  const revenueGrowth = useMemo(() => {
-    if (revenueLastMonth === 0) return revenueThisMonth > 0 ? 100 : 0;
-    return ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100;
-  }, [revenueThisMonth, revenueLastMonth]);
+  const revenueLastMonth = Math.max(
+    Math.min(0, Math.ceil(revenueThisMonth - revenueThisMonth * revenueGrowth)),
+    revenueThisMonth
+  );
 
   // Compute average revenue per student (safe division)
   const avgRevenuePerStudent = useMemo(() => {
-    return totalStudents > 0 ? revenueTotal / totalStudents : 0;
-  }, [revenueTotal, totalStudents]);
+    return totalStudents > 0 ? totalRevenue / totalStudents : 0;
+  }, [totalRevenue, totalStudents]);
 
   // Format enrollment trend for display
   const formattedTrend = useMemo(() => {
@@ -127,15 +128,15 @@ export function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDashboardP
       icon: Star,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-100 dark:bg-yellow-900/20',
-      subtitle: `${totalRatings} reviews`,
+      subtitle: `${totalReviews} reviews`,
     },
     {
       title: 'Total Revenue',
-      value: `$${revenueTotal.toLocaleString()}`,
+      value: `₹${totalRevenue?.toLocaleString()}`,
       icon: DollarSign,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-100 dark:bg-emerald-900/20',
-      subtitle: `$${revenueThisMonth.toLocaleString()} this month`,
+      subtitle: `₹${revenueThisMonth.toLocaleString()} this month`,
     },
   ];
 
@@ -226,7 +227,7 @@ export function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDashboardP
             <RatingChart
               averageRating={averageRating}
               ratingsBreakdown={ratingsBreakdown}
-              totalRatings={totalRatings}
+              totalRatings={totalReviews}
             />
           </CardContent>
         </Card>
@@ -283,13 +284,13 @@ export function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDashboardP
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
                   <p className="text-2xl font-bold text-emerald-600">
-                    ${revenueTotal.toLocaleString()}
+                    ₹{totalRevenue.toLocaleString()}
                   </p>
                   <p className="text-sm text-muted-foreground">Total Revenue</p>
                 </div>
                 <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <p className="text-2xl font-bold text-blue-600">
-                    ${revenueThisMonth.toLocaleString()}
+                    ₹{revenueThisMonth.toLocaleString()}
                   </p>
                   <p className="text-sm text-muted-foreground">This Month</p>
                 </div>
@@ -298,12 +299,12 @@ export function CourseAnalyticsDashboard({ courseId }: CourseAnalyticsDashboardP
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
                   <span className="text-sm font-medium">Last Month</span>
-                  <span className="font-bold">${revenueLastMonth.toLocaleString()}</span>
+                  <span className="font-bold">₹{revenueLastMonth.toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
                   <span className="text-sm font-medium">Avg Revenue / Student</span>
-                  <span className="font-bold">${avgRevenuePerStudent.toFixed(2)}</span>
+                  <span className="font-bold">₹{avgRevenuePerStudent.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
