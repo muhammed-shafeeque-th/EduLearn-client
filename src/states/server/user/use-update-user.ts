@@ -1,10 +1,11 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 import { User, UserProfileUpdatePayload } from '@/types/user';
 import { ApiResponse } from '@/types/api-response';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
+import { useAuthUserSelector } from '@/states/client';
 
 /**
  * Hook to update the current user's profile.
@@ -14,6 +15,8 @@ import { QUERY_KEYS } from '@/lib/react-query/query-keys';
  */
 export function useUpdateUser() {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
 
   const mutation = useMutation<ApiResponse<User>, Error, Partial<UserProfileUpdatePayload>>({
     mutationFn: (data) => userService.updateUserProfile(data),
@@ -21,7 +24,7 @@ export function useUpdateUser() {
       // Invalidate and refetch relevant queries only if success
       if (response.success) {
         // Update cached current user data optimistically if possible
-        queryClient.setQueryData(QUERY_KEYS.users.current(), response);
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), response);
         if (response.data?.id) {
           queryClient.setQueryData(QUERY_KEYS.users.detail(response.data.id), response);
         }

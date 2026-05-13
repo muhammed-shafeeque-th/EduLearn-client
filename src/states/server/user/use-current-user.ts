@@ -1,19 +1,25 @@
 'use client';
 import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 import { RegisterInstructorPayload, User, UserProfileUpdatePayload } from '@/types/user';
 import { ApiResponse } from '@/types/api-response';
-import { adminService } from '@/services/admin.service';
+import { adminService } from '@/services/admin';
+import { useAuthUserSelector } from '@/states/client';
+import { instructorService } from '@/services/instructor';
 
 export function useCurrentUser(
   options?: Partial<UseQueryOptions<ApiResponse<User | null>, null, User | null>>
 ) {
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id;
+  const isEnabled = !!authUserId && (options?.enabled ?? true);
+
   return useQuery<ApiResponse<User | null>, null, User | null>({
-    queryKey: QUERY_KEYS.users.current(),
+    queryKey: QUERY_KEYS.users.current(authUserId!),
     queryFn: ({ signal }) => userService.getCurrentUser({ signal }),
     staleTime: options?.staleTime ?? 10 * 60 * 1000, // 10 minutes for current user
-    enabled: options?.enabled ?? false,
+    enabled: isEnabled,
     select: (data) => {
       // ApiResponse<User>
       return data && data.success ? data.data : null;
@@ -36,19 +42,21 @@ export function useCurrentUser(
 
 export function useUpdateUserProfile() {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
 
   return useMutation({
     mutationFn: (data: Partial<UserProfileUpdatePayload>) => userService.updateUserProfile(data),
     onMutate: async (newProfile: Partial<UserProfileUpdatePayload>) => {
       // Cancel outgoing queries
-      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.current() });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.current(authUserId) });
 
       // Snapshot previous value
-      const previousUser = queryClient.getQueryData<User>(QUERY_KEYS.users.current());
+      const previousUser = queryClient.getQueryData<User>(QUERY_KEYS.users.current(authUserId));
 
       // Optimistically update
       if (previousUser) {
-        queryClient.setQueryData(QUERY_KEYS.users.current(), {
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), {
           ...previousUser,
           ...newProfile,
         });
@@ -59,12 +67,12 @@ export function useUpdateUserProfile() {
     onError: (error, variables, context) => {
       // Rollback on error
       if (context?.previousUser) {
-        queryClient.setQueryData(QUERY_KEYS.users.current(), context.previousUser);
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), context.previousUser);
       }
     },
     onSuccess: (updatedUser) => {
       // Update current user cache
-      queryClient.setQueryData(QUERY_KEYS.users.current(), updatedUser);
+      queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), updatedUser);
 
       // Update user detail cache if exists
       queryClient.setQueryData(
@@ -86,9 +94,11 @@ export function useUpdateUserProfile() {
 }
 export function useBlockUser() {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
 
   return useMutation<ApiResponse<void>, unknown, string, { previousUser?: ApiResponse<User> }>({
-    mutationFn: (userId: string) => adminService.blockUser(userId),
+    mutationFn: (userId: string) => adminService.blockAccount(userId),
     onMutate: async (userId) => {
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.detail(userId) });
@@ -111,7 +121,7 @@ export function useBlockUser() {
     onError: (error, variables, context) => {
       // Rollback on error
       if (context?.previousUser) {
-        queryClient.setQueryData(QUERY_KEYS.users.current(), context.previousUser);
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), context.previousUser);
       }
     },
     onSuccess: (_, userId) => {
@@ -135,8 +145,11 @@ export function useBlockUser() {
 export function useUnBlockUser() {
   const queryClient = useQueryClient();
 
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
+
   return useMutation({
-    mutationFn: (userId: string) => adminService.unBlockUser(userId),
+    mutationFn: (userId: string) => adminService.unblockAccount(userId),
     onMutate: async (userId) => {
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.detail(userId) });
@@ -159,7 +172,7 @@ export function useUnBlockUser() {
     onError: (error, variables, context) => {
       // Rollback on error
       if (context?.previousUser) {
-        queryClient.setQueryData(QUERY_KEYS.users.current(), context.previousUser);
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), context.previousUser);
       }
     },
     onSuccess: (_, userId) => {
@@ -184,19 +197,22 @@ export function useUnBlockUser() {
 export function useRegisterInstructor() {
   const queryClient = useQueryClient();
 
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
+
   return useMutation({
     mutationFn: (payload: RegisterInstructorPayload) =>
-      userService.registerInstructor(payload as RegisterInstructorPayload),
+      instructorService.registerInstructor(payload as RegisterInstructorPayload),
     onMutate: async (newProfile) => {
       // Cancel outgoing queries
-      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.current() });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.users.current(authUserId) });
 
       // Snapshot previous value
-      const previousUser = queryClient.getQueryData<User>(QUERY_KEYS.users.current());
+      const previousUser = queryClient.getQueryData<User>(QUERY_KEYS.users.current(authUserId));
 
       // Optimistically update
       if (previousUser) {
-        queryClient.setQueryData(QUERY_KEYS.users.current(), {
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), {
           ...previousUser,
           ...newProfile,
         });
@@ -207,12 +223,12 @@ export function useRegisterInstructor() {
     onError: (error, variables, context) => {
       // Rollback on error
       if (context?.previousUser) {
-        queryClient.setQueryData(QUERY_KEYS.users.current(), context.previousUser);
+        queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), context.previousUser);
       }
     },
     onSuccess: (updatedUser) => {
       // Update current user cache
-      queryClient.setQueryData(QUERY_KEYS.users.current(), updatedUser);
+      queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), updatedUser);
 
       // Update user detail cache if exists
       queryClient.setQueryData(
@@ -239,7 +255,7 @@ export function useRegisterInstructor() {
 //   return useMutation({
 //     mutationFn: userService.updateAvatar,
 //     onSuccess: (updatedUser) => {
-//       queryClient.setQueryData(QUERY_KEYS.users.current(), updatedUser);
+//       queryClient.setQueryData(QUERY_KEYS.users.current(authUserId), updatedUser);
 //       queryClient.setQueryData(QUERY_KEYS.users.detail(updatedUser.id), updatedUser);
 //     },
 //     meta: {

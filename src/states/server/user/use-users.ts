@@ -2,7 +2,7 @@
 
 import { useQuery, useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { userService, UsersParams } from '@/services/user.service';
+import { userService, UsersParams } from '@/services/user';
 
 /**
  * Fetch a paginated list of users.
