@@ -365,10 +365,10 @@ export function CourseCertificateTab({
                           Download as Image
                         </DropdownMenuItem> */}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handlePrint}>
+                        {/* <DropdownMenuItem onClick={handlePrint}>
                           <Printer className="h-4 w-4 mr-2" />
                           Print Certificate
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
 

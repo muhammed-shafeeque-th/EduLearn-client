@@ -21,14 +21,14 @@ interface CourseQuizzesTabProps {
 }
 
 export function CourseQuizzesTab({ enrollment, progress, onQuizStart }: CourseQuizzesTabProps) {
-  // Extract quizzes with section info
-  const quizzes = enrollment.sections
-    .filter((section) => section.quiz)
-    .map((section, index) => ({
-      quiz: section.quiz!,
-      sectionTitle: section.title,
-      sectionOrder: index + 1,
-      progress: progress.quizzes.find((q) => q.quizId === section.quiz!.id),
+  // Extract quizzes with module info
+  const quizzes = enrollment.modules
+    .filter((module) => module.quiz)
+    .map((module, index) => ({
+      quiz: module.quiz!,
+      moduleTitle: module.title,
+      moduleOrder: index + 1,
+      progress: progress.quizzes.find((q) => q.quizId === module.quiz!.id),
     }));
 
   const completedQuizzes = quizzes.filter((q) => q.progress?.completed).length;
@@ -117,7 +117,7 @@ export function CourseQuizzesTab({ enrollment, progress, onQuizStart }: CourseQu
 
       {/* Quiz List */}
       <div className="space-y-4">
-        {quizzes.map(({ quiz, sectionTitle, sectionOrder, progress: quizProgress }, index) => (
+        {quizzes.map(({ quiz, moduleTitle, moduleOrder, progress: quizProgress }, index) => (
           <Card
             key={quiz.id}
             className={cn(
@@ -141,7 +141,7 @@ export function CourseQuizzesTab({ enrollment, progress, onQuizStart }: CourseQu
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">
-                      Section {sectionOrder}: {sectionTitle}
+                      Module {moduleOrder}: {moduleTitle}
                     </p>
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground flex-wrap gap-2">
                       {quiz.requirePassingScore && quiz.passingScore && (

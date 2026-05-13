@@ -11,11 +11,8 @@ interface CourseDetailsTabProps {
 }
 
 export function CourseDetailsTab({ enrollment }: CourseDetailsTabProps) {
-  const totalLessons = enrollment.sections.reduce(
-    (acc, section) => acc + section.lessons.length,
-    0
-  );
-  const totalQuizzes = enrollment.sections.filter((s) => s.quiz).length;
+  const totalLessons = enrollment.modules.reduce((acc, module) => acc + module.lessons.length, 0);
+  const totalQuizzes = enrollment.modules.filter((s) => s.quiz).length;
 
   return (
     <div className="space-y-6">
@@ -69,31 +66,31 @@ export function CourseDetailsTab({ enrollment }: CourseDetailsTabProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {enrollment.sections.map((section, index) => (
+            {enrollment.modules.map((module, index) => (
               <div
-                key={section.id}
+                key={module.id}
                 className="p-4 border rounded-lg hover:bg-accent/50 transition-colors"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <h4 className="font-semibold mb-1">
-                      Section {index + 1}: {section.title}
+                      Module {index + 1}: {module.title}
                     </h4>
-                    {section.description && (
-                      <p className="text-sm text-muted-foreground">{section.description}</p>
+                    {module.description && (
+                      <p className="text-sm text-muted-foreground">{module.description}</p>
                     )}
                   </div>
-                  {/* <Badge variant={section.isPublished ? 'default' : 'secondary'}>
-                    {section.isPublished ? 'Published' : 'Draft'}
+                  {/* <Badge variant={module.isPublished ? 'default' : 'secondary'}>
+                    {module.isPublished ? 'Published' : 'Draft'}
                   </Badge> */}
                 </div>
 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <BookOpen className="h-4 w-4" />
-                    {section.lessons.length} {section.lessons.length === 1 ? 'lesson' : 'lessons'}
+                    {module.lessons.length} {module.lessons.length === 1 ? 'lesson' : 'lessons'}
                   </span>
-                  {section.quiz && (
+                  {module.quiz && (
                     <span className="flex items-center gap-1">
                       <ListChecks className="h-4 w-4" />
                       Quiz included

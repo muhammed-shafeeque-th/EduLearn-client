@@ -21,7 +21,7 @@ interface CourseSidebarProps {
   onItemHover?: (item: CourseItem) => void;
 }
 
-interface SectionGroup {
+interface ModuleGroup {
   id: string;
   title: string;
   items: CourseItem[];
@@ -38,19 +38,19 @@ export function CourseSidebar({
   isItemLocked,
   onItemHover,
 }: CourseSidebarProps) {
-  // GROUP ITEMS BY SECTION
+  // GROUP ITEMS BY MODULE
 
-  const sections = useMemo<SectionGroup[]>(() => {
-    const sectionMap = new Map<string, CourseItem[]>();
+  const modules = useMemo<ModuleGroup[]>(() => {
+    const moduleMap = new Map<string, CourseItem[]>();
 
     courseItems.forEach((item) => {
-      if (!sectionMap.has(item.sectionId)) {
-        sectionMap.set(item.sectionId, []);
+      if (!moduleMap.has(item.moduleId)) {
+        moduleMap.set(item.moduleId, []);
       }
-      sectionMap.get(item.sectionId)!.push(item);
+      moduleMap.get(item.moduleId)!.push(item);
     });
 
-    return Array.from(sectionMap.entries()).map(([sectionId, items]) => {
+    return Array.from(moduleMap.entries()).map(([moduleId, items]) => {
       const completed = items.filter((item) => {
         const itemProgress = getItemProgress(item, progress);
         return itemProgress?.completed || false;
@@ -60,8 +60,8 @@ export function CourseSidebar({
       const progressPercent = total > 0 ? (completed / total) * 100 : 0;
 
       return {
-        id: sectionId,
-        title: items[0]?.sectionTitle || 'Untitled Section',
+        id: moduleId,
+        title: items[0]?.moduleTitle || 'Untitled Module',
         items,
         completed,
         total,
@@ -142,24 +142,24 @@ export function CourseSidebar({
         </p>
       </div>
 
-      {/* Section List */}
+      {/* Module List */}
       <div className="space-y-4">
-        {sections.map((section) => (
-          <div key={section.id} className="border rounded-lg overflow-hidden bg-card">
-            {/* Section Header */}
+        {modules.map((module) => (
+          <div key={module.id} className="border rounded-lg overflow-hidden bg-card">
+            {/* Module Header */}
             <div className="p-3 bg-accent/30 flex items-center justify-between">
               <div className="flex items-center space-x-2 flex-1 min-w-0">
                 <ListChecks className="h-4 w-4 text-primary shrink-0" />
-                <span className="font-semibold text-sm truncate">{section.title}</span>
+                <span className="font-semibold text-sm truncate">{module.title}</span>
               </div>
               <Badge variant="secondary" className="text-xs shrink-0 ml-2">
-                {section.completed}/{section.total}
+                {module.completed}/{module.total}
               </Badge>
             </div>
 
-            {/* Section Items */}
+            {/* Module Items */}
             <div className="divide-y">
-              {section.items.map((item) => {
+              {module.items.map((item) => {
                 const isLocked = isItemLocked(item);
                 const isActive = item.id === currentItemId;
                 const itemProgress = getItemProgress(item, progress);
@@ -203,9 +203,9 @@ export function CourseSidebar({
               })}
             </div>
 
-            {/* Section Progress Bar */}
+            {/* Module Progress Bar */}
             <div className="p-2 bg-muted/30">
-              <Progress value={section.progressPercent} className="h-1" />
+              <Progress value={module.progressPercent} className="h-1" />
             </div>
           </div>
         ))}
