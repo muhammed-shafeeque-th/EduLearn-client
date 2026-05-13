@@ -7,7 +7,7 @@ import { Award } from 'lucide-react';
 import Link from 'next/link';
 
 export function CertificatesList() {
-  const { data: certificates, isLoading, error } = useUserCertificates({ enabled: true });
+  const { certificates, isLoading, certificatesError } = useUserCertificates({ enabled: true });
 
   if (isLoading) {
     return (
@@ -19,7 +19,7 @@ export function CertificatesList() {
     );
   }
 
-  if (error) {
+  if (certificatesError) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-card rounded-xl border border-dashed text-center">
         <div className="bg-destructive/10 p-4 rounded-full mb-4">
