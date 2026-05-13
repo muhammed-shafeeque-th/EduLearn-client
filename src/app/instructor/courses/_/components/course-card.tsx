@@ -57,13 +57,13 @@ function getStatusLabel(status: string) {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
-  // Calculate metrics only if sections are defined and not empty
-  // const totalSections = course.sections?.length || 0;
-  // const totalLessons = course.sections
-  //   ? course.sections.reduce((sum, section) => sum + (section.lessons?.length || 0), 0)
+  // Calculate metrics only if modules are defined and not empty
+  // const totalModules = course.modules?.length || 0;
+  // const totalLessons = course.modules
+  //   ? course.modules.reduce((sum, module) => sum + (module.lessons?.length || 0), 0)
   //   : 0;
-  // const totalQuizzes = course.sections
-  //   ? course.sections.reduce((sum, section) => sum + (section.quiz ? 1 : 0), 0)
+  // const totalQuizzes = course.modules
+  //   ? course.modules.reduce((sum, module) => sum + (module.quiz ? 1 : 0), 0)
   //   : 0;
 
   const formatDate = (dateString: string) =>
@@ -143,11 +143,11 @@ export function CourseCard({ course }: CourseCardProps) {
             >
               {course.discountPrice ? (
                 <div className="flex items-center gap-1">
-                  <span className="line-through text-xs">${course.price}</span>
-                  <span className="font-semibold">${course.discountPrice}</span>
+                  <span className="line-through text-xs">₹{course.price}</span>
+                  <span className="font-semibold">₹{course.discountPrice}</span>
                 </div>
               ) : (
-                <span className="font-semibold">${course.price || 'N/A'}</span>
+                <span className="font-semibold">₹{course.price || 'N/A'}</span>
               )}
             </Badge>
           </div>
@@ -158,7 +158,7 @@ export function CourseCard({ course }: CourseCardProps) {
               variant="secondary"
               className="bg-black/80 text-white hover:bg-black/90 text-[11px] px-1.5 py-0.5 rounded tracking-wide"
             >
-              {course.noOfSections}S • {course.noOfLessons}L • {course.noOfQuizzes}Q
+              {course.noOfModules}M • {course.noOfLessons}L • {course.noOfQuizzes}Q
             </Badge>
           </div>
         </div>
