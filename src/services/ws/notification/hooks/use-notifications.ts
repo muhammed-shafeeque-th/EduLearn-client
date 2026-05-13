@@ -15,9 +15,11 @@ import {
 } from '@/states/server/notification/use-notifications';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuthUserSelector } from '@/states/client';
 
 export function useNotifications(filters: Partial<NotificationFilters> = {}) {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const processedNotificationIds = useRef<Set<string>>(new Set());
 
@@ -40,7 +42,7 @@ export function useNotifications(filters: Partial<NotificationFilters> = {}) {
 
       // Update TanStack Query cache - add to all notification lists
       queryClient.setQueriesData(
-        { queryKey: QUERY_KEYS.notifications.lists() },
+        { queryKey: QUERY_KEYS.notifications.lists(user?.userId ?? 'current') },
         (
           old:
             | {
@@ -109,7 +111,7 @@ export function useNotifications(filters: Partial<NotificationFilters> = {}) {
         processedNotificationIds.current.clear();
       }
     },
-    [queryClient]
+    [queryClient, user]
   );
 
   // Handle WebSocket errors

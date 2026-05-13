@@ -28,7 +28,7 @@ import {
   useRemoveMessageReaction,
 } from '@/states/server/messaging/use-messaging';
 import { useSendMessage, useChatMutations } from '@/states/server/messaging/use-chat-mutations';
-import { messageService } from '@/services/_/messaging.service';
+import { chatService } from '@/services/chat';
 import { debounce } from '@/lib/utils';
 import { useOnlineUsers } from './use-online-users';
 
@@ -89,7 +89,9 @@ export function useMessaging({
   const messages = useMemo(() => messagesQuery.messages ?? [], [messagesQuery.messages]);
 
   const chatListQueryKey =
-    role === 'instructor' ? QUERY_KEYS.chat.instructorChats() : QUERY_KEYS.chat.studentChats();
+    role === 'instructor'
+      ? QUERY_KEYS.chat.instructorChats(userId!)
+      : QUERY_KEYS.chat.studentChats(userId!);
 
   const {
     createOrGetChatMutation,
@@ -622,7 +624,7 @@ export function useMessaging({
     async (messageId: string, content: string): Promise<Message | null> => {
       if (!userId || !chatId) return null;
       try {
-        const res = await messageService.editMessage(chatId, messageId, content);
+        const res = await chatService.editMessage(chatId, messageId, content);
         if (!res.success || !res.data) {
           toast.error(res.message || 'Failed to edit message');
           return null;
@@ -641,7 +643,7 @@ export function useMessaging({
     async (messageId: string, forEveryone = false): Promise<boolean> => {
       if (!userId || !chatId) return false;
       try {
-        await messageService.deleteMessage(chatId, messageId, forEveryone);
+        await chatService.deleteMessage(chatId, messageId, forEveryone);
         // toast.error(res.message || 'Failed to delete message');
         // if (!res.success) {
         //   return false;
@@ -678,7 +680,7 @@ export function useMessaging({
   const markAsRead = useCallback(async () => {
     if (!chatId) return;
     try {
-      await messageService.markAsRead(chatId);
+      await chatService.markAsRead(chatId);
     } catch (error) {
       console.error('Failed to mark as read:', error);
     }
