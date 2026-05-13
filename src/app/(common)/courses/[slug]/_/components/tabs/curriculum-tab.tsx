@@ -34,14 +34,14 @@ type VideoData = {
 };
 
 export function CurriculumTab({ course }: CurriculumTabProps) {
-  const [expandedSections, setExpandedSections] = useState<string[]>(['1']);
+  const [expandedModules, setExpandedModules] = useState<string[]>(['1']);
   const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null);
   // const [completedLessons, setCompletedLessons] = useState<string[]>(['1', '5']);
-  const curriculum = course.sections || [];
+  const curriculum = course.modules || [];
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(sectionId) ? prev.filter((id) => id !== sectionId) : [...prev, sectionId]
+  const toggleModule = (moduleId: string) => {
+    setExpandedModules((prev) =>
+      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
     );
   };
 
@@ -96,30 +96,30 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
   };
 
   const getTotalDuration = () => {
-    return curriculum.reduce((total, section) => {
-      const sectionMinutes = parseInt(
-        section.lessons
+    return curriculum.reduce((total, module) => {
+      const moduleMinutes = parseInt(
+        module.lessons
           .reduce((total, lesson) => total + (lesson.estimatedDuration || 0), 0)
           .toString()
           .replace(/\D/g, '')
       );
-      return total + sectionMinutes;
+      return total + moduleMinutes;
     }, 0);
   };
 
   const getTotalLessons = () => {
-    return curriculum.reduce((total, section) => total + section.lessons.length, 0);
+    return curriculum.reduce((total, module) => total + module.lessons.length, 0);
   };
 
-  // const getCompletionPercentage = (sectionId: string) => {
-  //   const section = curriculum.find((s) => s.id === sectionId);
-  //   if (!section) return 0;
+  // const getCompletionPercentage = (moduleId: string) => {
+  //   const module = curriculum.find((s) => s.id === moduleId);
+  //   if (!module) return 0;
 
-  //   const completedCount = section.lessons.filter((lesson) =>
+  //   const completedCount = module.lessons.filter((lesson) =>
   //     completedLessons.includes(lesson.id)
   //   ).length;
 
-  //   return Math.round((completedCount / section.lessons.length) * 100);
+  //   return Math.round((completedCount / module.lessons.length) * 100);
   // };
 
   return (
@@ -158,7 +158,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
               <span className="text-sm font-medium">Quizzes</span>
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {curriculum.reduce((total, section) => total + (section.quiz ? 1 : 0), 0)}
+              {curriculum.reduce((total, module) => total + (module.quiz ? 1 : 0), 0)}
             </div>
           </div>
 
@@ -168,19 +168,19 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
               <span className="text-sm font-medium">Resources</span>
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {curriculum.reduce((total, section) => total + (section.lessons.length || 0), 0)}
+              {curriculum.reduce((total, module) => total + (module.lessons.length || 0), 0)}
             </div>
           </div>
         </motion.div>
 
-        {/* Curriculum Sections */}
+        {/* Curriculum Modules */}
         <div className="space-y-4">
-          {curriculum.map((section, index) => {
-            // const completionPercentage = getCompletionPercentage(section.id);
+          {curriculum.map((module, index) => {
+            // const completionPercentage = getCompletionPercentage(module.id);
 
             return (
               <motion.div
-                key={section.id}
+                key={module.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -189,18 +189,18 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                   <CardHeader className="pb-3">
                     <button
                       className="flex items-center justify-between cursor-pointer group w-full bg-transparent border-0 p-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-                      onClick={() => toggleSection(section.id)}
+                      onClick={() => toggleModule(module.id)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          toggleSection(section.id);
+                          toggleModule(module.id);
                         }
                       }}
                       type="button"
                       tabIndex={0}
                       // role="button"
-                      aria-expanded={expandedSections.includes(section.id)}
-                      aria-controls={`section-panel-${section.id}`}
+                      aria-expanded={expandedModules.includes(module.id)}
+                      aria-controls={`module-panel-${module.id}`}
                     >
                       <div className="flex items-center gap-3">
                         <Button
@@ -208,7 +208,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                           size="sm"
                           className="p-1 h-auto group-hover:bg-gray-100 dark:group-hover:bg-gray-700"
                         >
-                          {expandedSections.includes(section.id) ? (
+                          {expandedModules.includes(module.id) ? (
                             <ChevronUp className="w-4 h-4" />
                           ) : (
                             <ChevronDown className="w-4 h-4" />
@@ -217,7 +217,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <CardTitle className="text-base group-hover:text-orange-600 transition-colors">
-                              {section.title}
+                              {module.title}
                             </CardTitle>
                             {/* {completionPercentage > 0 && (
                               <Badge variant="secondary" className="text-xs">
@@ -226,10 +226,10 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                             )} */}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                            <span>{section.lessons.length} lessons</span>
+                            <span>{module.lessons.length} lessons</span>
                             <span>•</span>
                             <span>
-                              {section.lessons.reduce(
+                              {module.lessons.reduce(
                                 (total, lesson) => total + (lesson.estimatedDuration || 0),
                                 0
                               )}{' '}
@@ -240,7 +240,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                                 <span>•</span>
                                 <span className="text-green-600">
                                   {
-                                    section.lessons.filter((l) => completedLessons.includes(l.id))
+                                    module.lessons.filter((l) => completedLessons.includes(l.id))
                                       .length
                                   }{' '}
                                   completed
@@ -264,7 +264,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                   </CardHeader>
 
                   <AnimatePresence>
-                    {expandedSections.includes(section.id) && (
+                    {expandedModules.includes(module.id) && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
@@ -273,7 +273,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                       >
                         <CardContent className="pt-0">
                           <div className="space-y-2">
-                            {section.lessons.map((lesson: Lesson, lessonIndex: number) => {
+                            {module.lessons.map((lesson: Lesson, lessonIndex: number) => {
                               const Icon = getLessonIcon(lesson.contentType);
                               // const isCompleted = completedLessons.includes(lesson.id);
 
@@ -377,14 +377,14 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                             })}
                           </div>
 
-                          {/* Section Summary */}
+                          {/* Module Summary */}
                           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                               <div className="flex items-center gap-4">
-                                <span>{section.lessons.length} lessons</span>
+                                <span>{module.lessons.length} lessons</span>
                                 <span>•</span>
                                 <span>
-                                  {section.lessons.reduce(
+                                  {module.lessons.reduce(
                                     (total, lesson) => total + (lesson.estimatedDuration || 0),
                                     0
                                   )}{' '}
@@ -393,7 +393,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                               </div>
                               <div className="flex items-center gap-2">
                                 <BookOpen className="w-4 h-4" />
-                                <span>Section {index + 1}</span>
+                                <span>Module {index + 1}</span>
                               </div>
                             </div>
                           </div>

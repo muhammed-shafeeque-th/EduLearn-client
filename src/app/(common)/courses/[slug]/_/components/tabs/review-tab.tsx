@@ -37,7 +37,7 @@ import {
   SortAsc,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Course, mockReviews } from '@/types/course';
+import { Course } from '@/types/course';
 
 interface ReviewsTabProps {
   course: Course;
@@ -62,7 +62,7 @@ export function ReviewsTab({ course }: ReviewsTabProps) {
     comment: '',
   });
 
-  const reviews = mockReviews;
+  const reviews = [];
 
   const ratingDistribution = [
     { stars: 5, count: 856, percentage: 67 },

@@ -158,7 +158,6 @@ export function CourseHeader({ course }: CourseHeaderProps) {
     [course.trailer]
   );
 
-
   const handleShowPreview = useCallback(() => setShowVideoPreview(true), []);
   const handleHidePreview = useCallback(() => setShowVideoPreview(false), []);
 
