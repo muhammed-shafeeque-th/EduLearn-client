@@ -4,17 +4,17 @@ import { useState } from 'react';
 import { Bell, CheckCheck, Filter, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NotificationItem } from './notification-item';
-import { Notification, NotificationFilter, NotificationType } from '@/types/notification';
+import { NotificationFilter, NotificationType } from '@/types/notification';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '@/services/ws/notification/hooks/use-notifications';
 import { NotificationFilters } from './notification-filters';
 import { cn } from '@/lib/utils';
 
-interface NotificationListProps {
-  initialData: Notification[];
-}
+// interface NotificationListProps {
+//   initialData: Notification[];
+// }
 
-export function NotificationList({ initialData }: NotificationListProps) {
+export function NotificationList() {
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [typeFilter, setTypeFilter] = useState<NotificationType | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -30,7 +30,7 @@ export function NotificationList({ initialData }: NotificationListProps) {
     refresh,
   } = useNotifications(filter !== 'all' ? { isRead: filter === 'read' } : {});
   // Use initial data until notifications are loaded
-  const displayNotifications = notifications.length > 0 ? notifications : initialData;
+  const displayNotifications = notifications.length > 0 ? notifications : [];
 
   const filteredNotifications = displayNotifications.filter((n) => {
     if (filter === 'unread' && n.isRead) return false;
