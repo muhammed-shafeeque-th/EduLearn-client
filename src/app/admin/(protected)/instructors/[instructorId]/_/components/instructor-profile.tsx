@@ -46,11 +46,11 @@ function getStatusBadge(status: Instructor['status']) {
   );
 }
 
-export function InstructorProfile({ instructor: instr }: InstructorProfileProps) {
+export function InstructorProfile({ instructor: initialInstructor }: InstructorProfileProps) {
   const router = useRouter();
-  const { user } = useAdminUser(instr.id);
+  const { user } = useAdminUser(initialInstructor.id);
 
-  const instructor = (user as Instructor) ?? instr;
+  const instructor = (user as Instructor) ?? initialInstructor;
 
   return (
     <motion.div
@@ -178,7 +178,7 @@ export function InstructorProfile({ instructor: instr }: InstructorProfileProps)
 
           <Separator />
 
-          {/* Bio Section */}
+          {/* Bio Module */}
           {instructor.instructorProfile?.bio && (
             <div>
               <h3 className="text-lg font-semibold mb-3">

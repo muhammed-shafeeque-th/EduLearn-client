@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Users, Star, Clock, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { BookOpen, Users, Star, Clock, Eye, MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { Course, CourseMeta } from '@/types/course';
-import { useInstructorCourses } from '@/states/server/course/use-courses';
 import Image from 'next/image';
+import { useAdminInstructorCourses } from '@/states/server/admin/use-admin-course';
 
 interface InstructorCoursesProps {
   instructorId: string;
@@ -130,7 +130,7 @@ function CourseListItem({ course, instructorId }: { course: CourseMeta; instruct
 }
 
 export function InstructorCourses({ instructorId }: InstructorCoursesProps) {
-  const { courses, totalCount } = useInstructorCourses(instructorId, { page: 1, pageSize: 5 });
+  const { courses, totalCount } = useAdminInstructorCourses(instructorId, { page: 1, pageSize: 5 });
 
   const safeCourses: CourseMeta[] = Array.isArray(courses) ? courses : [];
   const publishedCourses = safeCourses.filter((course) => course.status === 'published');
