@@ -11,7 +11,6 @@ import { useEffect, useMemo } from 'react';
 import { generateTempId } from '../utils/course-controller/utils/utils';
 
 export const useCourseForm = ({ course }: { course: Course }) => {
-  // 1. Memoize default values to prevent unnecessary re-calculations
   const basicDefaults = useMemo(
     () =>
       ({
@@ -29,8 +28,8 @@ export const useCourseForm = ({ course }: { course: Course }) => {
           unit: (course.durationUnit as any) || 'days',
         },
         currency: course.currency as any,
-        discountPrice: course.discountPrice,
-        price: course.price!,
+        discountPrice: course.discountPrice ? Number(course.discountPrice) : undefined,
+        price: course.price ? Number(course.price) : undefined,
       })!,
     [course]
   );
@@ -38,7 +37,7 @@ export const useCourseForm = ({ course }: { course: Course }) => {
   const basicForm = useForm({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: basicDefaults,
-    mode: 'onChange', // Enable live validation
+    mode: 'onChange',
   });
 
   const advancedDefaults = useMemo(

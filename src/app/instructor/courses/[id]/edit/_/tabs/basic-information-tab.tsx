@@ -160,7 +160,11 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({ form }
                       onChange={(e) => {
                         const newObjectives = [...topics];
                         newObjectives[index] = e.target.value;
-                        setValue('topics', newObjectives, { shouldValidate: true });
+                        setValue('topics', newObjectives, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                          shouldTouch: true,
+                        });
                       }}
                       className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
                       placeholder={`Course topic ${index + 1}`}
@@ -170,7 +174,11 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({ form }
                       type="button"
                       onClick={() => {
                         const newObjectives = topics.filter((_: string, i: number) => i !== index);
-                        setValue('topics', newObjectives, { shouldValidate: true });
+                        setValue('topics', newObjectives, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                          shouldTouch: true,
+                        });
                       }}
                       className="p-2 text-red-400 hover:text-red-600 transition-colors"
                       aria-label="Remove topic"
@@ -183,7 +191,10 @@ export const BasicInformationTab: React.FC<BasicInformationTabProps> = ({ form }
             <button
               type="button"
               onClick={() => {
-                setValue('topics', [...(topics || []), ''], { shouldValidate: true });
+                setValue('topics', [...(topics || []), ''], {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
               }}
               className="text-sm text-primary dark:text-primary-foreground hover:underline"
             >

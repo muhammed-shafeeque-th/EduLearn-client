@@ -256,7 +256,7 @@ export class CourseController {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lesson.id,
-        moduleId: module.id,
+        moduleId: $module.id,
         data: { [key]: value },
       });
     } else {
@@ -323,7 +323,7 @@ export class CourseController {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lessonId,
-        moduleId: module.id,
+        moduleId: $module.id,
         data: { content: undefined },
       });
     } else {
@@ -360,7 +360,7 @@ export class CourseController {
       this.queue.push({
         type: 'LESSON_UPDATE',
         id: lessonId,
-        moduleId: module.id,
+        moduleId: $module.id,
         data: { content: newContent },
       });
     } else {
@@ -385,7 +385,7 @@ export class CourseController {
         this.queue.push({
           type: 'LESSON_DELETE',
           id: removed.id,
-          moduleId: module.id,
+          moduleId: $module.id,
         });
       } else {
         this.removePendingCreate('LESSON_CREATE', removed.id);
@@ -410,7 +410,7 @@ export class CourseController {
     const lessonOrder = lessons.filter((l) => !isTempId(l.id)).map((l) => l.order);
 
     const $module = this.config.modulesArray.fields[moduleIdx];
-    const moduleId = module.id;
+    const moduleId = $module.id;
 
     if (!isTempId(moduleId) && lessonOrder.length === lessons.length) {
       this.queue.push({
@@ -462,9 +462,9 @@ export class CourseController {
     value: Quiz[T]
   ): void {
     const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
-    if (!module) return;
+    if (!$module) return;
 
-    const moduleId = module.id;
+    const moduleId = $module.id;
     const quiz = this.config.curriculumForm.getValues(`modules.${moduleIdx}.quiz`);
 
     if (!quiz || quiz.id !== quizId) return;
@@ -496,9 +496,9 @@ export class CourseController {
    */
   updateQuizQuestionField(moduleIdx: number, quizId: string, questions: Quiz['questions']): void {
     const $module = this.config.curriculumForm.getValues(`modules.${moduleIdx}`);
-    if (!module) return;
+    if (!$module) return;
 
-    const moduleId = module.id;
+    const moduleId = $module.id;
 
     const quiz = this.config.curriculumForm.getValues(`modules.${moduleIdx}.quiz`);
     if (!quiz || quiz.id !== quizId) return;
@@ -527,8 +527,8 @@ export class CourseController {
    */
   deleteQuiz(moduleIdx: number, quizId: string): void {
     const $module = this.config.modulesArray.fields[moduleIdx];
-    if (!module) return;
-    const moduleId = module.id;
+    if (!$module) return;
+    const moduleId = $module.id;
 
     this.config.curriculumForm.setValue(`modules.${moduleIdx}.quiz`, undefined, {
       shouldDirty: true,
@@ -550,13 +550,13 @@ export class CourseController {
    * Execute all pending operations
    */
   async commit(): Promise<CommitResult> {
-    console.log('Commit called');
+    // console.log('Commit called');
 
-    console.log('Operation Ops : ' + JSON.stringify(this.queue.getAll(), null, 2));
-    console.log('Queue is Empty : ' + this.queue.isEmpty());
+    // console.log('Operation Ops : ' + JSON.stringify(this.queue.getAll(), null, 2));
+    // console.log('Queue is Empty : ' + this.queue.isEmpty());
 
     this.queue.normalize();
-    console.log('Operation normalized : ' + JSON.stringify(this.queue.getAll(), null, 2));
+    // console.log('Operation normalized : ' + JSON.stringify(this.queue.getAll(), null, 2));
     if (this.queue.isEmpty()) return { success: true };
 
     if (this.config.onBeforeCommit) {
@@ -698,8 +698,8 @@ export class CourseController {
     };
 
     const isFormValid = await formMap[form].trigger();
-    const errors = formMap[form].formState?.errors;
-    console.log(`Errors of ${form} : ` + JSON.stringify(errors, null, 2));
+    // const errors = formMap[form].formState?.errors;
+    // console.log(`Errors of ${form} : ` + JSON.stringify(errors, null, 2));
 
     return isFormValid;
   }

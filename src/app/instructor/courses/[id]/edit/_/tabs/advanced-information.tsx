@@ -61,7 +61,9 @@ export const AdvancedInformationTab: React.FC<AdvancedInformationTabProps> = ({
             accept="image/*"
             courseId={courseId!}
             value={thumbnail}
-            onUpload={(url) => setValue('thumbnail', url)}
+            onUpload={(url) =>
+              setValue('thumbnail', url, { shouldDirty: true, shouldValidate: true })
+            }
             error={errors.thumbnail?.message}
             icon={Upload}
             buttonText="Upload Image"
@@ -75,7 +77,9 @@ export const AdvancedInformationTab: React.FC<AdvancedInformationTabProps> = ({
             value={trailer}
             courseId={courseId!}
             error={errors.trailer?.message}
-            onUpload={(url) => setValue('trailer', url)}
+            onUpload={(url) =>
+              setValue('trailer', url, { shouldDirty: true, shouldValidate: true })
+            }
             buttonText="Upload Video"
           />
         </div>
@@ -87,7 +91,9 @@ export const AdvancedInformationTab: React.FC<AdvancedInformationTabProps> = ({
           </h3>
           <MarkdownEditor
             value={description || ''}
-            onChange={(value) => setValue('description', value)}
+            onChange={(value) =>
+              setValue('description', value, { shouldDirty: true, shouldValidate: true })
+            }
             placeholder="Enter you course descriptions"
             error={errors.description?.message}
           />

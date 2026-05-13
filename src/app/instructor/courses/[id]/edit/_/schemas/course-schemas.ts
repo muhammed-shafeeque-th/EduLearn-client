@@ -93,7 +93,7 @@ export const basicInfoSchema = z
     }),
     duration: durationSchema,
     price: positiveNumber.default(1),
-    discountPrice: z.number().min(1).optional(),
+    discountPrice: z.number().min(0.1).optional(),
     currency: z.enum(['INR', 'USD', 'EUR']).default('INR'),
   })
   .refine((data) => !data.discountPrice || data.discountPrice < data.price, {
