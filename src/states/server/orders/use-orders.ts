@@ -2,7 +2,7 @@
 
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { OrderParams, orderService } from '@/services/order.service';
+import { OrderParams, orderService } from '@/services/order';
 import { useAuthUserSelector } from '@/states/client';
 
 /**
@@ -73,12 +73,14 @@ export function useOrder(orderId: string, options?: { enabled?: boolean }) {
 
 export function useOrdersInfinite(params: Partial<Omit<OrderParams, 'page'>> = {}) {
   const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId;
 
   return useInfiniteQuery({
     queryKey: QUERY_KEYS.orders.list(authUser?.userId || 'current', {}),
     queryFn: ({ pageParam = 1, signal }) =>
       orderService.getOrders({ ...params, page: pageParam }, { signal }),
     initialPageParam: 1,
+    enabled: isEnabled,
     getNextPageParam: (lastPage) =>
       lastPage.success && lastPage.pagination?.hasNext ? lastPage.pagination.page + 1 : undefined,
     getPreviousPageParam: (firstPage) =>
