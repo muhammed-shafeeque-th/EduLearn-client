@@ -4,21 +4,25 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { messageService, MessagesParams } from '@/services/messaging.service';
+import { chatService, MessagesParams } from '@/services/chat';
 import { Message, MessageReaction } from '@/types/chat';
+import { useAuthUserSelector } from '@/states/client';
 
-// --- Queries ---
+//  Queries
 
 export function useStudentChats(
   filters: Partial<MessagesParams> = {},
   options?: { enabled?: boolean }
 ) {
   const pageSize = filters.pageSize || 20;
+  const user = useAuthUserSelector();
+
+  const isEnabled = !!user?.userId && (options?.enabled ?? true);
 
   return useInfiniteQuery({
-    queryKey: QUERY_KEYS.chat.studentChats(),
+    queryKey: QUERY_KEYS.chat.studentChats(user?.userId || user?.id || 'current'),
     queryFn: async ({ pageParam = 1, signal }) => {
-      const response = await messageService.getStudentChats(
+      const response = await chatService.getStudentChats(
         {
           ...filters,
           page: pageParam,
@@ -36,7 +40,7 @@ export function useStudentChats(
       };
     },
     initialPageParam: 1,
-    enabled: options?.enabled ?? true,
+    enabled: isEnabled,
     getNextPageParam: (lastPage) => (lastPage.pagination?.hasNext ? lastPage.page + 1 : undefined),
     getPreviousPageParam: (firstPage) =>
       firstPage.pagination?.hasPrev ? firstPage.page - 1 : undefined,
@@ -53,11 +57,12 @@ export function useInstructorChats(
   options?: { enabled?: boolean }
 ) {
   const pageSize = filters.pageSize || 20;
+  const user = useAuthUserSelector();
 
   return useInfiniteQuery({
-    queryKey: QUERY_KEYS.chat.instructorChats(),
+    queryKey: QUERY_KEYS.chat.instructorChats(user?.userId || user?.id || 'current'),
     queryFn: async ({ pageParam = 1, signal }) => {
-      const response = await messageService.getInstructorChats(
+      const response = await chatService.getInstructorChats(
         {
           ...filters,
           page: pageParam,
@@ -75,7 +80,7 @@ export function useInstructorChats(
       };
     },
     initialPageParam: 1,
-    enabled: options?.enabled ?? true,
+    enabled: (!!user && options?.enabled) ?? true,
     getNextPageParam: (lastPage) => (lastPage.pagination?.hasNext ? lastPage.page + 1 : undefined),
     getPreviousPageParam: (firstPage) =>
       firstPage.pagination?.hasPrev ? firstPage.page - 1 : undefined,
@@ -94,7 +99,7 @@ export function useMessages(chatId: string, filters: Partial<MessagesParams> = {
     queryKey: QUERY_KEYS.chat.chat(chatId),
     enabled: !!chatId,
     queryFn: async ({ pageParam = 1, signal }) => {
-      const response = await messageService.getMessages(
+      const response = await chatService.getMessages(
         chatId,
         {
           ...filters,
@@ -124,7 +129,7 @@ export function useMessages(chatId: string, filters: Partial<MessagesParams> = {
   });
 }
 
-// --- List Flatteners ---
+//  List Flatteners
 
 export function useStudentChatList(
   filters: Partial<MessagesParams> = {},
@@ -159,14 +164,14 @@ export function useMessageList(chatId: string, filters: Partial<MessagesParams> 
   return { ...query, messages, unreadCount, hasMore };
 }
 
-// --- Mutations ---
+//  Mutations
 
 export function useMarkChatAsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await messageService.markAsRead(id);
+      const response = await chatService.markAsRead(id);
       if (!response.success) throw new Error(response.message || 'Failed to mark as read');
       return id;
     },
@@ -234,7 +239,7 @@ export function useAddMessageReaction() {
       userId: string;
     }) => {
       const { chatId, messageId, emoji } = payload;
-      const response = await messageService.reactMessage(chatId, messageId, emoji);
+      const response = await chatService.reactMessage(chatId, messageId, emoji);
       if (!response.success) throw new Error(response.message || 'Failed to add reaction');
       return response.data; // may be undefined if backend doesn't return reaction, but we optimistically constructed it on mutate
     },
@@ -303,7 +308,7 @@ export function useRemoveMessageReaction() {
     // payload: { chatId, messageId, reactionId }
     mutationFn: async (payload: { chatId: string; messageId: string; reactionId: string }) => {
       const { chatId, messageId, reactionId } = payload;
-      await messageService.removeReaction(chatId, messageId, reactionId);
+      await chatService.removeReaction(chatId, messageId, reactionId);
       // if (!response.success) throw new Error(response.message || 'Failed to remove reaction');
       // return response.data;
     },
@@ -356,7 +361,7 @@ export function useDeleteMessage(chatId: string) {
 
   return useMutation({
     mutationFn: async (messageId: string) => {
-      const response = await messageService.deleteMessage(chatId, messageId);
+      const response = await chatService.deleteMessage(chatId, messageId);
       if (!response.success) throw new Error(response.message || 'Failed to delete notification');
       return messageId;
     },

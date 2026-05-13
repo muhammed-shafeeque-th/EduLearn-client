@@ -4,9 +4,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { messageService } from '@/services/messaging.service';
+import { chatService } from '@/services/chat';
 import type { Chat, Message } from '@/types/chat';
 import type { ChatRole } from '@/services/ws/chat/hooks/use-messaging';
+import { useAuthUserSelector } from '@/states/client';
 
 // Send Message
 type SendMessageArgs = {
@@ -17,10 +18,12 @@ type SendMessageArgs = {
 
 export function useSendMessage(role: ChatRole = 'student') {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
 
   return useMutation({
     mutationFn: async ({ chatId, content }: SendMessageArgs) => {
-      const res = await messageService.sendMessage(chatId, content);
+      const res = await chatService.sendMessage(chatId, content);
 
       if (!res.success || !res.data) {
         throw new Error(res.message || 'Failed to send message');
@@ -58,7 +61,9 @@ export function useSendMessage(role: ChatRole = 'student') {
 
       // Update chat list preview
       const chatListKey =
-        role === 'instructor' ? QUERY_KEYS.chat.instructorChats() : QUERY_KEYS.chat.studentChats();
+        role === 'instructor'
+          ? QUERY_KEYS.chat.instructorChats(authUserId)
+          : QUERY_KEYS.chat.studentChats(authUserId);
 
       queryClient.setQueriesData({ queryKey: chatListKey }, (old: any) => {
         if (!old?.pages) return old;
@@ -91,7 +96,9 @@ export function useSendMessage(role: ChatRole = 'student') {
 
       // Update chat list with real message id
       const chatListKey =
-        role === 'instructor' ? QUERY_KEYS.chat.instructorChats() : QUERY_KEYS.chat.studentChats();
+        role === 'instructor'
+          ? QUERY_KEYS.chat.instructorChats(authUserId)
+          : QUERY_KEYS.chat.studentChats(authUserId);
 
       queryClient.setQueriesData({ queryKey: chatListKey }, (old: any) => {
         if (!old?.pages) return old;
@@ -134,9 +141,13 @@ export function useSendMessage(role: ChatRole = 'student') {
 
 export function useChatMutations(role: ChatRole = 'student') {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
+  const authUserId = user?.userId ?? user?.id ?? 'current';
 
   const chatListKey =
-    role === 'instructor' ? QUERY_KEYS.chat.instructorChats() : QUERY_KEYS.chat.studentChats();
+    role === 'instructor'
+      ? QUERY_KEYS.chat.instructorChats(authUserId)
+      : QUERY_KEYS.chat.studentChats(authUserId);
 
   // Helper: update a single chat in the infinite-query cache
   function updateChatInCache(updated: Chat) {
@@ -154,7 +165,7 @@ export function useChatMutations(role: ChatRole = 'student') {
 
   const createOrGetChatMutation = useMutation({
     mutationFn: (params: { studentId: string; instructorId: string; role: string }) =>
-      messageService.createOrGetChat(params),
+      chatService.createOrGetChat(params),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to create chat');
@@ -179,7 +190,7 @@ export function useChatMutations(role: ChatRole = 'student') {
   });
 
   const pinChatMutation = useMutation({
-    mutationFn: (chatId: string) => messageService.pinChat(chatId),
+    mutationFn: (chatId: string) => chatService.pinChat(chatId),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to pin chat');
@@ -191,7 +202,7 @@ export function useChatMutations(role: ChatRole = 'student') {
   });
 
   const unpinChatMutation = useMutation({
-    mutationFn: (chatId: string) => messageService.unpinChat(chatId),
+    mutationFn: (chatId: string) => chatService.unpinChat(chatId),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to unpin chat');
@@ -204,7 +215,7 @@ export function useChatMutations(role: ChatRole = 'student') {
 
   const muteChatMutation = useMutation({
     mutationFn: ({ chatId, durationMs }: { chatId: string; durationMs?: number }) =>
-      messageService.muteChat(chatId, durationMs),
+      chatService.muteChat(chatId, durationMs),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to mute chat');
@@ -216,7 +227,7 @@ export function useChatMutations(role: ChatRole = 'student') {
   });
 
   const unmuteChatMutation = useMutation({
-    mutationFn: (chatId: string) => messageService.unmuteChat(chatId),
+    mutationFn: (chatId: string) => chatService.unmuteChat(chatId),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to unmute chat');
@@ -228,7 +239,7 @@ export function useChatMutations(role: ChatRole = 'student') {
   });
 
   const archiveChatMutation = useMutation({
-    mutationFn: (chatId: string) => messageService.archiveChat(chatId),
+    mutationFn: (chatId: string) => chatService.archiveChat(chatId),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to archive chat');
@@ -240,7 +251,7 @@ export function useChatMutations(role: ChatRole = 'student') {
   });
 
   const unarchiveChatMutation = useMutation({
-    mutationFn: (chatId: string) => messageService.unarchiveChat(chatId),
+    mutationFn: (chatId: string) => chatService.unarchiveChat(chatId),
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         toast.error(res.message || 'Failed to unarchive chat');
@@ -252,7 +263,7 @@ export function useChatMutations(role: ChatRole = 'student') {
   });
 
   const deleteChatMutation = useMutation({
-    mutationFn: (chatId: string) => messageService.deleteChat(chatId),
+    mutationFn: (chatId: string) => chatService.deleteChat(chatId),
     onSuccess: (res, chatId) => {
       if (!res.success) {
         toast.error(res.message || 'Failed to delete chat');
