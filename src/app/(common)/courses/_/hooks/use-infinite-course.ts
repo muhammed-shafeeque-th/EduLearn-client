@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useCoursesInfinite } from '@/states/server/course/use-courses';
-import type { CourseParams } from '@/services/course.service';
+import type { CourseParams } from '@/services/course';
 
 export function useInfiniteCoursesLoader(params: Partial<Omit<CourseParams, 'page'>>) {
   const query = useCoursesInfinite(params);
