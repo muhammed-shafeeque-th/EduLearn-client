@@ -5,7 +5,7 @@ export interface EnrollmentLearnData {
   course: CourseSummary; // subset of Course fields needed for UI
   progressPercent: number;
   status: 'ACTIVE' | 'COMPLETED' | 'DROPPED';
-  sections: {
+  modules: {
     id: string;
     title: string;
     description?: string;
@@ -87,7 +87,7 @@ export interface QuizWithProgress {
   };
 }
 
-export interface EnrollmentSectionItem {
+export interface EnrollmentModuleItem {
   id: string;
   type: LearningItemType;
   title: string;
@@ -97,13 +97,13 @@ export interface EnrollmentSectionItem {
   quiz?: QuizWithProgress;
 }
 
-export interface EnrollmentSection {
+export interface EnrollmentModule {
   id: string;
   title: string;
   description?: string;
   order: number;
   isPublished: boolean;
-  items: EnrollmentSectionItem[]; // composed from lessons + quiz
+  items: EnrollmentModuleItem[]; // composed from lessons + quiz
 }
 
 export interface CourseSummary {
@@ -151,7 +151,7 @@ export interface EnrollmentReview {
 //   status: 'ACTIVE' | 'COMPLETED' | 'DROPPED';
 //   progressPercent: number;
 //   course: CourseSummary;
-//   sections: EnrollmentSection[];
+//   modules: EnrollmentModule[];
 //   stats: EnrollmentProgressStats;
 //   milestones: any[];
 //   reviews: EnrollmentReview[];

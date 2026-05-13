@@ -5,7 +5,7 @@ export type {
   CourseItem,
   EnrollmentDetail,
   EnrollmentProgressResponse,
-  EnrollmentSection,
+  EnrollmentModule,
   LessonProgress,
   ProgressStats,
   QuestionOption,
