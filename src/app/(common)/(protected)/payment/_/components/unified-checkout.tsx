@@ -3,7 +3,7 @@
 import { StripeCheckout } from './providers/stripe-payment-provider';
 import { RazorpayCheckout } from './providers/rozorpay-payment-provider';
 import { PayPalButtons } from './providers/paypal-payment-provider';
-import { PaymentProvider } from '@/services/payment.service';
+import { PaymentProvider } from '@/services/payment';
 
 interface UnifiedCheckoutProps {
   provider: PaymentProvider;

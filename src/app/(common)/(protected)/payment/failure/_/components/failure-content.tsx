@@ -158,7 +158,7 @@ export function FailureContent({ orderId, error, order: serverOrder }: FailureCo
                     <div className="flex justify-between">
                       <span>Amount:</span>
                       <span className="font-bold">
-                        ${normalizeCurrencyAmount(order.totalAmount)}
+                        ₹{normalizeCurrencyAmount(order.totalAmount)}
                       </span>
                     </div>
                     <div className="flex justify-between">
