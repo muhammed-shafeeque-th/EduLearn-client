@@ -11,7 +11,6 @@ import {
   Share2,
   MoreVertical,
   Eye,
-  Download,
   ExternalLink,
   CheckCircle,
   Ban,
@@ -68,7 +67,7 @@ const statusLabels: Record<CourseStatus, string> = {
 };
 
 export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
-  const [isExporting, setIsExporting] = useState(false);
+  // const [, setIsExporting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
 
@@ -102,18 +101,18 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
     }
   }, [course.title, course.description]);
 
-  const handleExport = useCallback(async () => {
-    return toast.info({ title: 'Coming soon' });
-    setIsExporting(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      toast.success({ title: 'Course data exported successfully!' });
-    } catch (error) {
-      toast.error({ title: 'Failed to export course data', description: getErrorMessage(error) });
-    } finally {
-      setIsExporting(false);
-    }
-  }, []);
+  // const handleExport = useCallback(async () => {
+  //   return toast.info({ title: 'Coming soon' });
+  //   setIsExporting(true);
+  //   try {
+  //     await new Promise((resolve) => setTimeout(resolve, 2000));
+  //     toast.success({ title: 'Course data exported successfully!' });
+  //   } catch (error) {
+  //     toast.error({ title: 'Failed to export course data', description: getErrorMessage(error) });
+  //   } finally {
+  //     setIsExporting(false);
+  //   }
+  // }, []);
 
   const handlePublish = useCallback(async () => {
     try {
