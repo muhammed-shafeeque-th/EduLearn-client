@@ -40,7 +40,7 @@ const BATCH_SIZE = 5;
 const RETRY_MAX = 2;
 const RETRY_DELAY = 1000;
 
-function useFormChangeEffect<T extends FieldValues>(
+export function useFormChangeEffect<T extends FieldValues>(
   form: UseFormReturn<T>,
   setHasUnsavedChanges: (c: boolean) => void
 ) {
