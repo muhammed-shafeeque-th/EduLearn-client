@@ -5,15 +5,16 @@ import React, { useMemo, useState, useEffect, ReactNode } from 'react';
 import { QueryClient, QueryCache, MutationCache, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Provider as ReduxProvider } from 'react-redux';
-import { store } from '@/states/client';
 import {
   persistQueryClient,
   PersistQueryClientProvider,
 } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { compress, decompress } from 'lz-string';
-import { restoreCredentials, logout } from '@/states/client/slices/auth-slice';
+import { getStore } from '@/states/client';
+import { restoreCredentials, logout, refreshToken } from '@/states/client/slices/auth-slice';
 import { NotificationProvider } from '@/states/client/providers/notification';
+import { AuthCustomEvents } from '../constants/auth-events';
 
 // Auth Plugin Interface
 export interface AuthPlugin {
@@ -89,15 +90,21 @@ export function StateProviders({ children }: ProvidersProps) {
   // Hydrate Redux state from localStorage (client-side only)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      store.dispatch(restoreCredentials());
+      getStore()?.dispatch(restoreCredentials());
 
       const handleForceLogout = () => {
-        store.dispatch(logout());
+        getStore()?.dispatch(logout());
       };
 
-      window.addEventListener('auth:force-logout', handleForceLogout);
+      const handleAuthSyncSession = () => {
+        getStore()?.dispatch(refreshToken());
+      };
+
+      window.addEventListener(AuthCustomEvents.ForceLogout, handleForceLogout);
+      window.addEventListener(AuthCustomEvents.SyncSession, handleAuthSyncSession);
       return () => {
-        window.removeEventListener('auth:force-logout', handleForceLogout);
+        window.removeEventListener(AuthCustomEvents.ForceLogout, handleForceLogout);
+        window.removeEventListener(AuthCustomEvents.SyncSession, handleAuthSyncSession);
       };
     }
   }, []);
@@ -148,7 +155,7 @@ export function StateProviders({ children }: ProvidersProps) {
 
   return (
     <Provider {...providerProps}>
-      <ReduxProvider store={store}>
+      <ReduxProvider store={getStore()!}>
         <NotificationProvider>
           {children}
           {process.env.NODE_ENV === 'development' && (

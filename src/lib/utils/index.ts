@@ -6,6 +6,8 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
+export const isClient = typeof window !== 'undefined';
+
 export function getErrorMessage(error: unknown, fallbackMessage = 'Something went wrong'): string {
   return error instanceof Error
     ? error.message
@@ -221,10 +223,9 @@ export function decodeJwt<T = any>(token: string): T | null {
   }
 
   try {
-    const decoded =
-      typeof window !== 'undefined'
-        ? window.atob(payload)
-        : Buffer.from(payload, 'base64').toString('utf-8');
+    const decoded = isClient
+      ? window.atob(payload)
+      : Buffer.from(payload, 'base64').toString('utf-8');
     return JSON.parse(decoded) as T;
   } catch {
     return null;
@@ -276,7 +277,7 @@ export function isUUID(str: string): boolean {
  * Safe getter for window object, returns undefined on server.
  */
 export function getWindow(): Window | undefined {
-  return typeof window !== 'undefined' ? window : undefined;
+  return isClient ? window : undefined;
 }
 
 /**
