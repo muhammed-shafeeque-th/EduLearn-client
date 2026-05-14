@@ -39,7 +39,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
                 {review.avatar && !imageError ? (
                   <Image
                     src={review.avatar}
-                    alt={review.name}
+                    alt={review.user?.name}
                     width={64}
                     height={64}
                     className="w-full h-full object-cover rounded-full"
