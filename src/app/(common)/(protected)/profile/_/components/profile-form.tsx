@@ -232,9 +232,7 @@ export function ProfileForm() {
                   <ProfileUpload
                     error={errors.avatar}
                     currentAvatarUrl={form.watch('avatar')}
-                    onUploadSuccess={(url) =>
-                      form.setValue('avatar', url ?? '', { shouldDirty: true })
-                    }
+                    onUploadSuccess={(url) => form.setValue('avatar', url, { shouldDirty: true })}
                   />
                 </div>
               </div>

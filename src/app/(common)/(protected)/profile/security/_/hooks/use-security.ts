@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { authService } from '@/services/auth.service';
+import { authService } from '@/services/auth';
 import { PasswordChangeType } from '../schema';
 import { toast } from '@/hooks/use-toast';
 import { UseFormReset } from 'react-hook-form';
