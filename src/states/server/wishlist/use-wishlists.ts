@@ -2,10 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { wishlistService } from '@/services/wishlist.service';
+import { userService } from '@/services/user';
 import { useAuthSelector } from '@/states/client';
 import { Wishlist } from '@/types/wishlist';
-import { toast } from '../../../hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
 
 /**
@@ -24,7 +24,7 @@ export function useWishlist(options?: { enabled?: boolean }) {
     refetch: refetchWishlist,
   } = useQuery({
     queryKey: QUERY_KEYS.wishlist.user(user?.userId || ''),
-    queryFn: ({ signal }) => wishlistService.getCurrentUserWishlist({ signal }),
+    queryFn: ({ signal }) => userService.getCurrentUserWishlist({ signal }),
     enabled: !!user?.userId && (options?.enabled ?? true),
     staleTime: 60 * 1000,
     meta: {
@@ -42,7 +42,7 @@ export function useWishlist(options?: { enabled?: boolean }) {
     isError: isAddError,
     error: addError,
   } = useMutation({
-    mutationFn: ({ courseId }: { courseId: string }) => wishlistService.addToWishlist(courseId),
+    mutationFn: ({ courseId }: { courseId: string }) => userService.addToWishlist(courseId),
     onMutate: async ({ courseId }) => {
       if (!user?.userId) return;
       const previousWishlist = queryClient.getQueryData<Wishlist>(
@@ -94,8 +94,7 @@ export function useWishlist(options?: { enabled?: boolean }) {
     isError: isRemoveError,
     error: removeError,
   } = useMutation({
-    mutationFn: ({ courseId }: { courseId: string }) =>
-      wishlistService.removeFromWishlist(courseId),
+    mutationFn: ({ courseId }: { courseId: string }) => userService.removeFromWishlist(courseId),
     onMutate: async ({ courseId }) => {
       if (!user?.userId) return;
       const previousWishlist = queryClient.getQueryData<Wishlist>(
@@ -147,8 +146,7 @@ export function useWishlist(options?: { enabled?: boolean }) {
     isError: isToggleError,
     error: toggleError,
   } = useMutation({
-    mutationFn: ({ courseId }: { courseId: string }) =>
-      wishlistService.toggleWishlistItem(courseId),
+    mutationFn: ({ courseId }: { courseId: string }) => userService.toggleWishlistItem(courseId),
     onMutate: async () => {
       if (!user?.userId) return;
       const previousWishlist = queryClient.getQueryData<Wishlist>(
