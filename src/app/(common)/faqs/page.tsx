@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import { FAQsPage } from './_/components/faq-page';
+import { Suspense } from 'react';
+import { FAQsSkeleton } from './_/components/skeletons/faq-skeleton';
 
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
@@ -12,7 +14,9 @@ export default function FAQs() {
   return (
     <main className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 border-t border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto">
-        <FAQsPage />
+        <Suspense fallback={<FAQsSkeleton />}>
+          <FAQsPage />
+        </Suspense>
       </div>
 
       {/* Background Decor */}

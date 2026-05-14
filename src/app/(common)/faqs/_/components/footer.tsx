@@ -68,12 +68,12 @@ export function Footer() {
           </motion.div>
 
           {/* Footer Links */}
-          {Object.entries(footerSections).map(([title, links], sectionIndex) => (
+          {Object.entries(footerSections).map(([title, links], moduleIndex) => (
             <motion.div
               key={title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: sectionIndex * 0.1 }}
+              transition={{ duration: 0.6, delay: moduleIndex * 0.1 }}
             >
               <h3 className="text-lg font-semibold mb-4">{title}</h3>
               <ul className="space-y-2">
