@@ -275,6 +275,7 @@ export function ChatList({
               </Badge>
             </Button>
           )}
+          {/*
           {stats.pinned > 0 && (
             <Button
               variant={type === 'pinned' ? 'default' : 'outline'}
@@ -286,6 +287,7 @@ export function ChatList({
               Pinned
             </Button>
           )}
+            */}
         </div>
 
         {/* Sort */}
@@ -365,9 +367,9 @@ const ChatItem = memo(function ChatItem({
   onSelect,
   currentUser,
   onlineUsers,
-  onPin,
-  onMute,
-  onArchive,
+  // onPin,
+  // onMute,
+  // onArchive,
   onDelete: _onDelete,
   animationDelay = 0,
 }: {
@@ -460,9 +462,9 @@ const ChatItem = memo(function ChatItem({
               >
                 {displayName}
               </h4>
-              {chat.isPinned && (
+              {/* {chat.isPinned && (
                 <Pin className="w-3.5 h-3.5 text-blue-600 fill-blue-600 shrink-0" />
-              )}
+              )} */}
               {isMuted && <BellOff className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
             </div>
 
@@ -502,7 +504,7 @@ const ChatItem = memo(function ChatItem({
         </div>
 
         {/* Actions */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -545,7 +547,7 @@ const ChatItem = memo(function ChatItem({
               Archive Chat
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
     </button>
   );
