@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 
 export function useCheckUsername(username: string) {
   const [isChecking, setIsChecking] = useState(false);

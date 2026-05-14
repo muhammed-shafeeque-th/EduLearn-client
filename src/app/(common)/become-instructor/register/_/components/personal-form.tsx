@@ -3,13 +3,13 @@
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, FileText, Heading, Loader2, Plus, X } from 'lucide-react';
+import { User, FileText, Heading, Plus, X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useState, useEffect, useRef } from 'react';
 // import MarkdownEditor from '@/app/instructor/courses/create/_/components/markdown-editor';
 import { PersonalInfo } from '../schemas';
 import { Textarea } from '@/components/ui/textarea';
-import { useCheckUsername } from '../hooks/use-check-username';
+// import { useCheckUsername } from '../hooks/use-check-username';
 import { Badge } from '@/components/ui/badge';
 
 const PREDEFINED_TAGS = [
@@ -112,8 +112,8 @@ function PersonalForm({ personalForm }: PersonalFormProps) {
 
   const availableTags = PREDEFINED_TAGS.filter((tag) => !selectedTags.includes(tag));
 
-  const username = watch('username');
-  const { isChecking, usernameExists, error: usernameError } = useCheckUsername(username);
+  // const username = watch('username');
+  // const { isChecking, usernameExists, error: usernameError } = useCheckUsername(username);
 
   return (
     <motion.div
@@ -133,20 +133,18 @@ function PersonalForm({ personalForm }: PersonalFormProps) {
             <Input
               id="username"
               {...register('username')}
-              className={`pl-10 pr-10 ${
-                errors.username || usernameExists ? 'border-destructive' : ''
-              }`}
+              className={`pl-10 pr-10 ${errors.username}`}
               placeholder="john_doe"
             />
-            {isChecking && (
+            {/* {isChecking && (
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400 w-4 h-4" />
-            )}
+            )} */}
           </div>
           {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
-          {!errors.username && usernameExists && (
+          {/* {!errors.username && usernameExists && (
             <p className="text-red-500 text-sm">This username is already taken.</p>
           )}
-          {usernameError && <p className="text-gray-500 text-sm">{usernameError}</p>}
+          {usernameError && <p className="text-gray-500 text-sm">{usernameError}</p>} */}
         </div>
       </div>
       <div className="space-y-2">
