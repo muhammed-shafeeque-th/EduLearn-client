@@ -1,14 +1,14 @@
 'use client';
 
 import { useOrdersInfinite } from '@/states/server/orders/use-orders';
-import { OrderParams } from '@/services/order.service';
+import { OrderParams } from '@/services/_/order.service';
 import { useCallback, useEffect, useRef } from 'react';
 
 export function useOrders(params: Partial<Omit<OrderParams, 'page'>>) {
   const query = useOrdersInfinite(params);
 
-  // Intersection observer ref
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  // Intermodule observer ref
+  const observerRef = useRef<IntermoduleObserver | null>(null);
 
   // Load more when the last item becomes visible
   const lastElementRef = useCallback(
@@ -17,7 +17,7 @@ export function useOrders(params: Partial<Omit<OrderParams, 'page'>>) {
 
       if (observerRef.current) observerRef.current.disconnect();
 
-      observerRef.current = new IntersectionObserver(
+      observerRef.current = new IntermoduleObserver(
         (entries) => {
           const entry = entries[0];
           if (entry.isIntersecting && query.hasNextPage && !query.isFetchingNextPage) {
