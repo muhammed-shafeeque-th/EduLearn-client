@@ -2,7 +2,7 @@
 
 import { ForgotPasswordSchemaType } from '../schemas';
 import { useState } from 'react';
-import { authService } from '@/services/auth.service';
+import { authService } from '@/services/auth';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
 

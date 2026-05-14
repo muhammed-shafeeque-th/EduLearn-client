@@ -2,7 +2,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ResetPasswordFormData } from '../schemas';
-import { authService } from '@/services/auth.service';
+import { authService } from '@/services/auth';
 import { getErrorMessage } from '@/lib/utils';
 
 export function useResetPassword(token: string) {
