@@ -17,6 +17,7 @@ import AuthButtons from './components/auth-buttons';
 import { useAuthIsAuthenticated, useAuthSelector } from '@/states/client';
 
 import { useGlobalErrorToast } from '@/hooks/use-global-error.toast';
+import { getUserRole } from '@/lib/utils/user.utils';
 
 const ThemeToggle = dynamic(
   () => import('../../../components/shared/theme-button').then((m) => m.ThemeToggle),
@@ -30,6 +31,7 @@ const UserMenu = dynamic(() => import('./components/user-menu').then((m) => m.Us
 export default function Header() {
   const { user, isLoading } = useAuthSelector();
   const isAuthenticated = useAuthIsAuthenticated();
+  const userRole = getUserRole(user);
 
   useGlobalErrorToast();
 
@@ -67,7 +69,7 @@ export default function Header() {
             {isAuthenticated && (
               <>
                 {/* Show Become Instructor for students only, Instructor button for instructors */}
-                {user?.role === 'student' && (
+                {userRole === 'student' && (
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button variant="ghost" asChild>
                       <Link href="/become-instructor" className="flex items-center gap-2">
@@ -77,7 +79,7 @@ export default function Header() {
                     </Button>
                   </motion.div>
                 )}
-                {user?.role === 'instructor' && (
+                {userRole === 'instructor' && (
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button variant="ghost" asChild>
                       <Link href="/instructor" className="flex items-center gap-2">
@@ -88,7 +90,7 @@ export default function Header() {
                   </motion.div>
                 )}
                 {/* Admin dashboard button for admin users */}
-                {user?.role === 'admin' && (
+                {userRole === 'admin' && (
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button variant="ghost" asChild>
                       <Link href="/admin/dashboard" className="flex items-center gap-2">
