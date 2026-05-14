@@ -40,6 +40,10 @@ export enum ERROR_CODES {
   NOT_FOUND = 'not_found',
   USER_BLOCKED = 'user_blocked',
   TOO_MANY_REQUESTS = 'too_many_requests',
+
+  // Backend match
+  ACCOUNT_BLOCKED = 'ACCOUNT_BLOCKED',
+  INSTRUCTOR_ACCESS_DENIED = 'INSTRUCTOR_ACCESS_DENIED',
 }
 
 // Type representing allowed error code values
@@ -85,6 +89,8 @@ const ERROR_CODE_MESSAGES: Record<ERROR_CODES, string> = {
   [ERROR_CODES.UNKNOWN_ERROR]: 'Something went wrong.',
   [ERROR_CODES.NOT_FOUND]: 'The requested resource was not found.',
   [ERROR_CODES.TOO_MANY_REQUESTS]: 'Too many requests. Please slow down and try again later.',
+  [ERROR_CODES.ACCOUNT_BLOCKED]: 'Your account has been blocked. Please contact support.',
+  [ERROR_CODES.INSTRUCTOR_ACCESS_DENIED]: 'Your instructor privileges have been suspended.',
 };
 
 /**
