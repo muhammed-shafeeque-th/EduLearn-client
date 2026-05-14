@@ -32,7 +32,7 @@ export default function UserLoading() {
 
       {/* Testimonials Section */}
 
-      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+      <module className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <Skeleton className="h-8 w-80 mx-auto mb-4" />
@@ -56,11 +56,11 @@ export default function UserLoading() {
             </div>
           </div>
         </div>
-      </section>
+      </module>
 
       {/* CTA Section */}
 
-      <section className="py-20 px-4">
+      <module className="py-20 px-4">
         <div className="container mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -74,7 +74,7 @@ export default function UserLoading() {
             </div>
           </div>
         </div>
-      </section>
+      </module>
     </main>
   );
 }
