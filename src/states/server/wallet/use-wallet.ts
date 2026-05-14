@@ -3,8 +3,8 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { useAuthSelector, useAuthUserSelector } from '@/states/client';
-import { walletService } from '@/services/wallet.service';
-import type { WalletParams } from '@/services/wallet.service';
+import { userService } from '@/services/user';
+import type { WalletParams } from '@/services/user';
 
 /**
  * Hook to fetch the current user's wallet.
@@ -18,7 +18,7 @@ export function useCurrentUserWallet(options?: { enabled?: boolean }) {
 
   const query = useQuery({
     queryKey: QUERY_KEYS.wallet.user(authUser?.userId || 'current'),
-    queryFn: ({ signal }) => walletService.getCurrentUserWallet({ signal }),
+    queryFn: ({ signal }) => userService.getCurrentUserWallet({ signal }),
     enabled,
     staleTime: 30 * 1000, // 30 seconds
     meta: {
@@ -60,7 +60,7 @@ export function useInfiniteWalletTransactions(
     queryKey: QUERY_KEYS.wallet.transactions(user?.userId ?? '', params),
     queryFn: async ({ pageParam = 1, signal }) => {
       // Supports backend with standard paginated response
-      const response = await walletService.getWalletTransactions(
+      const response = await userService.getWalletTransactions(
         {
           ...params,
           page: pageParam,
