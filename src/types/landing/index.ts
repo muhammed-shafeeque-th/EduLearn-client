@@ -1,9 +1,9 @@
-export interface Category {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  courses: number;
-}
+// export interface Category {
+//   id: string;
+//   name: string;
+//   icon: React.ReactNode;
+//   courses: number;
+// }
 
 export interface Testimonial {
   id: string;
