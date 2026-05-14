@@ -1,3 +1,5 @@
+'use client';
+
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { AuthState } from './slices/auth-slice';
 import adminReducer, { AdminState } from './slices/admin-slice';
@@ -6,7 +8,7 @@ import adminReducer, { AdminState } from './slices/admin-slice';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { AuthUser } from '@/types/auth';
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     auth: authReducer,
     admin: adminReducer,
@@ -37,3 +39,7 @@ export const useAuthIsAuthenticated: () => boolean = () =>
   useAppSelector((state) => state.auth.status === 'authenticated');
 
 export const useAdminSelector: () => AdminState = () => useAppSelector((state) => state.admin);
+
+export function getStore() {
+  return store;
+}
