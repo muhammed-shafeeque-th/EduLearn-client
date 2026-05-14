@@ -1,7 +1,7 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { cartService } from '@/services/cart.service';
+import { userService } from '@/services/user';
 import { useAuthSelector } from '@/states/client';
 import { Cart } from '@/types/cart';
 
@@ -13,7 +13,7 @@ export function useCart(options?: { enabled?: boolean }) {
   // Cart Query
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
     queryKey: QUERY_KEYS.cart.user(user?.userId || ''),
-    queryFn: ({ signal }) => cartService.getCurrentUserCart({ signal }),
+    queryFn: ({ signal }) => userService.getCurrentUserCart({ signal }),
     enabled,
     staleTime: 30 * 1000,
     meta: {
@@ -30,7 +30,7 @@ export function useCart(options?: { enabled?: boolean }) {
     isPending: isAdding,
     error: addError,
   } = useMutation({
-    mutationFn: ({ courseId }: { courseId: string }) => cartService.addToCart(courseId),
+    mutationFn: ({ courseId }: { courseId: string }) => userService.addToCart(courseId),
     onMutate: async ({ courseId }: { courseId: string }) => {
       if (!user?.userId) return;
 
@@ -58,7 +58,7 @@ export function useCart(options?: { enabled?: boolean }) {
 
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cart.user(user?.userId) });
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.users.current(),
+        queryKey: QUERY_KEYS.users.current(user.userId),
         refetchType: 'none',
       });
     },
@@ -74,7 +74,7 @@ export function useCart(options?: { enabled?: boolean }) {
     isPending: isRemoving,
     error: removeError,
   } = useMutation({
-    mutationFn: ({ courseId }: { courseId: string }) => cartService.removeFromCart(courseId),
+    mutationFn: ({ courseId }: { courseId: string }) => userService.removeFromCart(courseId),
     onMutate: async ({ courseId }: { courseId: string }) => {
       if (!user?.userId) return;
 
@@ -100,7 +100,7 @@ export function useCart(options?: { enabled?: boolean }) {
 
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cart.user(user?.userId) });
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.users.current(),
+        queryKey: QUERY_KEYS.users.current(user.userId),
         refetchType: 'none',
       });
     },
@@ -116,7 +116,7 @@ export function useCart(options?: { enabled?: boolean }) {
     isPending: isClearing,
     error: clearError,
   } = useMutation({
-    mutationFn: () => cartService.clearCart(),
+    mutationFn: () => userService.clearCart(),
     onSuccess: () => {
       if (!user?.userId) return;
 
@@ -125,7 +125,7 @@ export function useCart(options?: { enabled?: boolean }) {
       queryClient.setQueryData(QUERY_KEYS.cart.user(user?.userId), 0);
 
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.users.current(),
+        queryKey: QUERY_KEYS.users.current(user.userId),
         refetchType: 'none',
       });
     },
@@ -172,10 +172,10 @@ export function useCart(options?: { enabled?: boolean }) {
 
 //   return useInfiniteQuery({
 //     queryKey: QUERY_KEYS.cart.infiniteItems(user?.userId, params),
-//     // You need a paginated endpoint, e.g., cartService.getCartItemsPaginated:
+//     // You need a paginated endpoint, e.g., userService.getCartItemsPaginated:
 //     queryFn: async ({ pageParam = 1 }) => {
 //       // This assumes your backend supports this, you may need to adjust the call.
-//       const response = await cartService.getCurrentUserCart({
+//       const response = await userService.getCurrentUserCart({
 //         ...params,
 //         page: pageParam,
 //         pageSize: params.pageSize,
