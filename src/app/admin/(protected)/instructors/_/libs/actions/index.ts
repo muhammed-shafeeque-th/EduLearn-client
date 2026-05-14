@@ -1,7 +1,7 @@
 'use server';
 
 import { serverAdminService } from '@/services/server-service-clients';
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 import { unstable_cache, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 
@@ -43,10 +43,10 @@ export async function handleInstructorAction(
         // response = await serverAdminService.updateUser(instructorId, { status: 'approved' });
         break;
       case 'block':
-        response = await serverAdminService.blockUser(instructorId);
+        response = await serverAdminService.blockInstructor(instructorId);
         break;
       case 'unblock':
-        response = await serverAdminService.unBlockUser(instructorId);
+        response = await serverAdminService.unblockInstructor(instructorId);
         break;
       case 'delete':
         response = await serverAdminService.deleteUser(instructorId);
