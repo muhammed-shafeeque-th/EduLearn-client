@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: EnrollmentPageProps): Promise<Metadata> {
   const { enrollmentId } = await params;
-  const currentUser = await authGuard({
+  await authGuard({
     // roles: ['student'],
     redirectTo: `/auth/login?next=/learn/${enrollmentId}`,
   });
