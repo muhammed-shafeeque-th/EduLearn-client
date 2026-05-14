@@ -240,7 +240,7 @@ const CourseCardComponent: React.FC<CourseCardProps> = ({ course }) => {
                   </Button>
                 ) : (
                   <>
-                    {!isEnrolled && (
+                    {/* {!isEnrolled && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -249,7 +249,7 @@ const CourseCardComponent: React.FC<CourseCardProps> = ({ course }) => {
                       >
                         <Link href={`/checkout?course=${course.id}`}>Buy Now</Link>
                       </Button>
-                    )}
+                    )} */}
 
                     {isEnrolled ? (
                       <Button
