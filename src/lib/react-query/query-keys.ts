@@ -16,7 +16,7 @@ export const QUERY_KEYS = {
     list: (filters: Record<string, any>) => [...QUERY_KEYS.users.lists(), { filters }] as const,
     details: () => [...QUERY_KEYS.users.all, 'detail'] as const,
     detail: (id: string) => [...QUERY_KEYS.users.details(), id] as const,
-    current: () => [...QUERY_KEYS.users.all, 'current'] as const,
+    current: (userId: string) => [...QUERY_KEYS.users.all, 'current', userId] as const,
     profile: (id: string) => [...QUERY_KEYS.users.details(), id, 'profile'] as const,
     instructors: (filters?: any) => [...QUERY_KEYS.users.all, 'instructors', filters] as const,
   },
@@ -88,6 +88,18 @@ export const QUERY_KEYS = {
     featured: () => [...QUERY_KEYS.courses.all, 'featured'] as const,
   },
 
+  // Category queries (top-level, used by CategoryService)
+  categories: {
+    all: ['categories'] as const,
+    lists: () => [...QUERY_KEYS.categories.all, 'list'] as const,
+    list: (filters?: Record<string, unknown>) =>
+      [...QUERY_KEYS.categories.lists(), { filters }] as const,
+    // Convenience keys
+    active: () => [...QUERY_KEYS.categories.all, 'active'] as const,
+    admin: () => [...QUERY_KEYS.categories.all, 'admin'] as const,
+    categoriesStats: () => [...QUERY_KEYS.categories.all, 'stats'] as const,
+  },
+
   // Cart & Wishlist queries
   cart: {
     all: ['cart'] as const,
@@ -104,11 +116,13 @@ export const QUERY_KEYS = {
   // Chat queries
   chat: {
     all: ['chat'] as const,
-    chats: (role: 'instructor' | 'student', filters?: any) =>
-      [...QUERY_KEYS.chat.all, 'chats', role, filters] as const,
+    chats: (role: 'instructor' | 'student', userId: string, filters?: any) =>
+      [...QUERY_KEYS.chat.all, 'chats', userId, role, filters] as const,
     // Convenience shortcuts
-    instructorChats: (filters?: any) => QUERY_KEYS.chat.chats('instructor', filters),
-    studentChats: (filters?: any) => QUERY_KEYS.chat.chats('student', filters),
+    instructorChats: (instructorId: string, filters?: any) =>
+      QUERY_KEYS.chat.chats('instructor', instructorId, filters),
+    studentChats: (studentId: string, filters?: any) =>
+      QUERY_KEYS.chat.chats('student', studentId, filters),
     chat: (id: string) => [...QUERY_KEYS.chat.all, id] as const,
     messages: (chatId: string) => [...QUERY_KEYS.chat.chat(chatId), 'messages'] as const,
     studentMessages: (chatId: string) =>
@@ -144,9 +158,9 @@ export const QUERY_KEYS = {
   // Notification queries
   notifications: {
     all: ['notifications'] as const,
-    lists: () => [...QUERY_KEYS.notifications.all, 'list'] as const,
+    lists: (userId: string) => [...QUERY_KEYS.notifications.all, 'list', userId] as const,
     list: (userId: string, filters: Record<string, any>) =>
-      [...QUERY_KEYS.notifications.lists(), userId, { filters }] as const,
+      [...QUERY_KEYS.notifications.lists(userId), { filters }] as const,
     details: (userId: string) => [...QUERY_KEYS.notifications.all, userId, 'detail'] as const,
     detail: (userId: string, id: string) =>
       [...QUERY_KEYS.notifications.details(userId), id] as const,

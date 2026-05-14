@@ -1,7 +1,7 @@
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { cache } from 'react';
 import { QUERY_KEYS } from './query-keys';
-import { CourseFilters } from '@/services/course.service';
+import { CourseFilters } from '@/services/course';
 import { Course } from '@/types/course';
 import { serverCourseService, serverUserService } from '@/services/server-service-clients';
 
@@ -23,7 +23,7 @@ export async function prefetchCurrentUser() {
 
   try {
     await queryClient.prefetchQuery({
-      queryKey: QUERY_KEYS.users.current(),
+      queryKey: QUERY_KEYS.users.current(""),
       queryFn: () => serverUserService.getCurrentUser(),
     });
   } catch (error) {
