@@ -1,15 +1,15 @@
 import { AdminSidebar } from './_components/sidebar';
 import { AdminHeader } from './_components/header';
-import { requireAuth } from '@/lib/auth/require-auth';
+import { authGuard } from '@/lib/auth/auth-guard';
 import { getAdmin } from '@/lib/auth/auth-user';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAuth({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getUser: getAdmin as any,
+  await authGuard({
+    getUser: getAdmin,
     roles: ['admin'],
+    // permissions: [Permissions.ADMIN_DASHBOARD],
     redirectTo: '/admin/auth/login',
   });
 
