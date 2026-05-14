@@ -59,7 +59,7 @@ export function SupportSection(): React.JSX.Element {
   return (
     <section
       className="py-12 lg:py-20 bg-primary/5 dark:bg-gray-900"
-      aria-labelledby="support-section-title"
+      aria-labelledby="support-module-title"
     >
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -95,7 +95,7 @@ export function SupportSection(): React.JSX.Element {
           >
             <div className="space-y-4">
               <h2
-                id="support-section-title"
+                id="support-module-title"
                 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white"
               >
                 Don&apos;t worry, we&apos;re always{' '}
