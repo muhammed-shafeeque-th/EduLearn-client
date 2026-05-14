@@ -3,7 +3,7 @@ export interface AuthUser {
   userId: string;
   email: string;
   username: string;
-  role: UserRoles;
+  roles: UserRole[];
   avatar?: string;
 }
 
@@ -13,4 +13,4 @@ export enum AuthType {
 }
 export type AuthProvider = 'google' | 'facebook' | 'github';
 
-export type UserRoles = 'student' | 'instructor' | 'admin';
+export type UserRole = 'student' | 'instructor' | 'admin';
