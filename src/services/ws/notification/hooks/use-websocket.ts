@@ -152,9 +152,9 @@ export function useNotificationWebSocket({
   // Memoized reconnect function
   const reconnect = useCallback(() => {
     if (managerRef.current && enabled) {
-      managerRef.current.reconnect();
+      managerRef.current.connect(url);
     }
-  }, [enabled]);
+  }, [enabled, url]);
 
   // Get queued message count
   const queuedMessageCount = managerRef.current?.getQueuedMessageCount() ?? 0;

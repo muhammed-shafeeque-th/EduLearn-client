@@ -50,20 +50,20 @@ export function CourseContent({ courseId }: CourseContentProps) {
     );
   }
 
-  // Calculate totals for sections, lessons, and estimated duration
-  const sectionCount = Array.isArray(course.sections) ? course.sections.length : 0;
+  // Calculate totals for modules, lessons, and estimated duration
+  const moduleCount = Array.isArray(course.modules) ? course.modules.length : 0;
   const totalLessons =
-    Array.isArray(course.sections) && course.sections.length > 0
-      ? course.sections.reduce(
+    Array.isArray(course.modules) && course.modules.length > 0
+      ? course.modules.reduce(
           (sum, sec) => sum + (Array.isArray(sec.lessons) ? sec.lessons.length : 0),
           0
         )
       : 0;
   const totalDuration =
-    Array.isArray(course.sections) && course.sections.length > 0
-      ? course.sections.reduce(
-          (sectionSum, sec) =>
-            sectionSum +
+    Array.isArray(course.modules) && course.modules.length > 0
+      ? course.modules.reduce(
+          (moduleSum, sec) =>
+            moduleSum +
             (Array.isArray(sec.lessons)
               ? sec.lessons.reduce(
                   (lessonSum, lesson) => lessonSum + (lesson.estimatedDuration ?? 0),
@@ -89,8 +89,8 @@ export function CourseContent({ courseId }: CourseContentProps) {
             <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <BookOpen className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="text-sm text-muted-foreground">Sections</p>
-                <p className="text-xl font-bold">{sectionCount}</p>
+                <p className="text-sm text-muted-foreground">Modules</p>
+                <p className="text-xl font-bold">{moduleCount}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -127,38 +127,36 @@ export function CourseContent({ courseId }: CourseContentProps) {
               <TabsTrigger value="requirements">Requirements</TabsTrigger>
             </TabsList>
 
-            {/* Curriculum Section */}
+            {/* Curriculum Module */}
             <TabsContent value="curriculum" className="space-y-6 mt-6">
-              {!course.sections?.length ? (
+              {!course.modules?.length ? (
                 <div className="text-muted-foreground text-center py-4">
-                  <span>No sections/lessons found for this course.</span>
+                  <span>No modules/lessons found for this course.</span>
                 </div>
               ) : (
-                course.sections.map((section, sectionIdx) => {
-                  const sectionDuration = Array.isArray(section.lessons)
-                    ? section.lessons.reduce((sum, l) => sum + (l.estimatedDuration ?? 0), 0)
+                course.modules.map((module, moduleIdx) => {
+                  const moduleDuration = Array.isArray(module.lessons)
+                    ? module.lessons.reduce((sum, l) => sum + (l.estimatedDuration ?? 0), 0)
                     : 0;
                   return (
-                    <div key={section.id} className="border rounded-lg p-4">
+                    <div key={module.id} className="border rounded-lg p-4">
                       <div className="mb-2">
                         <h4 className="font-semibold text-lg">
-                          Section {sectionIdx + 1}:{' '}
-                          <span className="font-normal">{section.title}</span>
+                          Module {moduleIdx + 1}:{' '}
+                          <span className="font-normal">{module.title}</span>
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {Array.isArray(section.lessons) ? section.lessons.length : 0} lessons •{' '}
-                          {Math.floor(sectionDuration / 60)}h{' · '}
-                          {sectionDuration % 60}m
+                          {Array.isArray(module.lessons) ? module.lessons.length : 0} lessons •{' '}
+                          {Math.floor(moduleDuration / 60)}h{' · '}
+                          {moduleDuration % 60}m
                         </p>
-                        {section.description && (
-                          <p className="text-muted-foreground text-xs mt-1">
-                            {section.description}
-                          </p>
+                        {module.description && (
+                          <p className="text-muted-foreground text-xs mt-1">{module.description}</p>
                         )}
                       </div>
                       <div className="space-y-2 mt-4">
-                        {section.lessons && section.lessons.length > 0 ? (
-                          section.lessons.map((lesson, lessonIdx) => (
+                        {module.lessons && module.lessons.length > 0 ? (
+                          module.lessons.map((lesson, lessonIdx) => (
                             <div
                               key={lesson.id}
                               className="flex items-center justify-between p-3 rounded-md border bg-gray-50 dark:bg-gray-800"
@@ -169,7 +167,7 @@ export function CourseContent({ courseId }: CourseContentProps) {
                                 </span>
                                 <div>
                                   <div className="font-medium">
-                                    {sectionIdx + 1}.{lessonIdx + 1} {lesson.title}
+                                    {moduleIdx + 1}.{lessonIdx + 1} {lesson.title}
                                   </div>
                                   {!!lesson.description && (
                                     <div className="text-sm text-muted-foreground">
@@ -204,7 +202,7 @@ export function CourseContent({ courseId }: CourseContentProps) {
                           ))
                         ) : (
                           <div className="text-sm text-muted-foreground px-2">
-                            No lessons in this section.
+                            No lessons in this module.
                           </div>
                         )}
                       </div>
@@ -214,7 +212,7 @@ export function CourseContent({ courseId }: CourseContentProps) {
               )}
             </TabsContent>
 
-            {/* Description Section */}
+            {/* Description Module */}
             <TabsContent value="description" className="mt-6">
               <div className="prose dark:prose-invert max-w-none">
                 <MarkdownRenderer
@@ -226,7 +224,7 @@ export function CourseContent({ courseId }: CourseContentProps) {
               </div>
             </TabsContent>
 
-            {/* Requirements Section */}
+            {/* Requirements Module */}
             <TabsContent value="requirements" className="mt-6">
               <div className="space-y-6">
                 <div>

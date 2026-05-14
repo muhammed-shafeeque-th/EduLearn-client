@@ -9,7 +9,7 @@ import {
   serverCourseService,
   serverUserService,
 } from '@/services/server-service-clients';
-import { CourseAnalytics } from '@/services/course.service';
+import { CourseAnalytics } from '@/services/_/course.service';
 
 export interface InstructorsStats {
   total: number;

@@ -1,5 +1,5 @@
 import { AdminLoginSchemaType } from '@/app/admin/auth/login/_/schemas';
-import { adminRefreshApi } from '@/lib/auth';
+import { adminRefreshApi } from '@/lib/auth/client-refresh';
 import { adminLocalStoreKey } from '@/lib/constants';
 import {
   decodeJwt,
@@ -8,7 +8,7 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage,
 } from '@/lib/utils';
-import { adminService } from '@/services/admin.service';
+import { adminService } from '@/services/admin';
 import { AuthResponse } from '@/types/auth';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { isErrorResponse, isSuccessResponse, isTokenExpired } from './auth-slice';
@@ -21,7 +21,7 @@ export type AdminState = {
   isAuthenticated: boolean;
   token: string | null;
   admin: {
-    role: string;
+    roles: string[];
     name?: string;
     email?: string;
   } | null;
@@ -32,7 +32,7 @@ interface AdminResponse {
   data: {
     email: string;
     token: string;
-    role: string;
+    roles: string[];
   };
 }
 
@@ -103,8 +103,8 @@ const adminSlice = createSlice({
      * Set admin credentials in state. Do not perform side effects here.
      */
     setAdminCredentials: (state, action: PayloadAction<AdminResponse>) => {
-      const { email, token, role } = action.payload?.data;
-      state.admin = { email, role };
+      const { email, token, roles } = action.payload?.data;
+      state.admin = { email, roles };
       state.token = token;
       state.isAuthenticated = true;
       state.error = null;
@@ -185,12 +185,12 @@ export function applyCredentials(state: AdminState, token: string) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payload = decodeJwt<any>(token);
-  if (payload.role !== 'admin') {
+  if (!(payload.roles ?? []).includes('admin')) {
     throw new Error('Not an admin token');
   }
 
   state.admin = {
-    role: payload.role,
+    roles: payload.roles,
     email: payload.email,
     name: payload.name,
   };

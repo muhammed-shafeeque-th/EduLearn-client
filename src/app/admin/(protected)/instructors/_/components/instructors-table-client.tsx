@@ -180,18 +180,18 @@ export function InstructorsTableClient({
         accessorKey: 'status',
         header: 'Status',
         cell: ({ row }) => {
-          const status = row.getValue('status') as string;
+          const roleStatus = row.original.roleStatus?.instructor || row.original.status || 'active';
           return (
             <div
               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                status === 'active'
+                roleStatus === 'active'
                   ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                  : status === 'pending'
+                  : roleStatus === 'suspended'
                     ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
               }`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {roleStatus.charAt(0).toUpperCase() + roleStatus.slice(1)}
             </div>
           );
         },

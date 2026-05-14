@@ -16,7 +16,7 @@ import Image from 'next/image';
 import { CourseInfo } from '@/types/course';
 import { toast } from '@/hooks/use-toast';
 import { useOrderMachine } from '@/hooks/use-order-machine';
-import type { PaymentProvider } from '@/services/payment.service';
+import type { PaymentProvider } from '@/services/payment';
 import { normalizeCurrencyAmount } from '@/lib/utils';
 import { OrderSummaryCard } from './order-summary';
 import { CheckoutSkeleton } from '../../loading';
@@ -160,7 +160,7 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
   // Toast for machine errors
   useEffect(() => {
     if (isFailed && machineError) {
-      toast.error({ title: machineError });
+      toast.error({ title: 'Order failed', description: machineError });
     }
   }, [isFailed, machineError]);
 
@@ -342,7 +342,7 @@ export function CheckoutContent({ existingOrderId, courseId, checkoutType }: Che
         animate="visible"
         className="space-y-8"
       >
-        {/* Header section */}
+        {/* Header module */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-6">
           <div className="space-y-2">
             <button

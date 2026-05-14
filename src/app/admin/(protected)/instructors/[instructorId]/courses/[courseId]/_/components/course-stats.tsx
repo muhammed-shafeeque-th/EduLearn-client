@@ -14,21 +14,19 @@ interface CourseStatsProps {
 export default function CourseStats({ courseId, instructorId }: CourseStatsProps) {
   const { stats, isLoading } = useInstructorCourseStats(instructorId, courseId);
 
-  const totalRevenue = stats?.revenueTotal ?? 0;
-  const revenueGrowth =
-    ((stats?.revenueThisMonth ?? 0) - (stats?.revenueLastMonth ?? 0)) /
-    (stats?.revenueLastMonth ?? 1);
+  const totalRevenue = stats?.totalRevenue ?? 0;
+  const revenueGrowth = stats?.revenueGrowth ?? 0;
   const monthlyRevenue = stats?.revenueThisMonth ?? 0;
   const completionRate = stats?.completionRate ?? 0;
   const averageRating = stats?.averageRating ?? 0;
-  const totalReviews = stats?.totalRatings ?? 0;
+  const totalReviews = stats?.totalReviews ?? 0;
   const engagementRate = stats?.engagementRate ?? 0;
   // const averageTimePerLesson = stats?.averageTimePerLesson ?? 0;
   // const discussionPosts = stats?.discussionPosts ?? 0;
   // const questionsAnswered = stats?.questionsAnswered ?? 0;
   const certificatesIssued = stats?.totalStudents ?? 0;
 
-  if (isLoading) {
+  if (isLoading || !stats) {
     return <StatsSkeleton />;
   }
 

@@ -8,14 +8,14 @@ export default function DashboardLayout({
   revenue,
   enrollment,
   growth,
-  top_courses,
+  top_categories,
 }: {
   children: React.ReactNode;
   stats: React.ReactNode;
   revenue: React.ReactNode;
   enrollment: React.ReactNode;
   growth: React.ReactNode;
-  top_courses: React.ReactNode;
+  top_categories: React.ReactNode;
   performance: React.ReactNode;
   reviews: React.ReactNode;
   activity: React.ReactNode;
@@ -35,7 +35,7 @@ export default function DashboardLayout({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {<Suspense fallback={<ChartSkeleton />}>{growth}</Suspense>}
-        {<Suspense fallback={<ChartSkeleton />}>{top_courses}</Suspense>}
+        {<Suspense fallback={<ChartSkeleton />}>{top_categories}</Suspense>}
       </div>
 
       {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

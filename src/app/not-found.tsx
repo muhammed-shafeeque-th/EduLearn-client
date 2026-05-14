@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import { NotFoundPage } from './_/not-found/not-found-page';
+import { Suspense } from 'react';
+import { NotFoundSkeleton } from './_/not-found/skeletons/not-found-skeleton';
 
 export const metadata: Metadata = {
   title: '404 - Page Not Found',
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function NotFound() {
-  return <NotFoundPage />;
+  return (
+    <Suspense fallback={<NotFoundSkeleton />}>
+      <NotFoundPage />;
+    </Suspense>
+  );
 }

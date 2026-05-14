@@ -3,13 +3,9 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { ApiResponse } from '@/types/api-response';
-import {
-  InstructorCoursesStats,
-  InstructorsStats,
-  InstructorStats,
-  userService,
-} from '@/services/user.service';
-import { CourseAnalytics } from '@/services/course.service';
+import { InstructorCoursesStats, InstructorsStats, InstructorStats } from '@/services/user';
+import { CourseAnalytics } from '@/services/course';
+import { instructorService } from '@/services/instructor';
 
 function getApiDataOrNull<T>(data: ApiResponse<T> | undefined | null): T | null {
   return !!data && data.success ? data.data : null;
@@ -48,7 +44,7 @@ export function useInstructorStats(
       if (!instructorId) {
         throw new Error('Instructor ID is required');
       }
-      return userService.getInstructorStats(instructorId, { signal });
+      return instructorService.getInstructorStats(instructorId, { signal });
     },
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled,
@@ -80,7 +76,7 @@ export function useInstructorsStats(
     ReturnType<typeof QUERY_KEYS.users.instructorsStats>
   >({
     queryKey: QUERY_KEYS.users.instructorsStats(),
-    queryFn: ({ signal }) => userService.getInstructorsStats({ signal }),
+    queryFn: ({ signal }) => instructorService.getInstructorsStats({ signal }),
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled: options?.enabled ?? true,
     meta: {
@@ -133,7 +129,7 @@ export function useInstructorCoursesStats(
       if (!instructorId) {
         throw new Error('Instructor ID is required');
       }
-      return userService.getInstructorCoursesStats(instructorId, { signal });
+      return instructorService.getInstructorCoursesStats(instructorId, { signal });
     },
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled,
@@ -181,7 +177,7 @@ export function useInstructorCourseStats(
       if (!instructorId) {
         throw new Error('Instructor ID is required');
       }
-      return userService.getInstructorCourseStats(instructorId, courseId, { signal });
+      return instructorService.getInstructorCourseStats(instructorId, courseId, { signal });
     },
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled,

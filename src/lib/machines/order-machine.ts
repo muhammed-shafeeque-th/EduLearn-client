@@ -1,9 +1,9 @@
 import { assign, fromPromise, log, setup, type AnyEventObject } from 'xstate';
 
 import type { Order, PlaceOrderPayload } from '@/types/order';
-import { paymentService, type PaymentProvider } from '@/services/payment.service';
+import { paymentService, type PaymentProvider } from '@/services/payment';
 import { pollUntil } from '../utils/poll';
-import { orderService } from '@/services/order.service';
+import { orderService } from '@/services/order';
 
 type Provider = PaymentProvider;
 
@@ -444,11 +444,11 @@ export const orderMachine = orderMachineSetup.createMachine({
   id: 'order',
   initial: 'idle',
   entry: ['logAction'],
-  on: {
-    '*': {
-      actions: ['logAction'],
-    },
-  },
+  // on: {
+  //   '*': {
+  //     actions: ['logAction'],
+  //   },
+  // },
   context: {
     order: null,
     paymentId: null,

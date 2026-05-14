@@ -1,16 +1,17 @@
 import React, { Suspense, ReactNode } from 'react';
-import { requireAuth } from '@/lib/auth/require-auth';
+import { authGuard } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { getUserRole } from '@/lib/utils/user.utils';
 
 interface BecomeInstructorLayoutProps {
   children: ReactNode;
 }
 
 export default async function BecomeInstructorLayout({ children }: BecomeInstructorLayoutProps) {
-  await requireAuth({
-    condition: (user) => user.role === 'student',
+  await authGuard({
+    condition: (user) => getUserRole(user) === 'student',
     onUnauthorized: (user) => {
-      if (user.role === 'instructor') {
+      if (getUserRole(user) === 'instructor') {
         redirect('/instructor');
       } else {
         redirect('/');

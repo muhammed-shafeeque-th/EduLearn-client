@@ -76,7 +76,7 @@ export function CourseSidebarSkeleton() {
           </div>
         </div>
 
-        {/* Sections */}
+        {/* Modules */}
         <div className="space-y-2 p-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-2">

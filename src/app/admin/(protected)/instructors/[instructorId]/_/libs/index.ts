@@ -1,6 +1,6 @@
 'use server';
 
-import { serverCourseService } from '@/services/server-service-clients';
+import { serverCourseService } from '@/services/_/server-service-clients';
 import { unstable_cache } from 'next/cache';
 
 export interface InstructorStatsData {

@@ -16,6 +16,6 @@ export function useInstructorAuth(): {
 } {
   const isAuthenticated = useAuthIsAuthenticated();
   const user = useAppSelector(selectUser);
-  const isInstructor = useMemo(() => user?.role === 'instructor', [user]);
+  const isInstructor = useMemo(() => !!user?.roles.includes('instructor'), [user]);
   return { isAuthenticated, user, isInstructor };
 }

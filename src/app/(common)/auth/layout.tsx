@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { Metadata } from 'next';
 import LoadingScreen from '@/components/ui/loading-screen';
-import { requireAuth } from '@/lib/auth';
+import { authGuard } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  await requireAuth({
+  await authGuard({
     condition: (user) => !!user?.id,
     onUnauthorized: () => {
       redirect('/');

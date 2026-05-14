@@ -4,7 +4,6 @@ import React, { JSX } from 'react';
 import { motion } from 'framer-motion';
 import { Users, BookOpen, Award, Globe, TrendingUp, LucideIcon } from 'lucide-react';
 
-// 1. Define type for stat object for better type-safety and documentation
 type Stat = {
   value: string;
   label: string;
@@ -13,7 +12,6 @@ type Stat = {
   bgColor: string;
 };
 
-// 2. Use 'const' assertion for the stats array
 const STATS: readonly Stat[] = [
   {
     value: '67.1k',
@@ -52,7 +50,6 @@ const STATS: readonly Stat[] = [
   },
 ];
 
-// 3. Extract StatCard as a memoized component for reusability
 interface StatCardProps {
   stat: Stat;
   index: number;
@@ -86,7 +83,6 @@ const StatCard: React.FC<StatCardProps> = React.memo(({ stat, index }) => {
 });
 StatCard.displayName = 'StatCard';
 
-// 4. Section component with accessibility best practices and structure
 export function StatsSection(): JSX.Element {
   return (
     <section

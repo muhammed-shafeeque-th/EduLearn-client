@@ -1,12 +1,12 @@
 import { Suspense } from 'react';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { enrollmentService } from '@/services/enrollment.service';
-import { requireAuth } from '@/lib/auth';
+import { authGuard } from '@/lib/auth';
 import { getServerQueryClient } from '@/lib/react-query/server';
 import { CertificatesList } from './_/components/certificates-list';
 import { CertificatesListSkeleton } from './_/components/skeletons/certificates-list-skeleton';
 import type { Metadata } from 'next';
+import { serverEnrollmentService } from '@/services/server-service-clients';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,12 +17,12 @@ export const metadata: Metadata = {
 
 export default async function CertificatesPage() {
   const queryClient = getServerQueryClient();
-  const user = await requireAuth();
+  const user = await authGuard();
 
   // Prefetch certificates
   await queryClient.prefetchQuery({
     queryKey: QUERY_KEYS.certificates.byUser(user!.id),
-    queryFn: () => enrollmentService.getUserCertificates(),
+    queryFn: () => serverEnrollmentService.getUserCertificates(),
   });
 
   return (

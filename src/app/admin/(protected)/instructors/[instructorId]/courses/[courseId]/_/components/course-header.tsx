@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Eye, Edit, Trash2, Ban, Loader2, ArrowLeft, MoreHorizontal } from 'lucide-react';
+import { Trash2, Ban, Loader2, ArrowLeft, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -85,10 +85,10 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
     [unPublishCourse]
   );
 
-  const handleDeleteDialogOpen = useCallback((courseId: string) => {
-    setDeleteTargetId(courseId);
-    setIsDeleteDialogOpen(true);
-  }, []);
+  // const handleDeleteDialogOpen = useCallback((courseId: string) => {
+  //   setDeleteTargetId(courseId);
+  //   setIsDeleteDialogOpen(true);
+  // }, []);
 
   const handleDeleteCourse = useCallback(async () => {
     if (!deleteTargetId) return;
@@ -122,16 +122,16 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
   };
 
   // For better practice: edit and preview navigation as handlers
-  const handleEdit = () => {
-    return;
-    // Takes user to the edit page for current course and instructor
-    router.push(`/admin/instructors/${instructor.id}/courses/${course.id}/edit`);
-  };
+  // const handleEdit = () => {
+  //   return;
+  //   // Takes user to the edit page for current course and instructor
+  //   router.push(`/admin/instructors/${instructor.id}/courses/${course.id}/edit`);
+  // };
 
-  const handlePreview = () => {
-    // Replace below with actual destination for course preview if applicable
-    router.push(`/courses/${course.id}/preview`);
-  };
+  // const handlePreview = () => {
+  //   // Replace below with actual destination for course preview if applicable
+  //   router.push(`/courses/${course.id}/preview`);
+  // };
 
   return (
     <>
@@ -241,7 +241,7 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={handlePreview}
@@ -260,7 +260,7 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
             >
               <Edit className="mr-2 h-4 w-4" />
               Edit
-            </Button>
+            </Button> */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -274,14 +274,14 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   onClick={handleEdit}
                   disabled={isAnyActionLoading}
                   aria-label="Edit Course"
                 >
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Course
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 {course.status === 'published' ? (
                   <DropdownMenuItem
                     onClick={() => handleUnpublish(course.id)}
@@ -305,7 +305,7 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
                     </DropdownMenuItem>
                   )
                 )}
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   onClick={() => handleDeleteDialogOpen(course.id)}
                   className="text-red-600"
                   disabled={isAnyActionLoading}
@@ -313,7 +313,7 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Course
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

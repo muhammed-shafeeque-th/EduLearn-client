@@ -10,7 +10,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 // import type { Course } from '@/types/course';
 import { CourseFilters } from '../types';
 import { useInfiniteCoursesLoader } from '../hooks/use-infinite-course';
-import { CourseSortBy } from '@/services/course.service';
+import { CourseSortBy } from '@/services/_/course.service';
 import { CoursesGridSkeleton } from './skeletons';
 
 // interface CoursesPageContainerProps {

@@ -3,19 +3,25 @@ import {
   getServerAuthToken,
   getServerCookieHeaders,
 } from '@/lib/server-apis/server-utils';
-import { UserService } from './user.service';
+import { UserService } from './user';
 import { serverAdminRefresh, serverRefresh } from '@/lib/server-apis/server-apis';
-import { CourseService } from './course.service';
-import { CartService } from './cart.service';
-import { WishlistService } from './wishlist.service';
-import { MediaService } from './media.service';
-import { OrderService } from './order.service';
-import { PaymentService } from './payment.service';
-import { AuthService } from './auth.service';
-import { EnrollmentService } from './enrollment.service';
-import { AdminService } from './admin.service';
+import { CourseService } from './course';
+import { MediaService } from './media';
+import { OrderService } from './order';
+import { PaymentService } from './payment';
+import { AuthService } from './auth';
+import { EnrollmentService } from './enrollment';
+import { AdminService } from './admin';
+import { InstructorService } from './instructor';
+import { NotificationService } from './notification';
 
 export const serverUserService = UserService.create({
+  getHeaders: getServerCookieHeaders,
+  authRefresh: serverRefresh,
+  retry: 2,
+  getToken: getServerAuthToken,
+});
+export const serverInstructorService = InstructorService.create({
   getHeaders: getServerCookieHeaders,
   authRefresh: serverRefresh,
   retry: 2,
@@ -33,19 +39,13 @@ export const serverCourseService = CourseService.create({
   retry: 2,
   getToken: getServerAuthToken,
 });
-export const serverCartService = CartService.create({
-  getHeaders: getServerCookieHeaders,
-  authRefresh: serverRefresh,
-  retry: 2,
-  getToken: getServerAuthToken,
-});
-export const serverWishlistService = WishlistService.create({
-  getHeaders: getServerCookieHeaders,
-  authRefresh: serverRefresh,
-  retry: 2,
-  getToken: getServerAuthToken,
-});
 export const serverEnrollmentService = EnrollmentService.create({
+  getHeaders: getServerCookieHeaders,
+  authRefresh: serverRefresh,
+  retry: 2,
+  getToken: getServerAuthToken,
+});
+export const serverNotificationService = NotificationService.create({
   getHeaders: getServerCookieHeaders,
   authRefresh: serverRefresh,
   retry: 2,

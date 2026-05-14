@@ -3,8 +3,11 @@ import { Suspense } from 'react';
 import { InstructorSidebar } from './_/components/instructor-sidebar';
 import { InstructorHeader } from './_/components/instructor-header';
 import LoadingScreen from '@/components/ui/loading-screen';
-import { requireAuth } from '@/lib/auth/require-auth';
+import { authGuard } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { getUserRole } from '@/lib/utils/user.utils';
+import { Permissions } from '@/lib/auth/auth-guard';
+import { ERROR_CODES } from '@/lib/errors/error-codes';
 
 export const metadata: Metadata = {
   title: 'Instructor Dashboard',
@@ -16,14 +19,15 @@ interface InstructorLayoutProps {
 }
 
 export default async function InstructorLayout({ children }: InstructorLayoutProps) {
-  await requireAuth({
+  await authGuard({
     roles: ['instructor'],
     redirectTo: '/auth/login',
+    permissions: [Permissions.INSTRUCTOR_DASHBOARD],
     onUnauthorized: (user) => {
-      if (user.role === 'student') {
+      if (getUserRole(user) === 'student') {
         redirect('/become-instructor');
       }
-      redirect('/');
+      redirect(`/?error_code=${ERROR_CODES.INSTRUCTOR_ACCESS_DENIED}`);
     },
   });
 

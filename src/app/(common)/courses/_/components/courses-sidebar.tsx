@@ -1,18 +1,10 @@
-import { ChevronDown, ChevronUp, Star, X } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
-import { CourseFilters } from '../types';
-import { CourseLevel } from '@/types/course';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
-const categories = [
-  { name: 'Development', count: 12 },
-  { name: 'Web Development', count: 8 },
-  { name: 'Data Science', count: 6 },
-  { name: 'Mobile Development', count: 10 },
-  { name: 'Software Testing', count: 2 },
-  { name: 'Programming Languages', count: 4 },
-];
+import { cn, debounce } from '@/lib/utils';
+import { useCategories } from '@/states/server/category';
+import { CourseLevel } from '@/types/course';
+import { ChevronDown, ChevronUp, Star, X } from 'lucide-react';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { CourseFilters } from '../types';
 
 const ratings = [
   { name: '4 Star & Up', value: '4' },
@@ -75,6 +67,9 @@ export const CoursesSidebar = memo(function CoursesSidebar({
   isMobile,
   onClose,
 }: CoursesSidebarProps) {
+  const { categories: fetchedCategories } = useCategories();
+  const displayCategories = fetchedCategories || [];
+
   const [expanded, setExpanded] = useState({
     category: true,
     rating: true,
@@ -82,8 +77,8 @@ export const CoursesSidebar = memo(function CoursesSidebar({
     price: true,
   });
 
-  const toggleSection = useCallback((section: keyof typeof expanded) => {
-    setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
+  const toggleSection = useCallback((module: keyof typeof expanded) => {
+    setExpanded((prev) => ({ ...prev, [module]: !prev[module] }));
   }, []);
 
   const handleCategoryChange = useCallback(
@@ -115,14 +110,25 @@ export const CoursesSidebar = memo(function CoursesSidebar({
     },
     [filters.level, onFiltersChange]
   );
+  const debouncedPriceChange = useMemo(
+    () =>
+      debounce((min: number, max: number, currentPriceFilter) => {
+        onFiltersChange({
+          price: { ...currentPriceFilter, min, max },
+        });
+      }, 800),
+    [onFiltersChange]
+    // We intentionally exclude `filters.price` from the dependency array
+    // so it doesn't recreate the function each time the price changes
+  );
 
   const handlePriceChange = useCallback(
     (values: number[]) => {
-      onFiltersChange({
-        price: { ...filters.price, min: values[0], max: values[1] },
-      });
+      // Execute the stable debounced function, passing the latest states
+      // directly as arguments so we don't end up with stale closures
+      debouncedPriceChange(values[0], values[1], filters.price);
     },
-    [filters.price, onFiltersChange]
+    [debouncedPriceChange, filters.price]
   );
 
   const totalActiveFilters =
@@ -157,9 +163,9 @@ export const CoursesSidebar = memo(function CoursesSidebar({
           isExpanded={expanded.category}
           onToggle={() => toggleSection('category')}
         >
-          {categories.map((cat) => (
+          {displayCategories.map((cat) => (
             <label
-              key={cat.name}
+              key={cat.id}
               className="group flex items-center justify-between cursor-pointer py-1.5 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -183,9 +189,9 @@ export const CoursesSidebar = memo(function CoursesSidebar({
                 </span>
               </div>
               {/* <span className="text-[10px] font-bold text-muted-foreground/50 bg-muted/50 px-1.5 py-0.5 rounded uppercase">
-                {cat.count}
+                {cat.courseCount}
               </span> */}
-            </label> 
+            </label>
           ))}
         </FilterSection>
 

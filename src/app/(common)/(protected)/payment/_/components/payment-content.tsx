@@ -14,7 +14,7 @@ import { PayPalButtons } from './providers/paypal-payment-provider';
 import { RazorpayCheckout } from './providers/rozorpay-payment-provider';
 import { toast } from '@/hooks/use-toast';
 import { useOrderMachine } from '@/hooks/use-order-machine';
-import type { PaymentProvider } from '@/services/payment.service';
+import type { PaymentProvider } from '@/services/payment';
 import type {
   PaymentProof,
   PaypalSession,

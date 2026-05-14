@@ -38,7 +38,7 @@ import { SecureVideoPlayer } from './video-player';
 import { CourseCertificateTab } from './tabs/course-certificate-tab';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
-import { AuthUser } from '@/lib/auth/require-auth/types';
+import { AuthUser } from '@/lib/auth/auth-guard/types';
 
 interface EnrollmentLearningClientProps {
   enrollmentId: string;
@@ -77,34 +77,34 @@ export function EnrollmentLearningClient({
   const completedToastRef = useRef<string | null>(null);
 
   const courseItems = useMemo<CourseItem[]>(() => {
-    const sortedSections = [...initialEnrollment.sections].sort((a, b) => a.order - b.order);
+    const sortedModules = [...initialEnrollment.modules].sort((a, b) => a.order - b.order);
 
     const items: CourseItem[] = [];
 
-    sortedSections.forEach((section) => {
-      const sortedLessons = [...section.lessons].sort((a, b) => a.order - b.order);
+    sortedModules.forEach((module) => {
+      const sortedLessons = [...module.lessons].sort((a, b) => a.order - b.order);
 
       sortedLessons.forEach((lesson) => {
         items.push({
           id: lesson.id,
           type: 'lesson',
-          sectionId: section.id,
-          sectionTitle: section.title,
+          moduleId: module.id,
+          moduleTitle: module.title,
           title: lesson.title,
           order: lesson.order,
           data: lesson,
         });
       });
 
-      if (section.quiz) {
+      if (module.quiz) {
         items.push({
-          id: section.quiz.id,
+          id: module.quiz.id,
           type: 'quiz',
-          sectionId: section.id,
-          sectionTitle: section.title,
-          title: section.quiz.title,
+          moduleId: module.id,
+          moduleTitle: module.title,
+          title: module.quiz.title,
           order: sortedLessons.length > 0 ? Math.max(...sortedLessons.map((l) => l.order)) + 1 : 1,
-          data: section.quiz,
+          data: module.quiz,
         });
       }
     });
@@ -262,9 +262,7 @@ export function EnrollmentLearningClient({
             </Button>
 
             <div className="flex items-center space-x-3">
-              <h1 className="font-semibold text-lg truncate max-w-md">
-                {currentItem.sectionTitle}
-              </h1>
+              <h1 className="font-semibold text-lg truncate max-w-md">{currentItem.moduleTitle}</h1>
               <div className="hidden sm:flex items-center space-x-2">
                 <Badge variant="secondary" className="font-normal">
                   {Math.round(progress.overallProgress)}% complete

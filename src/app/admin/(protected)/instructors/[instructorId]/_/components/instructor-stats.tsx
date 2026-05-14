@@ -36,7 +36,7 @@ export function InstructorStats({ instructorId }: InstructorStatsProps) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Monthly Revenue</span>
-              <span className="font-semibold">${monthlyRevenue}</span>
+              <span className="font-semibold">₹{monthlyRevenue}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Growth Rate</span>

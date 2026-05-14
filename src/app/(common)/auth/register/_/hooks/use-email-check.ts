@@ -44,7 +44,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { authService } from '@/services/auth.service';
+import { authService } from '@/services/auth';
 import { getErrorMessage } from '@/lib/utils';
 
 export function useCheckEmail(email: string) {

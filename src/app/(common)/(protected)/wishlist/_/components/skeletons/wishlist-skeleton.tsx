@@ -2,7 +2,7 @@ import { Heart } from 'lucide-react';
 import { CourseCardSkeleton } from './course-card-skeleton';
 
 export function WishlistSkeleton() {
-  const skeletonCount = 4; 
+  const skeletonCount = 4;
 
   return (
     <section

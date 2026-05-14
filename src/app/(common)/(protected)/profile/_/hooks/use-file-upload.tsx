@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  CloudinaryUploadResponse,
-  mediaService,
-  UploadSignatureResponse,
-} from '@/services/media.service';
+import { CloudinaryUploadResponse, mediaService, UploadSignatureResponse } from '@/services/media';
 import { useState, useCallback } from 'react';
 
 export const useFileUpload = () => {

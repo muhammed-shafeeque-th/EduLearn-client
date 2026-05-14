@@ -4,7 +4,8 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { InstructorMeta } from '@/types/user';
 import { ApiResponse } from '@/types/api-response';
-import { userService, type UsersParams } from '@/services/user.service';
+import { type UsersParams } from '@/services/user';
+import { instructorService } from '@/services/instructor';
 
 /**
  * Parameters for querying instructors.
@@ -40,7 +41,7 @@ export function useInstructors(params: UseInstructorsParams = {}, options?: UseI
   // UseQuery
   const query = useQuery<ApiResponse<InstructorMeta[]>, Error>({
     queryKey: QUERY_KEYS.users.instructors(effectiveParams),
-    queryFn: ({ signal }) => userService.getInstructors(effectiveParams, { signal }),
+    queryFn: ({ signal }) => instructorService.getInstructors(effectiveParams, { signal }),
     staleTime: options?.staleTime ?? 10 * 60 * 1000,
     enabled: options?.enabled ?? true,
     placeholderData: options?.placeholderData ?? keepPreviousData,

@@ -1,5 +1,5 @@
 import React, { Suspense, ReactNode } from 'react';
-import { requireAuth } from '@/lib/auth/require-auth';
+import { authGuard } from '@/lib/auth/auth-guard';
 
 interface ProtectedLayoutProps {
   children: ReactNode;
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function ProtectedLayout({ children }: ProtectedLayoutProps) {
   // Ensure the user is authenticated with accepted roles before rendering children
-  await requireAuth({
+  await authGuard({
     roles: ['instructor', 'student'],
     redirectTo: '/',
   });

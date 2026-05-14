@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star, Clock, Video, Heart, Users } from 'lucide-react';
+import { Star, Clock, Video, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -16,13 +16,13 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, onCourseClick, showInstructor = false }: CourseCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  // const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-  };
+  // const handleWishlist = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   setIsWishlisted(!isWishlisted);
+  // };
 
   const handleCardClick = () => {
     onCourseClick?.(course);
@@ -57,7 +57,7 @@ export function CourseCard({ course, onCourseClick, showInstructor = false }: Co
           <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           {/* Wishlist Button */}
-          <Button
+          {/* <Button
             variant="secondary"
             size="icon"
             onClick={handleWishlist}
@@ -69,7 +69,7 @@ export function CourseCard({ course, onCourseClick, showInstructor = false }: Co
                 isWishlisted ? 'fill-rose-500 text-rose-500' : 'text-slate-600'
               )}
             />
-          </Button>
+          </Button> */}
 
           {/* Level Badge */}
           <div className="absolute bottom-4 left-4">
@@ -132,11 +132,11 @@ export function CourseCard({ course, onCourseClick, showInstructor = false }: Co
             <div className="flex flex-col">
               {course.price && course.price > (course?.discountPrice ?? 0) && (
                 <span className="text-[10px] text-slate-400 line-through font-bold decoration-rose-500/50">
-                  ${course.price}
+                  ₹{course.price}
                 </span>
               )}
               <span className="text-xl font-black text-slate-900 dark:text-white">
-                ${course.discountPrice}
+                ₹{course.discountPrice}
               </span>
             </div>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] px-6 rounded-xl shadow-lg shadow-blue-500/20">

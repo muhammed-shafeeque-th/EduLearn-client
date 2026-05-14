@@ -65,7 +65,7 @@ const FeatureItem: React.FC<FeatureItemProps> = React.memo(({ feature, index }) 
 });
 FeatureItem.displayName = 'FeatureItem';
 
-// -- Main section component --
+// -- Main module component --
 
 export function WhyTeachSection(): React.JSX.Element {
   return (

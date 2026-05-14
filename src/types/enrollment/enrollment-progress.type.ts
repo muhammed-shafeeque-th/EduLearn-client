@@ -5,10 +5,10 @@ export interface EnrollmentDetail {
   progressPercent: number;
   status: 'ACTIVE' | 'COMPLETED' | 'DROPPED';
   enrolledAt: string;
-  sections: EnrollmentSection[];
+  modules: EnrollmentModule[];
 }
 
-export interface EnrollmentSection {
+export interface EnrollmentModule {
   id: string;
   title: string;
   description?: string;
@@ -159,8 +159,8 @@ export interface SignedVideoUrlResponse {
 export type CourseItem = {
   id: string;
   type: 'lesson' | 'quiz';
-  sectionId: string;
-  sectionTitle: string;
+  moduleId: string;
+  moduleTitle: string;
   title: string;
   order: number;
   data: LessonWithProgress | QuizWithProgress;

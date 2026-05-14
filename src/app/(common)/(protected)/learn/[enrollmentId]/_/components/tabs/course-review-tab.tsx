@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, Send, Pencil, Trash2 } from 'lucide-react';
+import { Star, Send, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { cn, getErrorMessage } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useEnrollmentReview } from '@/states/server/review/use-enrollment-review';
@@ -199,8 +199,15 @@ export function CourseReviewsTab({ enrollmentId, overallProgressPercent }: Cours
                       onClick={handleDelete}
                       disabled={isDeleting}
                     >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      {isDeleting ? 'Deleting...' : 'Delete'}
+                      {isDeleting ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <>
+                          <Trash2 className="w-4 h-4 mr-1" />
+                        </>
+                      )}
+                      {/* <Trash2 className="w-4 h-4 mr-1" />
+                      {isDeleting ? 'Deleting...' : 'Delete'} */}
                     </Button>
                   </div>
                 ) : (

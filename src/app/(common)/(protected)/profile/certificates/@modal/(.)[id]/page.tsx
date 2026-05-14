@@ -20,7 +20,7 @@ interface CertificateInterceptPageProps {
 export default function CertificateInterceptPage({ params }: CertificateInterceptPageProps) {
   const router = useRouter();
   const { id } = React.use(params);
-  const { data: certificates, isLoading } = useUserCertificates();
+  const { certificates, isLoading } = useUserCertificates();
 
   const certificate = certificates?.find((c) => c.id === id);
 

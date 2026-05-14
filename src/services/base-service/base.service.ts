@@ -69,7 +69,7 @@ export abstract class BaseService {
             ? config.headers
             : new AxiosHeaders(config.headers);
 
-        // First apply any dynamic headers (includes server-side cookies in Next.js)
+        // First apply any dynamic headers
         if (this.getHeaders) {
           const providedHeaders = await this.getHeaders();
           Object.entries(providedHeaders).forEach(([k, v]) => headers.set(k, v));
@@ -229,7 +229,7 @@ export abstract class BaseService {
     let errorCode: ErrorCode | undefined;
     let errorDetails: ErrorDetail[] | undefined;
     let message: string = error.message || 'Server error occurred';
-    this._logAxiosError(error);
+    // this._logAxiosError(error);
     let statusCode: number | undefined;
 
     if (error.response) {

@@ -29,11 +29,9 @@ export default function InstructorDashboard() {
     // isError: userError,
   } = useCurrentUser({ enabled: true });
 
-  const {
-    data: instructorStats,
-    isLoading: isStatsLoading,
-    isError: statsError,
-  } = useInstructorStats(user?.id ?? '', { enabled: !!user && user.status !== 'blocked' });
+  const { data: instructorStats, isLoading: isStatsLoading } = useInstructorStats(user?.id ?? '', {
+    enabled: !!user && user.status !== 'blocked',
+  });
 
   const {
     courses: courses,
@@ -57,7 +55,7 @@ export default function InstructorDashboard() {
   const recentCourses = useMemo(
     () =>
       courses?.length
-        ? courses.map((course) => ({
+        ? courses.slice(0, 3).map((course) => ({
             id: course.id,
             title: course.title,
             students: course.students,
@@ -208,11 +206,12 @@ export default function InstructorDashboard() {
       {/* Stats Grid */}
       {isStatsLoading ? (
         <CourseStatsSkeleton />
-      ) : statsError ? (
-        <div className="p-8 text-center text-red-600 dark:text-red-400">
-          Failed to load stats. Please refresh.
-        </div>
       ) : (
+        //  statsError ? (
+        //   <div className="p-8 text-center text-red-600 dark:text-red-400">
+        //     Failed to load stats. Please refresh.
+        //   </div>
+        // ) :
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {statsGrid.map((stat, index) => {
             const Icon = stat.icon;
@@ -306,7 +305,7 @@ export default function InstructorDashboard() {
                         {course.title}
                       </h3>
                       <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                        ${course.revenue?.toLocaleString()}
+                        ₹{course.revenue?.toLocaleString()}
                       </span>
                     </div>
 

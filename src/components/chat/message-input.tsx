@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useRef, useCallback, KeyboardEvent, useEffect } from 'react';
@@ -295,7 +296,7 @@ export function MessageInput({
         };
 
         mediaRecorder.onstop = () => {
-          const _audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          // const _audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           // TODO: Send audio blob
           toast.success({ title: 'Voice message recorded' });
           stream.getTracks().forEach((track) => track.stop());

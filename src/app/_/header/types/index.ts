@@ -5,12 +5,12 @@ export interface User {
   avatar?: string;
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  icon: string;
-  subcategories?: Subcategory[];
-}
+// export interface Category {
+//   id: string;
+//   name: string;
+//   icon: string;
+//   subcategories?: Subcategory[];
+// }
 
 export interface Subcategory {
   id: string;

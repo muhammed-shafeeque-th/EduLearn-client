@@ -1,21 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NotFoundIllustration } from './not-found-illustration';
-import { NotFoundSkeleton } from './skeletons/not-found-skeleton';
+// import { NotFoundSkeleton } from './skeletons/not-found-skeleton';
 import Link from 'next/link';
 import CommonHeader from '@/app/_/header';
 
 export function NotFoundPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => setIsLoading(false), 1000);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) {
@@ -33,9 +33,9 @@ export function NotFoundPage() {
     window.location.reload();
   };
 
-  if (isLoading) {
-    return <NotFoundSkeleton />;
-  }
+  // if (isLoading) {
+  //   return <NotFoundSkeleton />;
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-white to-primary/5 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">

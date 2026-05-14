@@ -3,7 +3,11 @@ export type ApiResponse<T> =
   | {
       success: false;
       message: string;
-      error: { code: string; details?: [{ message?: string; field?: string }] };
+      error: {
+        code: string;
+        reason?: string;
+        details?: [{ message?: string; field?: string }];
+      };
     };
 
 /**

@@ -4,7 +4,7 @@ import { DashboardStats } from '../@stats/_/dashboard-stats';
 import { RevenueChart } from '../@revenue/_/revenue-chart';
 import { CourseEnrollmentChart } from '../@enrollment/_/course-enrollment-chart';
 import { UserGrowthChart } from '../@growth/_/user-growth-chart';
-import { TopCoursesChart } from '../@top_courses/_/top-course-chart';
+import { TopCoursesChart } from '../@top_categories/_/top-course-chart';
 import { InstructorPerformanceChart } from '../@performance/_/instructor-performance-chart';
 import { ReviewsChart } from '../@reviews/_/reviews-chart';
 // import { RecentActivity } from './_components/recent-activity';

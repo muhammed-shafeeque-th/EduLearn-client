@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { SuccessContent } from './_/components/success-content';
 import { SuccessPageSkeleton } from './_/components/skeletons/success-page-skeletons';
 import { redirect } from 'next/navigation';
-import { requireAuth } from '@/lib/auth';
+import { authGuard } from '@/lib/auth';
 import { getServerOrder } from '@/lib/server-apis/order-apis';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 
@@ -26,7 +26,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   }
 
   // Authenticate user
-  const user = await requireAuth();
+  const user = await authGuard();
 
   // Fetch and validate order
   const { success, order } = await getServerOrder(orderId);

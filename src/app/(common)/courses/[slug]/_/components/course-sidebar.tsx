@@ -17,7 +17,6 @@ import {
   ShoppingCart,
   Heart,
   Share2,
-  Gift,
   Clock,
   Trophy,
   Smartphone,
@@ -30,7 +29,6 @@ import {
   Timer,
   Zap,
   Check,
-  X,
   Copy,
   Facebook,
   Twitter,
@@ -84,9 +82,9 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
   const isInWishlist = wishlist?.items.some((item) => item.courseId === course.id);
   const { isEnrolled } = useIsEnrolled(course.id);
 
-  const [showCouponInput, setShowCouponInput] = useState(false);
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  // const [showCouponInput, setShowCouponInput] = useState(false);
+  // const [couponCode, setCouponCode] = useState('');
+  // const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
 
   // Later, this should be replaced by real per-user/per-offer logic from backend.
   const [timeLeft, setTimeLeft] = useState<number>(() => generateRandomInitialTime());
@@ -221,29 +219,30 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
   };
    */
 
-  const handleApplyCoupon = () => {
-    const validCoupons = ['SAVE20', 'STUDENT50', 'NEWUSER'];
+  // const handleApplyCoupon = () => {
+  //   const validCoupons = ['SAVE20', 'STUDENT50', 'NEWUSER'];
 
-    if (validCoupons.includes(couponCode.toUpperCase())) {
-      setAppliedCoupon(couponCode.toUpperCase());
-      setShowCouponInput(false);
-      setCouponCode('');
-      toast.success({ title: 'Coupon applied successfully!' });
-    } else {
-      toast.error({ title: 'Invalid coupon code' });
-    }
-  };
+  //   if (validCoupons.includes(couponCode.toUpperCase())) {
+  //     setAppliedCoupon(couponCode.toUpperCase());
+  //     setShowCouponInput(false);
+  //     setCouponCode('');
+  //     toast.success({ title: 'Coupon applied successfully!' });
+  //   } else {
+  //     toast.error({ title: 'Invalid coupon code' });
+  //   }
+  // };
 
   const getDiscountedPrice = () => {
-    if (!appliedCoupon) return course.discountPrice;
+    // if (!appliedCoupon)
+    return course.discountPrice;
 
-    const discounts: { [key: string]: number } = {
-      SAVE20: 0.8,
-      STUDENT50: 0.5,
-      NEWUSER: 0.7,
-    };
+    // const discounts: { [key: string]: number } = {
+    //   SAVE20: 0.8,
+    //   STUDENT50: 0.5,
+    //   NEWUSER: 0.7,
+    // };
 
-    return course.discountPrice * (discounts[appliedCoupon] || 1);
+    // return course.discountPrice * (discounts[appliedCoupon] || 1);
   };
 
   const calculateSavings = () => {
@@ -266,10 +265,10 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
           <div className="space-y-3">
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                ${getDiscountedPrice()?.toFixed(2) ?? 0}
+                ₹{getDiscountedPrice()?.toFixed(2) ?? 0}
               </span>
               {course.price && (
-                <span className="text-lg text-gray-500 line-through">${course.price}</span>
+                <span className="text-lg text-gray-500 line-through">₹{course.price}</span>
               )}
             </div>
 
@@ -279,12 +278,12 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                   {Math.round((1 - getDiscountedPrice() / course.price) * 100)}% off
                 </Badge>
               )}
-              {appliedCoupon && (
+              {/* {appliedCoupon && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
                   <Gift className="w-3 h-3 mr-1" />
                   {appliedCoupon} Applied
                 </Badge>
-              )}
+              )} */}
             </div>
 
             {/* Savings Display */}
@@ -293,7 +292,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                 <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                   <Zap className="w-4 h-4" />
                   <span className="text-sm font-medium">
-                    You save ${calculateSavings().toFixed(2)}!
+                    You save ₹{calculateSavings().toFixed(2)}!
                   </span>
                 </div>
               </div>
@@ -440,7 +439,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
           {/* Coupon Section */}
           {/* Hide coupon if enrolled or instructor */}
-          {!isEnrolled && !isInstructor && (
+          {/* {!isEnrolled && !isInstructor && (
             <div className="text-center">
               <AnimatePresence>
                 {!showCouponInput && !appliedCoupon ? (
@@ -455,7 +454,8 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                       Apply Coupon
                     </Button>
                   </motion.div>
-                ) : !appliedCoupon ? (
+                ) :
+                 !appliedCoupon ? (
                   <motion.div
                     className="space-y-2"
                     initial={{ opacity: 0, y: -10 }}
@@ -509,7 +509,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                 )}
               </AnimatePresence>
             </div>
-          )}
+          )} */}
 
           {/* Money Back Guarantee */}
           <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">

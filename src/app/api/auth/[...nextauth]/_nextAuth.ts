@@ -5,7 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { Auth2SignData, AuthProvider } from '@/types/auth';
 import { AuthType, AuthUser } from '@/types/auth';
 import { AdapterUser } from 'next-auth/adapters';
-import { UserRoles } from '@/types/auth';
+import { UserRole } from '@/types/auth';
 import { config } from '@/lib/config';
 import { serverAuthService } from '@/services/server-service-clients';
 
@@ -21,7 +21,7 @@ declare module 'next-auth' {
       accessToken?: string;
       provider?: string;
     } & DefaultSession['user'] &
-      AuthUser;
+    AuthUser;
     authTokenCookie?: string;
   }
 
@@ -35,7 +35,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     token?: string;
-    role?: UserRoles;
+    roles?: UserRole[];
     accessToken?: string;
     provider?: string;
   }
@@ -70,7 +70,7 @@ async function handleOAuthSign({ user, account }: { user: User | AdapterUser; ac
     const decoded = decodeJwt<any>(accessToken);
 
     user.id = decoded.userId;
-    user.role = decoded.role;
+    user.roles = decoded.roles;
     user.name = decoded.username;
     user.image = decoded.avatar;
     user.email = decoded.email;
@@ -93,7 +93,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.roles = user.roles;
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
@@ -106,7 +106,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token, ...rest }) {
       if (token) {
         session.user.userId = token.id;
-        session.user.role = token.role!;
+        session.user.roles = token.roles!;
         session.user.email = token.email!;
         session.user.name = token.name;
         session.user.avatar = token.image as string;
@@ -141,7 +141,7 @@ export const authOptions: NextAuthOptions = {
         credential: { type: 'text' },
       },
       async authorize(credentials, req): Promise<User | null> {
-        console.log('Authorize called with ' + credentials?.credential);
+        // console.log('Authorize called with ' + credentials?.credential);
         if (!credentials?.credential) {
           throw new Error('No credential found.');
         }
@@ -184,7 +184,7 @@ export const authOptions: NextAuthOptions = {
             email: decoded.email,
             avatar: decoded.avatar,
             image: decoded.avatar,
-            role: decoded.role,
+            roles: decoded.roles,
             token: accessToken,
             provider: 'google',
           };

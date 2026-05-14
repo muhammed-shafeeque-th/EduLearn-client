@@ -28,7 +28,7 @@ export function FormSkeleton() {
       {/* Submit button */}
       <Skeleton className="h-12 w-full" />
 
-      {/* Resend section */}
+      {/* Resend module */}
       <div className="space-y-4">
         <Skeleton className="h-4 w-32 mx-auto" />
         <Skeleton className="h-10 w-full" />

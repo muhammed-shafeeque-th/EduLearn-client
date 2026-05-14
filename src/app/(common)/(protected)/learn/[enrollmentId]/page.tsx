@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { EnrollmentLearningClient } from './_/components/learning-page-client';
 import EnrollmentPageSkeleton from './loading';
 import { fetchServerEnrollment } from '@/lib/server-apis/enrollment-api';
-import { requireAuth } from '@/lib/auth';
+import { authGuard } from '@/lib/auth';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 
 interface EnrollmentPageProps {
@@ -19,6 +19,10 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: EnrollmentPageProps): Promise<Metadata> {
   const { enrollmentId } = await params;
+  await authGuard({
+    // roles: ['student'],
+    redirectTo: `/auth/login?next=/learn/${enrollmentId}`,
+  });
 
   try {
     const { enrollment, success } = await fetchServerEnrollment(enrollmentId);
@@ -51,7 +55,7 @@ export default async function EnrollmentPage({ params, searchParams }: Enrollmen
   const { enrollmentId } = await params;
   const { itemId, itemType } = await searchParams;
 
-  const currentUser = await requireAuth({
+  const currentUser = await authGuard({
     // roles: ['student'],
     redirectTo: `/auth/login?next=/learn/${enrollmentId}`,
 

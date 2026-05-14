@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef } from 'react
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Notification } from '@/types/notification';
-import { notificationService } from '@/services/notification.service';
+import { notificationService } from '@/services/notification';
 import { useNotificationWebSocket } from '@/services/ws/notification/hooks/use-websocket';
 import { config } from '@/lib/config';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';

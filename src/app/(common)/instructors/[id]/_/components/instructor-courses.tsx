@@ -24,7 +24,9 @@ export function InstructorCourses({
   const coursesPerPage = 4;
 
   const visibleCourses = useMemo(() => {
-    return courses.slice(currentIndex, currentIndex + coursesPerPage);
+    return courses
+      .filter((course) => course.status === 'published')
+      .slice(currentIndex, currentIndex + coursesPerPage);
   }, [courses, currentIndex, coursesPerPage]);
 
   const canGoPrevious = currentIndex > 0;

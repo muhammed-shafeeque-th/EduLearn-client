@@ -23,7 +23,7 @@ export class OperationExecutor {
 
   constructor(
     private courseId: string,
-    private courseService: typeof import('@/services/_/course.service').courseService,
+    private courseService: typeof import('@/services/course').courseService,
     private readonly snapshotFactory: () => CurriculumSnapshot
   ) {}
 

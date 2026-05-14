@@ -1,6 +1,6 @@
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
-import { adminService } from '@/services/admin.service';
+import { adminService } from '@/services/_/admin.service';
 
 export const useBlockUser = () => {
   const handleBlock = async (userId: string) => {

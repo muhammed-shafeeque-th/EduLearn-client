@@ -79,15 +79,15 @@ export function CourseCard({ course }: CourseCardProps) {
     );
 
   // Lessons and duration
-  // const courseLessonsCount = course.sections
-  //   ? course.sections.reduce((acc, section) => acc + section.lessons.length, 0)
+  // const courseLessonsCount = course.modules
+  //   ? course.modules.reduce((acc, module) => acc + module.lessons.length, 0)
   //   : 0;
 
-  // const courseInMinutes = course.sections
-  //   ? course.sections.reduce(
-  //       (sSum, section) =>
+  // const courseInMinutes = course.modules
+  //   ? course.modules.reduce(
+  //       (sSum, module) =>
   //         sSum +
-  //         section.lessons.reduce((lSum, lesson) => lSum + (lesson.estimatedDuration ?? 0), 0),
+  //         module.lessons.reduce((lSum, lesson) => lSum + (lesson.estimatedDuration ?? 0), 0),
   //       0
   //     )
   //   : 0;

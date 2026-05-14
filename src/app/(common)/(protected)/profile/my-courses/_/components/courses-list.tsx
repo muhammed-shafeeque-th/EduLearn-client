@@ -98,10 +98,10 @@ export function CoursesList({
     setCurrentPage(1);
   };
 
-  const handleCategoryChange = useCallback((value: string | null) => {
-    setSelectedCategory(value);
-    setCurrentPage(1);
-  }, []);
+  // const handleCategoryChange = useCallback((value: string | null) => {
+  //   setSelectedCategory(value);
+  //   setCurrentPage(1);
+  // }, []);
 
   const clearFilters = useCallback(() => {
     setSearchQuery('');
@@ -137,7 +137,7 @@ export function CoursesList({
           </SelectContent>
         </Select>
 
-        {categories.length > 0 && (
+        {/* {categories.length > 0 && (
           <Select
             value={selectedCategory ?? '__ALL_CATEGORIES__'}
             onValueChange={(v) => handleCategoryChange(v === '__ALL_CATEGORIES__' ? null : v)}
@@ -154,7 +154,7 @@ export function CoursesList({
               ))}
             </SelectContent>
           </Select>
-        )}
+        )} */}
 
         {hasActiveFilters && (
           <Button size="sm" variant="outline" onClick={clearFilters}>

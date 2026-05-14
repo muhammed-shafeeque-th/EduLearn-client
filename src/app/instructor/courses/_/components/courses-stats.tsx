@@ -12,12 +12,12 @@ interface CourseStatsProps {
 
 const statConfigs = [
   {
-    key: 'totalCourses',
-    title: 'Total Courses',
+    key: 'completionRate',
+    title: 'Courses Completion rate',
     icon: BookOpen,
     color: 'text-blue-600',
     bgColor: 'bg-blue-100 dark:bg-blue-900/20',
-    format: (v: number) => v?.toString(),
+    format: (v: number) => `${v?.toString()} %`,
   },
   {
     key: 'totalStudents',
@@ -36,24 +36,21 @@ const statConfigs = [
     format: (v: number) => (v ? v.toFixed(1) : '—'),
   },
   {
-    key: 'totalRevenue',
-    title: 'Total Revenue',
+    key: 'published',
+    title: 'Total Published courses',
     icon: TrendingUp,
     color: 'text-purple-600',
     bgColor: 'bg-purple-100 dark:bg-purple-900/20',
-    format: (v: number) => (v != null ? `₹${v.toLocaleString()}` : '—'),
+    format: (v: number) => (v != null ? `${v.toLocaleString()}` : '—'),
   },
 ];
 
 export function CoursesStats({}: CourseStatsProps) {
   const { userId } = useAuthUserSelector() ?? {};
 
-  const {
-    data: stats,
-    isLoading,
-    isError,
-    error,
-  } = useInstructorCoursesStats(userId!, { enabled: true });
+  const { stats, isLoading, isError, error } = useInstructorCoursesStats(userId!, {
+    enabled: true,
+  });
 
   // Loading or error states
   if (isLoading) {
@@ -88,11 +85,11 @@ export function CoursesStats({}: CourseStatsProps) {
   }
 
   // Defensive fallback values
-  const resolvedStats = stats ?? {
-    totalCourses: 0,
-    totalStudents: 0,
-    averageRating: 0,
-    totalRevenue: 0,
+  const resolvedStats = {
+    completionRate: stats?.avgCompletionRate ?? 0,
+    totalStudents: stats?.totalEnrollments ?? 0,
+    averageRating: stats?.averageRating ?? 0,
+    published: stats?.published ?? 0,
   };
 
   return (

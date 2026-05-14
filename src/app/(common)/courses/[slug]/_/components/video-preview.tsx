@@ -21,7 +21,6 @@ interface VideoPreviewProps {
 
 /**
  * Fully reliable Plyr video preview component
- * Works correctly with Next.js + Shadcn Dialog + SSR
  */
 export function VideoPreview({ isOpen, onClose, videoData }: VideoPreviewProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);

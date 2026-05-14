@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 
 // Server Components
 import StatsSection from './components/stats-section';
-import CategoriesSection from './components/categories-section';
+import CategoriesSection from './components/categories-section-cl';
 
 // Loading Components
 import {

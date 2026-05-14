@@ -35,7 +35,7 @@ export function UserActions({ user }: UserActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
-  const { blockUser, unblockUser, deleteUser } = useAdminUser(user.id);
+  const { blockAccount, unblockAccount, deleteUser } = useAdminUser(user.id);
   const queryClient = useQueryClient();
 
   // Handle block/unblock action
@@ -44,14 +44,15 @@ export function UserActions({ user }: UserActionsProps) {
       try {
         let result;
         if (user.status === 'blocked') {
-          result = await unblockUser(user.id);
+          result = await unblockAccount(user.id);
         } else {
-          result = await blockUser(user.id);
+          result = await blockAccount(user.id);
         }
         if (result?.success) {
           toast.success({
             title:
-              result.message || (user.status === 'blocked' ? 'User unblocked' : 'User blocked'),
+              result.message ||
+              (user.status === 'blocked' ? 'Account unblocked' : 'Account blocked'),
           });
         } else {
           toast.error({ title: result?.message || 'Failed to update user status' });
@@ -63,7 +64,7 @@ export function UserActions({ user }: UserActionsProps) {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.usersStats() });
       }
     });
-  }, [blockUser, unblockUser, user.id, user.status, queryClient]);
+  }, [blockAccount, unblockAccount, user.id, user.status, queryClient]);
 
   // Handle delete action
   const handleDelete = useCallback(() => {
@@ -158,12 +159,14 @@ export function UserActions({ user }: UserActionsProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {user.status === 'blocked' ? 'Unblock User' : 'Block User'}
+              {user.status === 'blocked' ? 'Unblock User Account' : 'Block User Account'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {user.status === 'blocked' ? 'unblock' : 'block'}{' '}
+              Are you sure you want to {user.status === 'blocked' ? 'unblock' : 'block'} this
+              Account
               <span className="font-semibold">{user.firstName + ' ' + user.lastName}</span>?
-              {user.status !== 'blocked' && ' This will restrict their access to the platform.'}
+              {user.status !== 'blocked' &&
+                ' This will restrict their complete access to the platform'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

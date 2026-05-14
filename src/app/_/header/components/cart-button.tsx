@@ -123,10 +123,10 @@ const CartButton = memo(function CartButton() {
                     <h4 className="font-medium text-sm truncate">{item.course?.title}</h4>
                     <p className="text-xs text-muted-foreground">{item.course?.instructor?.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="font-medium text-sm">${item.course?.discountPrice}</span>
+                      <span className="font-medium text-sm">₹{item.course?.discountPrice}</span>
                       {item.course?.price && item.course?.price !== item.course?.discountPrice && (
                         <span className="text-xs text-muted-foreground line-through">
-                          ${item.course?.price}
+                          ₹{item.course?.price}
                         </span>
                       )}
                     </div>

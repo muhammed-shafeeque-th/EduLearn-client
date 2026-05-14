@@ -12,13 +12,10 @@ interface CourseListItemProps {
 }
 
 export function CourseListItem({ course }: CourseListItemProps) {
-  const courseLessonsCount = course.sections.reduce(
-    (acc, section) => acc + section.lessons.length,
-    0
-  );
-  const courseInMinutes = course.sections.reduce(
-    (sSum, section) =>
-      sSum + section.lessons.reduce((lSum, lesson) => lSum + (lesson.estimatedDuration ?? 0), 0),
+  const courseLessonsCount = course.modules.reduce((acc, module) => acc + module.lessons.length, 0);
+  const courseInMinutes = course.modules.reduce(
+    (sSum, module) =>
+      sSum + module.lessons.reduce((lSum, lesson) => lSum + (lesson.estimatedDuration ?? 0), 0),
     0
   );
   return (
@@ -66,7 +63,7 @@ export function CourseListItem({ course }: CourseListItemProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
-                    <span>{course.enrollments?.toLocaleString()}</span>
+                    <span>{course.students?.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />

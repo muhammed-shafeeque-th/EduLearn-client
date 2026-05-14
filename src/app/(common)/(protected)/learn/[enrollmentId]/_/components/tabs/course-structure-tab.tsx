@@ -28,27 +28,27 @@ export function CourseStructureTab({
 }: CourseStructureTabProps) {
   return (
     <div className="space-y-6">
-      {enrollment.sections.map((section, sectionIndex) => {
+      {enrollment.modules.map((module, moduleIndex) => {
         const items: CourseItem[] = [
-          ...section.lessons.map((lesson) => ({
+          ...module.lessons.map((lesson) => ({
             id: lesson.id,
             type: 'lesson' as const,
-            sectionId: section.id,
-            sectionTitle: section.title,
+            moduleId: module.id,
+            moduleTitle: module.title,
             title: lesson.title,
             order: lesson.order,
             data: lesson,
           })),
-          ...(section.quiz
+          ...(module.quiz
             ? [
                 {
-                  id: section.quiz.id,
+                  id: module.quiz.id,
                   type: 'quiz' as const,
-                  sectionId: section.id,
-                  sectionTitle: section.title,
-                  title: section.quiz.title,
+                  moduleId: module.id,
+                  moduleTitle: module.title,
+                  title: module.quiz.title,
                   order: 999,
-                  data: section.quiz,
+                  data: module.quiz,
                 },
               ]
             : []),
@@ -65,14 +65,14 @@ export function CourseStructureTab({
         }).length;
 
         return (
-          <Card key={section.id}>
+          <Card key={module.id}>
             <div className="p-4 bg-accent/30 flex items-center justify-between border-b">
               <div>
                 <h3 className="font-semibold">
-                  Section {sectionIndex + 1}: {section.title}
+                  Module {moduleIndex + 1}: {module.title}
                 </h3>
-                {section.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
+                {module.description && (
+                  <p className="text-sm text-muted-foreground mt-1">{module.description}</p>
                 )}
               </div>
               <Badge variant="secondary">

@@ -4,7 +4,7 @@ export async function pollUntil<T>({
   fn,
   validate,
   interval = 2000,
-  maxAttempts = 40,
+  maxAttempts = 10,
   maxInterval = 30_000,
 }: {
   fn: () => Promise<T>;

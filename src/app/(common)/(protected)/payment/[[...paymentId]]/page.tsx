@@ -4,7 +4,7 @@ import { PaymentContent } from '../_/components/payment-content';
 import { redirect } from 'next/navigation';
 import { PaymentPageSkeleton } from '../_/components/skeletons/payment-page-skeleton';
 import { getServerOrder } from '@/lib/server-apis/order-apis';
-import { requireAuth } from '@/lib/auth';
+import { authGuard } from '@/lib/auth';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 
 export const metadata: Metadata = {
@@ -31,11 +31,10 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
   }
 
   // Authenticate user
-  const user = await requireAuth();
+  const user = await authGuard();
 
   // Fetch and validate order
   const { success, order } = await getServerOrder(orderId);
-  console.log('Order : ' + JSON.stringify(order, null, 2));
 
   if (!success || !order) {
     // Unable to find the order or failed fetch
@@ -61,9 +60,6 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
   // if (!['pending_payment', 'processing', 'created'].includes(order.status)) {
   //   redirect(`/checkout?orderId=${order.id}&error_code=${ERROR_CODES.INVALID_ORDER_STATUS}`);
   // }
-
-  console.log('Rendering paymentPage');
-
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={<PaymentPageSkeleton />}>

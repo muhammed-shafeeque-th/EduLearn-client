@@ -4,7 +4,7 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { notificationService } from '@/services/notification.service';
+import { notificationService } from '@/services/notification';
 import { Notification, NotificationFilters } from '@/types/notification';
 import { useAuthUserSelector } from '@/states/client';
 // import { useNotificationContext } from '@/app/(common)/(protected)/notifications/_/__provider';
@@ -16,6 +16,7 @@ export function useNotifications(filters: Partial<NotificationFilters> = {}) {
   const pageSize = filters.pageSize || 20;
 
   const authUser = useAuthUserSelector();
+  const isEnabled = !!authUser?.userId;
 
   return useInfiniteQuery({
     queryKey: QUERY_KEYS.notifications.list(authUser?.userId || 'current', filters),
@@ -40,6 +41,7 @@ export function useNotifications(filters: Partial<NotificationFilters> = {}) {
       };
     },
     initialPageParam: 1,
+    enabled: isEnabled,
     getNextPageParam: (lastPage) => {
       return lastPage.pagination?.hasNext ? lastPage.page + 1 : undefined;
     },
@@ -164,18 +166,21 @@ export function useMarkNotificationAsRead() {
       );
 
       // Update infinite query pages
-      queryClient.setQueriesData({ queryKey: QUERY_KEYS.notifications.lists() }, (old: any) => {
-        if (!old?.pages) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            notifications: (page.notifications || [])?.map((n: Notification) =>
-              n.id === id ? { ...n, isRead: true } : n
-            ),
-          })),
-        };
-      });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.notifications.lists(authUser?.userId ?? 'current') },
+        (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              notifications: (page.notifications || [])?.map((n: Notification) =>
+                n.id === id ? { ...n, isRead: true } : n
+              ),
+            })),
+          };
+        }
+      );
 
       return { previousNotifications };
     },
@@ -203,6 +208,7 @@ export function useMarkNotificationAsRead() {
  */
 export function useMarkAllNotificationsAsRead() {
   const queryClient = useQueryClient();
+  const authUser = useAuthUserSelector();
 
   return useMutation({
     mutationFn: async () => {
@@ -219,19 +225,22 @@ export function useMarkAllNotificationsAsRead() {
       });
 
       // Optimistically update
-      queryClient.setQueriesData({ queryKey: QUERY_KEYS.notifications.lists() }, (old: any) => {
-        if (!old?.pages) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            notifications: (page.notifications || [])?.map((n: Notification) => ({
-              ...n,
-              isRead: true,
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.notifications.lists(authUser?.userId ?? 'current') },
+        (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              notifications: (page.notifications || [])?.map((n: Notification) => ({
+                ...n,
+                isRead: true,
+              })),
             })),
-          })),
-        };
-      });
+          };
+        }
+      );
 
       return { previousNotifications };
     },
@@ -277,16 +286,19 @@ export function useDeleteNotification() {
       });
 
       // Optimistically remove from lists
-      queryClient.setQueriesData({ queryKey: QUERY_KEYS.notifications.lists() }, (old: any) => {
-        if (!old?.pages) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            notifications: (page.notifications || []).filter((n: Notification) => n.id !== id),
-          })),
-        };
-      });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.notifications.lists(authUser?.userId ?? 'current') },
+        (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              notifications: (page.notifications || []).filter((n: Notification) => n.id !== id),
+            })),
+          };
+        }
+      );
 
       // Remove from detail cache
       queryClient.removeQueries({
@@ -318,6 +330,7 @@ export function useDeleteNotification() {
  */
 export function useClearAllNotifications() {
   const queryClient = useQueryClient();
+  const authUser = useAuthUserSelector();
 
   return useMutation({
     mutationFn: async () => {
@@ -334,19 +347,22 @@ export function useClearAllNotifications() {
       });
 
       // Optimistically clear all
-      queryClient.setQueriesData({ queryKey: QUERY_KEYS.notifications.lists() }, (old: any) => {
-        if (!old?.pages) return old;
-        return {
-          ...old,
-          pages: [
-            {
-              notifications: [],
-              pagination: { hasNext: false, hasPrev: false, page: 1, total: 0 },
-              page: 1,
-            },
-          ],
-        };
-      });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.notifications.lists(authUser?.userId ?? 'current') },
+        (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: [
+              {
+                notifications: [],
+                pagination: { hasNext: false, hasPrev: false, page: 1, total: 0 },
+                page: 1,
+              },
+            ],
+          };
+        }
+      );
 
       return { previousNotifications };
     },

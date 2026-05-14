@@ -27,7 +27,7 @@ export async function getCourseContent(courseId: string) {
   return {
     description:
       "## Advanced React Development\n\nThis comprehensive course covers **Advanced React Development** concepts including:\n\n- Advanced Hooks patterns and custom hooks\n- Performance optimization with React.memo and useMemo\n- State management with Context API and Redux Toolkit\n- Testing strategies with Jest and React Testing Library\n- Server-side rendering with Next.js\n\n### What You'll Build\n\nThroughout this course, you'll build several projects:\n\n1. **Task Management App** - Master hooks and state management\n2. **E-commerce Dashboard** - Learn performance optimization\n3. **Real-time Chat App** - Implement WebSocket integration\n4. **Portfolio Website** - Apply SSR techniques\n\n> *Transform your React skills from intermediate to advanced level with hands-on projects and real-world scenarios.*\n\n### Learning Outcomes\n\nBy the end of this course, you will be able to:\n\n- Build complex React applications with confidence\n- Optimize application performance effectively\n- Implement advanced patterns and best practices\n- Test your applications thoroughly\n- Deploy production-ready React applications",
-    sections: [],
+    modules: [],
     totalDuration: 1200,
     totalLessons: 45,
   };

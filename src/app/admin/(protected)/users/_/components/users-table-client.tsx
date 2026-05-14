@@ -203,8 +203,10 @@ export function UsersTableClient({
           let colorClass = 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
           if (status === 'active') {
             colorClass = 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-          } else if (status === 'pending') {
-            colorClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+          } else if (status === 'blocked') {
+            colorClass = 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+          } else if (status === 'deleted') {
+            colorClass = 'bg-gray-500 text-white';
           }
           return (
             <div

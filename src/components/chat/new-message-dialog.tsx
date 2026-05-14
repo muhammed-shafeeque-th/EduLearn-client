@@ -15,10 +15,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { UserInfo } from '@/types/user';
 
-import { userService } from '@/services/user.service';
+import { userService } from '@/services/user';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ChatRole } from '@/services/ws/chat/hooks/use-messaging';
+import { instructorService } from '@/services/instructor';
 
 // Props
 
@@ -44,7 +45,7 @@ const ROLE_CONFIG = {
     description: 'Search for your students to start a conversation',
     searchAriaLabel: 'Search Students',
     emptyLabel: 'students',
-    fetchFn: (params: Record<string, unknown>) => userService.getStudentsOfInstructor(params),
+    fetchFn: (params: Record<string, unknown>) => instructorService.getStudentsOfInstructor(params),
   },
   student: {
     description: 'Search for your instructors to start a conversation',

@@ -1,6 +1,6 @@
 import React, { Suspense, ReactNode } from 'react';
 import { MyChatsPageSkeleton } from '@/components/chat/skeletons/my-chats-page-skeleton';
-// import { requireAuth } from '@/lib/auth/require-auth';
+// import { authGuard } from '@/lib/auth/require-auth';
 // import { redirect } from 'next/navigation';
 
 interface MessagesLayoutProps {
@@ -8,7 +8,7 @@ interface MessagesLayoutProps {
 }
 
 export default async function MessagesLayout({ children }: MessagesLayoutProps) {
-  // await requireAuth({
+  // await authGuard({
   //   condition: (user) => user.role === 'student',
   //   onUnauthorized: (user) => {
   //     if (user.role === 'instructor') {

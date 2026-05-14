@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { FailureContent } from './_/components/failure-content';
 import { FailurePageSkeleton } from './_/components/skeletons/failure-page-skeleton';
-import { requireAuth } from '@/lib/auth';
+import { authGuard } from '@/lib/auth';
 import { getServerOrder } from '@/lib/server-apis/order-apis';
 import { redirect } from 'next/navigation';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
@@ -26,7 +26,7 @@ export default async function FailurePage({ searchParams }: FailurePageProps) {
   }
 
   // Authenticate user
-  const user = await requireAuth();
+  const user = await authGuard();
 
   // Fetch and validate order
   const { success, order } = await getServerOrder(orderId);

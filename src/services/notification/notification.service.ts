@@ -82,6 +82,10 @@ export class NotificationService extends BaseService implements INotificationSer
       });
     }
   }
+
+  static create(serviceOptions: BaseServiceOptions): INotificationService {
+    return new NotificationService(serviceOptions);
+  }
 }
 
 export const notificationService = new NotificationService();
