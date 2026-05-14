@@ -13,7 +13,7 @@ import {
   UserProfileUpdatePayload,
 } from '@/types/user';
 import { CourseAnalytics } from '../course';
-import { IUserDomainService, IUserService } from './interfaces/user.service.interface';
+import { IUserDomainService } from './interfaces/user.service.interface';
 import {
   buildQueryParams,
   InstructorCoursesStats,
@@ -171,7 +171,7 @@ export class UserService extends BaseService implements IUserDomainService {
     return this.get<ApiResponse<User>>(`/${userId}`, options);
   }
 
-  static create(serviceOptions: BaseServiceOptions): IUserService {
+  static create(serviceOptions: BaseServiceOptions): IUserDomainService {
     return new UserService(serviceOptions);
   }
 
