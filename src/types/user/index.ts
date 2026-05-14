@@ -10,9 +10,9 @@ export * from './payloads';
 
 export type UserStatus = 'verified' | 'not-verified' | 'active' | 'not-active' | 'blocked';
 
-export type UserRoles = 'student' | 'instructor' | 'admin';
-
 export type Gender = 'male' | 'female' | 'other';
+
+export type RoleStatus = 'active' | 'suspended' | 'blocked';
 
 export interface UserProfile {
   bio?: string;
@@ -31,6 +31,7 @@ export interface UserSocials {
   providerUserUrl?: string;
 }
 
+import { UserRole } from '../auth';
 import { Review } from '../review';
 
 export interface InstructorProfile {
@@ -64,6 +65,7 @@ export type User =
       createdAt: string;
       updatedAt?: string;
       isOnline?: boolean;
+      roleStatus: Record<UserRole, RoleStatus>;
     }
   | {
       id: string;
@@ -81,6 +83,7 @@ export type User =
       createdAt: string;
       updatedAt?: string;
       isOnline?: boolean;
+      roleStatus: Record<UserRole, RoleStatus>;
     };
 
 export type Instructor = Extract<User, { role: 'instructor' }>;
@@ -113,6 +116,7 @@ export interface UserMeta {
   country?: string | undefined;
   bio?: string | undefined;
   gender?: string | undefined;
+  roleStatus: Record<UserRole, RoleStatus>;
 }
 
 export interface InstructorMeta {
@@ -139,4 +143,5 @@ export interface InstructorMeta {
   joinedAt: string;
   education: string;
   experience: string;
+  roleStatus: Record<UserRole, RoleStatus>;
 }
