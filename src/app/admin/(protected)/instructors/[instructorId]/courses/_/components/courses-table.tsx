@@ -31,8 +31,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import Pagination from '@/components/ui/pagination';
 import { CourseMeta } from '@/types/course';
-import { useInstructorCourses } from '@/states/server/course/use-courses';
 import Image from 'next/image';
+import { useAdminInstructorCourses } from '@/states/server/admin/use-admin-course';
 
 interface CoursesTableProps {
   instructorId: string;
@@ -87,7 +87,10 @@ export function CoursesTable({ instructorId }: CoursesTableProps) {
     [page, search, status]
   );
 
-  const { courses, isLoading, isError, totalPages } = useInstructorCourses(instructorId, apiParams);
+  const { courses, isLoading, isError, totalPages } = useAdminInstructorCourses(
+    instructorId,
+    apiParams
+  );
 
   const coursesData: CourseMeta[] = useMemo(() => {
     return courses.map((d) => ({
