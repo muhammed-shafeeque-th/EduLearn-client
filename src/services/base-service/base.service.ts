@@ -47,7 +47,7 @@ export abstract class BaseService {
     this.authRefresh = options.authRefresh;
     this.getHeaders = options.getHeaders;
     this.hooks = options.hooks;
-    this.retry = options.retry ?? 3;
+    this.retry = options.retry ?? 2;
 
     this.client =
       options.axiosInstance ||
@@ -95,6 +95,7 @@ export abstract class BaseService {
         }
 
         headers.set('X-Request-ID', uuidv4());
+        config.headers = headers;
 
         this.hooks?.onRequest?.(config);
 

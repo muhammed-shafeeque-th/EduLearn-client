@@ -1,11 +1,13 @@
 'use client';
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthSync } from '@/hooks/use-auth-sync';
 import GoogleOneTapSignIn, {
   GoogleOneTapSignInProps,
 } from '@/components/one-tap/google-one-tap-signin';
 import { useAuthSelector } from '@/states/client';
 import { usePathname } from 'next/navigation';
+import { config } from '@/lib/config';
 
 export interface OneTapProviderProps {
   position?: GoogleOneTapSignInProps['position'];
@@ -24,21 +26,24 @@ export default function OneTapProvider({
 }: OneTapProviderProps) {
   useAuthSync();
   const pathname = usePathname();
-
-  // Only render the One Tap component if the user is not authenticated and not in admin route
   const { status } = useAuthSelector();
 
   if (status !== 'unauthenticated' || pathname.startsWith('/admin')) {
     return null;
   }
 
+  const clientId = config.googlePublicClientId;
+  if (!clientId) return null;
+
   return (
-    <GoogleOneTapSignIn
-      position={position}
-      customStyles={customStyles}
-      offset={offset}
-      autoSelect={autoSelect}
-      cancelOnTapOutside={cancelOnTapOutside}
-    />
+    <GoogleOAuthProvider clientId={clientId}>
+      <GoogleOneTapSignIn
+        position={position}
+        customStyles={customStyles}
+        offset={offset}
+        autoSelect={autoSelect}
+        cancelOnTapOutside={cancelOnTapOutside}
+      />
+    </GoogleOAuthProvider>
   );
 }

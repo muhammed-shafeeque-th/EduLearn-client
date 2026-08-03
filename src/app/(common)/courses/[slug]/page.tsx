@@ -12,6 +12,8 @@ import { notFound } from 'next/navigation';
 // import { ApiResponse } from '@/types/api-response';
 // import { reviveDates } from '@/lib/utils';
 import { fetchServerCourseBySlug, fetchServerCourses } from '@/lib/server-apis/courses-api';
+import { config } from '@/lib/config';
+import CourseJsonLd from './_/utils/CourseJsonLd';
 
 interface CoursePageProps {
   params: Promise<{ slug: string }>;
@@ -65,29 +67,79 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
   const { slug } = await params;
+
   const { course, success } = await getCourse(slug)!;
   if (!success || !course) {
     return { title: 'Course Not Found ' };
   }
 
+  const url = `${config.siteUrl}/courses/${course.slug}`;
+
   return {
-    title: course.title,
+    title: `${course.title} | EduLearn`,
     description: course.description?.slice(0, 150),
+    keywords: [
+      course.title,
+      `${course.title} course`,
+      `${course.title} tutorial`,
+      'online learning',
+      'EduLearn',
+    ],
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       title: course.title,
       description: course.description?.slice(0, 150),
-      images: [course.thumbnail || '/og-default.png'],
+      url,
+      siteName: 'EduLearn',
+      images: [
+        {
+          url: course.thumbnail,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: course.title,
       description: course.description?.slice(0, 150),
-      images: [course.thumbnail || '/og-default.png'],
+      images: [course.thumbnail],
     },
   };
 }
+
+// export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
+//   const { slug } = await params;
+//   const { course, success } = await getCourse(slug)!;
+//   if (!success || !course) {
+//     return { title: 'Course Not Found ' };
+//   }
+
+//   return {
+//     title: course.title,
+//     description: course.description?.slice(0, 150),
+//     openGraph: {
+//       title: course.title,
+//       description: course.description?.slice(0, 150),
+//       images: [course.thumbnail || '/og-default.png'],
+//     },
+//     twitter: {
+//       card: 'summary_large_image',
+//       title: course.title,
+//       description: course.description?.slice(0, 150),
+//       images: [course.thumbnail || '/og-default.png'],
+//     },
+//   };
+// }
 
 export default async function CoursePage({ params }: CoursePageProps) {
   const { slug } = await params;
@@ -98,30 +150,34 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            <Suspense fallback={<CourseHeaderSkeleton />}>
-              <CourseHeader course={course} />
-            </Suspense>
+    <>
+      <CourseJsonLd course={course} />
 
-            <Suspense fallback={<CourseContentSkeleton />}>
-              <CourseContent course={course} />
-            </Suspense>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-6">
-              <Suspense fallback={<CourseSidebarSkeleton />}>
-                <CourseSidebar course={course} />
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-6 lg:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              <Suspense fallback={<CourseHeaderSkeleton />}>
+                <CourseHeader course={course} />
               </Suspense>
+
+              <Suspense fallback={<CourseContentSkeleton />}>
+                <CourseContent course={course} />
+              </Suspense>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-6">
+                <Suspense fallback={<CourseSidebarSkeleton />}>
+                  <CourseSidebar course={course} />
+                </Suspense>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

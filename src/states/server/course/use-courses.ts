@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
 import { CourseParams, courseService, PaginationParams } from '@/services/course';
-import { BasicInfoRequestPayload, Course, CoursePayload } from '@/types/course';
+import { BasicInfoRequestPayload, Course, CourseMeta, CoursePayload } from '@/types/course';
 import { RequestOptions } from '@/services/base-service';
 
 /**
@@ -75,12 +75,46 @@ export function useCourseBySlug(slug: string, options?: { enabled?: boolean }) {
 /**
  * Infinite scrolling for courses.
  */
-export function useCoursesInfinite(params: Partial<Omit<CourseParams, 'page'>> = {}) {
+export type CoursesInfiniteInitialPage = {
+  courses: CourseMeta[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
+export function useCoursesInfinite(
+  params: Partial<Omit<CourseParams, 'page'>> = {},
+  options?: { initialPage?: CoursesInfiniteInitialPage }
+) {
+  const initialData = options?.initialPage
+    ? {
+        pages: [
+          {
+            success: true as const,
+            message: '',
+            data: options.initialPage.courses,
+            pagination: {
+              page: options.initialPage.page,
+              limit: options.initialPage.pageSize,
+              total: options.initialPage.total,
+              totalPages: options.initialPage.totalPages,
+              hasNext: options.initialPage.page < options.initialPage.totalPages,
+              hasPrev: options.initialPage.page > 1,
+            },
+          },
+        ],
+        pageParams: [1],
+      }
+    : undefined;
+
   return useInfiniteQuery({
     queryKey: QUERY_KEYS.courses.list(params),
     queryFn: ({ pageParam = 1, signal }) =>
       courseService.getCourses({ ...params, page: pageParam }, { signal }),
     initialPageParam: 1,
+    initialData,
+    initialDataUpdatedAt: initialData ? Date.now() : undefined,
     getNextPageParam: (lastPage) =>
       lastPage.success && lastPage.pagination?.hasNext ? lastPage.pagination.page + 1 : undefined,
     getPreviousPageParam: (firstPage) =>
@@ -92,7 +126,7 @@ export function useCoursesInfinite(params: Partial<Omit<CourseParams, 'page'>> =
     meta: {
       errorMessage: 'Failed to load courses',
     },
-    select: (data) => data, // Keep flexible for transforms if needed
+    select: (data) => data,
   });
 }
 

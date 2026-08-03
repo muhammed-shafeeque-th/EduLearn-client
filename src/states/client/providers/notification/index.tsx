@@ -8,6 +8,7 @@ import { notificationService } from '@/services/notification';
 import { useNotificationWebSocket } from '@/services/ws/notification/hooks/use-websocket';
 import { config } from '@/lib/config';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
+import { useAuthIsAuthenticated, useAuthUserSelector } from '../../index';
 
 export interface NotificationContextType {
   notifications: Notification[];
@@ -32,6 +33,8 @@ interface NotificationProviderProps {
  */
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const queryClient = useQueryClient();
+  const user = useAuthUserSelector();
+  const isAuthenticated = useAuthIsAuthenticated();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const processedNotificationIds = useRef<Set<string>>(new Set());
 
@@ -52,9 +55,11 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       }
       processedNotificationIds.current.add(notification.id);
 
+      if (!user?.userId) return;
+
       // Update TanStack Query cache - add to all notification lists
       queryClient.setQueriesData(
-        { queryKey: QUERY_KEYS.notifications.lists() },
+        { queryKey: QUERY_KEYS.notifications.lists(user.userId) },
         (
           old:
             | {
@@ -123,7 +128,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
         processedNotificationIds.current.clear();
       }
     },
-    [queryClient]
+    [queryClient, user?.userId]
   );
 
   // Handle WebSocket errors
@@ -136,6 +141,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   // Setup WebSocket connection
   const { isConnected } = useNotificationWebSocket({
     url: config.notificationWsUrl,
+    userId: user?.userId,
+    enabled: isAuthenticated && Boolean(user?.userId),
     onNotification: handleNewNotification,
     onError: handleWebSocketError,
     config: {
@@ -144,12 +151,10 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       enableMessageQueue: true,
     },
     onConnect() {
-      console.log('Notification WebSocket connected');
-      // Optionally refetch notifications on reconnect
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.all });
     },
     onDisconnect() {
-      console.log('Notification WebSocket disconnected');
+      // no-op
     },
   });
 
