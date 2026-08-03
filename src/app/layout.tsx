@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import './globals.css';
-import { StateProviders } from '@/lib/providers';
+import { RootProviders } from '@/lib/providers';
 import { ThemeProvider } from '@/lib/providers/theme/theme-provider';
 import { AuthSessionProvider } from '@/lib/providers/auth-session-provider';
 import React, { Suspense } from 'react';
 import { ToastProvider } from '@/lib/providers/toast-provider';
 import OneTapProvider from '@/lib/providers/one-tap-provider';
-import LoadingScreen from '@/components/ui/loading-screen';
+import { RouteFallback } from '@/components/ui/route-fallback';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 export const viewport: Viewport = {
@@ -60,10 +61,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} antialiased`}>
-        <StateProviders>
+      <body className={`${geistSans.variable} font-sans antialiased`}>
+        <RootProviders>
           <AuthSessionProvider>
-            <OneTapProvider />
             <ThemeProvider
               attribute="class"
               defaultTheme="light"
@@ -71,14 +71,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               disableTransitionOnChange
             >
               <main className="min-h-screen flex flex-col">
-                <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
+                <Suspense fallback={<RouteFallback />}>{children}</Suspense>
               </main>
+              <OneTapProvider />
             </ThemeProvider>
           </AuthSessionProvider>
-        </StateProviders>
+        </RootProviders>
         <ToastProvider />
-
-        {/* Portals/Modals can be rendered here  */}
         <div id="modal-root" />
       </body>
     </html>

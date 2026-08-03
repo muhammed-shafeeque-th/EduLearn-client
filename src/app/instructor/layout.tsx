@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { InstructorSidebar } from './_/components/instructor-sidebar';
 import { InstructorHeader } from './_/components/instructor-header';
-import LoadingScreen from '@/components/ui/loading-screen';
+import { RouteFallback } from '@/components/ui/route-fallback';
 import { authGuard } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getUserRole } from '@/lib/utils/user.utils';
@@ -38,7 +38,7 @@ export default async function InstructorLayout({ children }: InstructorLayoutPro
         <div className="flex-1">
           <InstructorHeader />
           <main className="flex-1">
-            <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
+            <Suspense fallback={<RouteFallback />}>{children}</Suspense>
           </main>
         </div>
       </div>
