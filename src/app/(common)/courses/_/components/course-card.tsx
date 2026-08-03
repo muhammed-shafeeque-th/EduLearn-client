@@ -19,6 +19,8 @@ import { useAuthSelector } from '@/states/client';
 
 interface CourseCardProps {
   course: CourseMeta;
+  /** Set true only for the first above-the-fold card in a list */
+  priorityImage?: boolean;
 }
 
 function getDiscountPercentage(original: number, discounted: number) {
@@ -26,7 +28,7 @@ function getDiscountPercentage(original: number, discounted: number) {
   return Math.round(((original - discounted) / original) * 100);
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export function CourseCard({ course, priorityImage = false }: CourseCardProps) {
   const { wishlist, toggleWishlist, isToggling } = useWishlist({ enabled: true });
 
   const { cart, addToCart, addError, isAdding: isAddingToCart } = useCart({ enabled: true });
@@ -189,8 +191,9 @@ export function CourseCard({ course }: CourseCardProps) {
             src={course.thumbnail}
             alt={course.title}
             className="object-cover transition duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, 480px"
-            priority
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            priority={priorityImage}
+            loading={priorityImage ? undefined : 'lazy'}
             draggable={false}
           />
 

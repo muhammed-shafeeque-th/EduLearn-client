@@ -10,18 +10,13 @@ import { useDebounce } from '@/hooks/use-debounce';
 // import type { Course } from '@/types/course';
 import { CourseFilters } from '../types';
 import { useInfiniteCoursesLoader } from '../hooks/use-infinite-course';
-import { CourseSortBy } from '@/services/_/course.service';
+import { CourseSortBy } from '@/services/course';
 import { CoursesGridSkeleton } from './skeletons';
+import type { CoursesInfiniteInitialPage } from '@/states/server/course/use-courses';
 
-// interface CoursesPageContainerProps {
-//   initialCourses: Course[];
-//   initialPagination: {
-//     page: number;
-//     pageSize: number;
-//     total: number;
-//     totalPages: number;
-//   };
-// }
+interface CoursesPageContainerProps {
+  initialPage?: CoursesInfiniteInitialPage;
+}
 
 const mockSuggestions = ['React', 'Python', 'Web Development', 'Data Science'];
 
@@ -34,7 +29,7 @@ function parseQueryArray(value: string | null): string[] {
     .filter(Boolean);
 }
 
-export function CoursesPageContainer() {
+export function CoursesPageContainer({ initialPage }: CoursesPageContainerProps) {
   // const router = useRouter();
   // const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -99,17 +94,19 @@ export function CoursesPageContainer() {
   }, [deferredFilters.rating]);
 
   const { courses, lastElementRef, isFetchingNextPage, hasNextPage, error, isError, isLoading } =
-    useInfiniteCoursesLoader({
-      category: deferredFilters.categories.join(','),
-      level: deferredFilters.level.join(','),
-      maxPrice: deferredFilters.price.max,
-      minPrice: deferredFilters.price.min,
-
-      rating: minRating ?? 0,
-      search: debouncedSearch,
-      sortBy: sortBy as CourseSortBy,
-      pageSize,
-    });
+    useInfiniteCoursesLoader(
+      {
+        category: deferredFilters.categories.join(','),
+        level: deferredFilters.level.join(','),
+        maxPrice: deferredFilters.price.max,
+        minPrice: deferredFilters.price.min,
+        rating: minRating ?? 0,
+        search: debouncedSearch,
+        sortBy: sortBy as CourseSortBy,
+        pageSize,
+      },
+      { initialPage }
+    );
 
   const handleFiltersChange = useCallback(
     (newFilters: Partial<CourseFilters>) => {

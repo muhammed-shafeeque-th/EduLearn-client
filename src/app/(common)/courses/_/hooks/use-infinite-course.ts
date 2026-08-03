@@ -1,11 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { useCoursesInfinite } from '@/states/server/course/use-courses';
+import {
+  useCoursesInfinite,
+  type CoursesInfiniteInitialPage,
+} from '@/states/server/course/use-courses';
 import type { CourseParams } from '@/services/course';
 
-export function useInfiniteCoursesLoader(params: Partial<Omit<CourseParams, 'page'>>) {
-  const query = useCoursesInfinite(params);
+export function useInfiniteCoursesLoader(
+  params: Partial<Omit<CourseParams, 'page'>>,
+  options?: { initialPage?: CoursesInfiniteInitialPage }
+) {
+  const query = useCoursesInfinite(params, options);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
 
