@@ -4,19 +4,11 @@ import { Facebook, Twitter, Github } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/ui/logo';
 import { GoogleIcon, MicrosoftIcon } from '@/components/icons';
-import { useEffect, useState } from 'react';
+const CURRENT_YEAR = new Date().getFullYear();
 
 export default function Footer() {
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
-
-  if (!currentYear) return null; // Prevent SSR/client mismatch
-
   return (
-    <footer className="w-full bg-slate-800 text-slate-300 font-inter">
+    <footer className="w-full bg-slate-800 text-slate-300">
       <div className="max-w-7xl mx-auto px-6 py-16 flex flex-wrap gap-y-12 gap-x-8 md:flex-nowrap md:justify-between md:items-start">
         {/* Company Info */}
         <section className="flex flex-col gap-4 flex-1 min-w-[220px]">
@@ -161,7 +153,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-slate-700 w-full mt-8" />
       <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <span className="text-sm font-medium">© {currentYear} EduLearn, Inc.</span>
+        <span className="text-sm font-medium">© {CURRENT_YEAR} EduLearn, Inc.</span>
         <nav aria-label="Legal" className="flex items-center gap-6">
           <Link
             href="/privacy"
