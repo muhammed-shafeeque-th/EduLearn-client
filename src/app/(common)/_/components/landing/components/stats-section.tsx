@@ -1,8 +1,5 @@
 // This could fetch from CMS or database
 async function getStats() {
-  // Simulate API call - replace with actual data fetching
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
   return [
     { number: '250+', label: 'Courses for our first members' },
     { number: '1000+', label: 'Courses for our first members' },

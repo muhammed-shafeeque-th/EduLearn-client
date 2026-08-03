@@ -6,7 +6,7 @@ import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 // import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import * as Icons from 'lucide-react';
+import { getCategoryIcon } from '@/lib/icons/category-icons';
 import { useCategories } from '@/states/server/category';
 import Link from 'next/link';
 
@@ -27,9 +27,7 @@ const CategoriesSection = () => {
       id: c.id,
       name: c.name,
       courses: c.courseCount || 0,
-      icon: c.icon
-        ? ((Icons as Record<string, any>)[c.icon as string] ?? Icons.BookOpen)
-        : Icons.BookOpen,
+      icon: getCategoryIcon(c.icon),
       color: c.color || predefinedColors[i % 4].color,
       iconColor: predefinedColors[i % 4].iconColor,
     };

@@ -118,36 +118,26 @@ const HeroSection = () => {
           >
             <div className="relative">
               {/* Main character */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="relative z-10"
-              >
+              <div className="relative z-10 animate-[float_4s_ease-in-out_infinite]">
                 <div className="w-80 h-80 md:w-96 md:h-96 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
                   <Image
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
                     alt="Student learning"
                     width={200}
                     height={200}
+                    priority
+                    sizes="(max-width: 768px) 160px, 200px"
                     className="rounded-full border-4 border-white shadow-lg"
                   />
                 </div>
-              </motion.div>
+              </div>
 
               {/* Floating elements */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                className="absolute top-10 right-10 w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center shadow-lg"
-              >
+              <div className="absolute top-10 right-10 w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center shadow-lg">
                 <BookOpen className="h-8 w-8 text-white" />
-              </motion.div>
+              </div>
 
-              <motion.div
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                className="absolute bottom-20 left-0 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border"
-              >
+              <div className="absolute bottom-20 left-0 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border animate-[float_3s_ease-in-out_1s_infinite]">
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                     <Play className="h-4 w-4 text-white" />
@@ -157,18 +147,14 @@ const HeroSection = () => {
                     <p className="text-xs text-gray-500">Join our community</p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                className="absolute top-1/2 -right-4 bg-yellow-400 p-3 rounded-xl shadow-lg"
-              >
+              <div className="absolute top-1/2 -right-4 bg-yellow-400 p-3 rounded-xl shadow-lg animate-[float_2.5s_ease-in-out_0.5s_infinite]">
                 <div className="text-center">
                   <p className="text-sm font-bold text-gray-800">2400+</p>
                   <p className="text-xs text-gray-700">Courses</p>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </div>
