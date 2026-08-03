@@ -39,7 +39,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import * as Icons from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  Edit,
+  Eye,
+  EyeOff,
+  FolderOpen,
+  Loader2,
+  MoreHorizontal,
+  Plus,
+  RotateCcw,
+  Search,
+  Trash2,
+} from 'lucide-react';
+import { getCategoryIcon } from '@/lib/icons/category-icons';
 import { Category } from '@/types/category';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, getErrorMessage } from '@/lib/utils';
@@ -321,7 +335,7 @@ export function CategoriesContent() {
     const hasSubcategories = category.subcategories && category.subcategories.length > 0;
     const isExpanded = expandedCategories.has(category.id);
     const isDeleted = !!category.deletedAt;
-    const Icon = (Icons as Record<string, any>)[category.icon as string] || Icons.FolderOpen;
+    const Icon = getCategoryIcon(category.icon);
 
     return (
       <motion.div
@@ -340,9 +354,9 @@ export function CategoriesContent() {
             {hasSubcategories && (
               <Button variant="ghost" size="sm" onClick={() => toggleCategory(category.id)}>
                 {isExpanded ? (
-                  <Icons.ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4" />
                 ) : (
-                  <Icons.ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4" />
                 )}
               </Button>
             )}
@@ -385,7 +399,7 @@ export function CategoriesContent() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    <Icons.MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -395,7 +409,7 @@ export function CategoriesContent() {
                       openEditDialog(category);
                     }}
                   >
-                    <Icons.Edit className="mr-2 h-4 w-4" />
+                    <Edit className="mr-2 h-4 w-4" />
                     Edit Category
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -404,12 +418,12 @@ export function CategoriesContent() {
                   >
                     {category.isActive ? (
                       <>
-                        <Icons.EyeOff className="mr-2 h-4 w-4" />
+                        <EyeOff className="mr-2 h-4 w-4" />
                         Deactivate
                       </>
                     ) : (
                       <>
-                        <Icons.Eye className="mr-2 h-4 w-4" />
+                        <Eye className="mr-2 h-4 w-4" />
                         Activate
                       </>
                     )}
@@ -424,7 +438,7 @@ export function CategoriesContent() {
                         setShowCreateDialog(true);
                       }}
                     >
-                      <Icons.Plus className="mr-2 h-4 w-4" />
+                      <Plus className="mr-2 h-4 w-4" />
                       Add Subcategory
                     </DropdownMenuItem>
                   )}
@@ -432,7 +446,7 @@ export function CategoriesContent() {
                     onClick={() => openDeleteDialog(category)}
                     className="text-red-600"
                   >
-                    <Icons.Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -445,9 +459,9 @@ export function CategoriesContent() {
                 disabled={isRestoring}
               >
                 {isRestoring ? (
-                  <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Icons.RotateCcw className="mr-2 h-4 w-4" />
+                  <RotateCcw className="mr-2 h-4 w-4" />
                 )}
                 Restore
               </Button>
@@ -503,7 +517,7 @@ export function CategoriesContent() {
             <CardTitle>All Categories</CardTitle>
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Icons.Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search categories..."
                   value={searchQuery}
@@ -536,7 +550,7 @@ export function CategoriesContent() {
           <div className="space-y-2">
             {filteredCategories.length === 0 ? (
               <div className="text-center py-12">
-                <Icons.FolderOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No categories found</h3>
                 <p className="text-muted-foreground mb-4">
                   {searchQuery
@@ -544,7 +558,7 @@ export function CategoriesContent() {
                     : 'Get started by creating your first category'}
                 </p>
                 <Button onClick={() => setShowCreateDialog(true)}>
-                  <Icons.Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Create Category
                 </Button>
               </div>
@@ -553,7 +567,7 @@ export function CategoriesContent() {
                 {filteredCategories.map((category) => renderCategory(category))}
                 <div className="flex items-center gap-2 pt-2">
                   <Button onClick={() => setShowCreateDialog(true)}>
-                    <Icons.Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Add Category
                   </Button>
                 </div>
@@ -680,7 +694,7 @@ export function CategoriesContent() {
               Cancel
             </Button>
             <Button onClick={handleCreateCategory} disabled={!formData.name || isCreating}>
-              {isCreating && <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Category
             </Button>
           </DialogFooter>
@@ -775,7 +789,7 @@ export function CategoriesContent() {
               Cancel
             </Button>
             <Button onClick={handleUpdateCategory} disabled={!formData.name || isUpdating}>
-              {isUpdating && <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Update Category
             </Button>
           </DialogFooter>
@@ -800,7 +814,7 @@ export function CategoriesContent() {
               className="bg-red-600 hover:bg-red-700"
               disabled={isDeleting}
             >
-              {isDeleting && <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Category
             </AlertDialogAction>
           </AlertDialogFooter>
