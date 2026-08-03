@@ -31,19 +31,21 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  experimental: isProd
-    ? {
-        optimizePackageImports: [
-          '@heroicons/react',
-          'lodash-es',
-          '@radix-ui/react-icons',
-          'lucide-react',
-        ],
-      }
-    : {},
+  experimental: {
+    optimizePackageImports: [
+      '@heroicons/react',
+      'lodash-es',
+      '@radix-ui/react-icons',
+      'lucide-react',
+      'framer-motion',
+      'date-fns',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+    ],
+  },
 
   compiler: {
-    removeConsole: false, //isProd,
+    removeConsole: isProd ? { exclude: ['error', 'warn'] } : false,
   },
 };
 
