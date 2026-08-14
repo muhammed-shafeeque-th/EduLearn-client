@@ -12,6 +12,7 @@ import { downloadCertificatePDF } from '@/lib/certificate/utils';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
 import { shareToLinkedInProfile } from '@/lib/certificate/utils/share-utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface CertificateCardProps {
   certificate: CertificateData;
@@ -45,7 +46,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
 
   return (
     <Card className="overflow-hidden group hover:shadow-md transition-all duration-300 border border-border rounded-xl">
-      <Link href={`/profile/certificates/${certificate.id}`}>
+      <Link href={ROUTES.student.profile.certificate(certificate.id)}>
         <div className="relative h-40 bg-muted/30 flex items-center justify-center border-b">
           <div className="relative">
             <Award className="h-16 w-16 text-primary/20 transition-transform duration-500 group-hover:scale-105" />
@@ -72,7 +73,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
         </div>
 
         <div className="flex items-center gap-2 pt-2 border-t">
-          <Link href={`/profile/certificates/${certificate.id}`} className="flex-1">
+          <Link href={ROUTES.student.profile.certificate(certificate.id)} className="flex-1">
             <Button variant="outline" className="w-full text-xs font-semibold gap-2 rounded-lg h-9">
               <Eye className="h-3.5 w-3.5" />
               Preview

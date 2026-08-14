@@ -11,6 +11,7 @@ import { downloadCertificatePDF } from '@/lib/certificate/utils';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
 import { shareToLinkedInProfile } from '@/lib/certificate/utils/share-utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface CertificatePageProps {
   params: Promise<{ id: string }>;
@@ -64,7 +65,7 @@ export default function CertificatePage({ params }: CertificatePageProps) {
           We couldn&apos;t find the certificate you&apos;re looking for.
         </p>
         <Button
-          onClick={() => router.push('/profile/certificates')}
+          onClick={() => router.push(ROUTES.student.profile.certificates)}
           variant="outline"
           className="rounded-xl"
         >
@@ -82,7 +83,7 @@ export default function CertificatePage({ params }: CertificatePageProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push('/profile/certificates')}
+            onClick={() => router.push(ROUTES.student.profile.certificates)}
             className="rounded-full hover:bg-muted"
           >
             <ChevronLeft className="h-5 w-5" />

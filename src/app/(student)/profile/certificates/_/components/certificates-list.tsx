@@ -5,6 +5,7 @@ import { useUserCertificates } from '@/states/server/certificate/use-user-certif
 import { CertificateCard } from './certificate-card';
 import { Award } from 'lucide-react';
 import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function CertificatesList() {
   const { certificates, isLoading, certificatesError } = useUserCertificates({ enabled: true });
@@ -42,7 +43,7 @@ export function CertificatesList() {
         <h3 className="text-xl font-semibold mb-2 text-foreground">No certificates found</h3>
         <p className="text-muted-foreground mb-6">Complete your courses to earn certifications!</p>
         <Link
-          href="/courses"
+          href={ROUTES.public.courses.root}
           className="px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
         >
           Browse Courses
