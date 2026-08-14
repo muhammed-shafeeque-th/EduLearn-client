@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { ResetPasswordFormData } from '../schemas';
 import { authService } from '@/services/auth';
 import { getErrorMessage } from '@/lib/utils';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function useResetPassword(token: string) {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +32,7 @@ export function useResetPassword(token: string) {
 
       // Redirect to login page after successful reset
       setTimeout(() => {
-        router.push('/auth/login?message=password-reset-success');
+        router.push(`${ROUTES.auth.login}?message=password-reset-success`);
       }, 2000);
     } catch (error) {
       setTokenValid(false);

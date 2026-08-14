@@ -17,6 +17,7 @@ import SocialSignin from '@/components/shared/social-signin';
 // import { FormSkeleton } from './skeletons/form-skeleton';
 import { useLogin } from '../hooks/use-login';
 import AnimatedSpinner from '@/components/shared/animated-spinner';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function SigninForm() {
   const { isLoading, onSubmit } = useLogin();
@@ -107,7 +108,7 @@ export function SigninForm() {
             </Label>
           </div>
           <Link
-            href="/auth/forgot-password"
+            href={ROUTES.auth.forgotPassword}
             className="text-sm font-medium text-primary hover:underline"
           >
             Forgot password?
@@ -152,7 +153,7 @@ export function SigninForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/register" className="font-medium text-primary hover:underline">
+          <Link href={ROUTES.auth.login} className="font-medium text-primary hover:underline">
             Sign up for free
           </Link>
         </p>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -48,7 +49,7 @@ export default function AuthError({ error, reset }: ErrorProps) {
                   Try again
                 </Button>
                 <Button variant="outline" asChild className="w-full h-11">
-                  <Link href="/auth/login">Back to login</Link>
+                  <Link href={ROUTES.auth.login}>Back to login</Link>
                 </Button>
               </div>
             </div>
@@ -60,7 +61,7 @@ export default function AuthError({ error, reset }: ErrorProps) {
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Need help?{' '}
             <Link
-              href="/support"
+              href={ROUTES.public.support}
               className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
             >
               Contact support

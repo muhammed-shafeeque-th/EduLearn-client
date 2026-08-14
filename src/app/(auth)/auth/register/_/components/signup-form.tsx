@@ -16,6 +16,7 @@ import SocialSignup from '@/components/shared/social-signin';
 import AnimatedSpinner from '@/components/shared/animated-spinner';
 import { useRegister } from '../hooks/use-register';
 import { useCheckEmail } from '../hooks/use-email-check';
+import { ROUTES } from '@/lib/constants/routes';
 
 export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -191,7 +192,7 @@ export default function SignupForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-medium text-primary hover:underline">
+          <Link href={ROUTES.auth.login} className="font-medium text-primary hover:underline">
             Sign in
           </Link>
         </p>

@@ -17,6 +17,7 @@ import { PasswordStrengthIndicator } from './password-strength-indicator';
 // import { ResetPasswordSkeleton } from './skeletons/reset-password-skeleton';
 import { useResetPassword } from '../hooks/use-reset-password';
 import AnimatedSpinner from '@/components/shared/animated-spinner';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -68,10 +69,10 @@ export function ResetPasswordForm() {
 
         <div className="space-y-3">
           <Button asChild className="w-full">
-            <Link href="/auth/forgot-password">Request New Reset Link</Link>
+            <Link href={ROUTES.auth.forgotPassword}>Request New Reset Link</Link>
           </Button>
           <Button variant="outline" asChild className="w-full">
-            <Link href="/auth/login">Back to Sign In</Link>
+            <Link href={ROUTES.auth.login}>Back to Sign In</Link>
           </Button>
         </div>
       </motion.div>
@@ -178,7 +179,7 @@ export function ResetPasswordForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Remember your password?{' '}
-          <Link href="/auth/login" className="font-medium text-primary hover:underline">
+          <Link href={ROUTES.auth.login} className="font-medium text-primary hover:underline">
             Back to Sign In
           </Link>
         </p>

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useOTP } from '../hooks/use-verify';
 import { Label } from '@/components/ui/label';
+import { ROUTES } from '@/lib/constants/routes';
 
 const OTP_LENGTH = 6 as const;
 
@@ -80,13 +81,13 @@ export function VerifyEmailForm() {
 
         <div className="space-y-4">
           <Button className="w-full bg-primary/80 hover:bg-primary text-white" size="lg" asChild>
-            <Link href="/" aria-label="Continue to Home">
+            <Link href={ROUTES.public.home} aria-label="Continue to Home">
               Continue to Home
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <Button variant="outline" className="w-full" asChild>
-            <Link href="/auth/login" aria-label="Back to Sign In">
+            <Link href={ROUTES.auth.login} aria-label="Back to Sign In">
               Back to Sign In
             </Link>
           </Button>
@@ -345,7 +346,7 @@ export function VerifyEmailForm() {
         </p>
         <p className="text-xs text-muted-foreground">
           Wrong email address?{' '}
-          <Link href="/auth/register" className="font-medium text-primary hover:underline">
+          <Link href={ROUTES.auth.login} className="font-medium text-primary hover:underline">
             Go back and correct it
           </Link>
         </p>

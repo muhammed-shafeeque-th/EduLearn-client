@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForgotPassword } from '../hooks/use-forgot-password';
 import { forgotPasswordSchema, ForgotPasswordSchemaType } from '../schemas';
+import { ROUTES } from '@/lib/constants/routes';
 
 export function ForgotPasswordForm() {
   const { isLoading, isSubmitted, onSubmit, setIsSubmitted } = useForgotPassword();
@@ -51,7 +52,7 @@ export function ForgotPasswordForm() {
             </button>
           </p>
 
-          <Link href="/auth/login">
+          <Link href={ROUTES.auth.login}>
             <Button variant="outline" className="w-full">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to sign in
@@ -93,7 +94,7 @@ export function ForgotPasswordForm() {
 
       <div className="text-center">
         <Link
-          href="/auth/login"
+          href={ROUTES.auth.login}
           className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
