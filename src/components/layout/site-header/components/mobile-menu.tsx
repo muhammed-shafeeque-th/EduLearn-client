@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Logo from '../../logo';
 import AuthButtons from './auth-buttons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +24,9 @@ import { AuthUser } from '@/types/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
+import { ROUTES } from '@/lib/constants/routes';
+import { getUserRole } from '@/lib/utils/user.utils';
+import { Logo } from '@/components/ui/logo';
 
 interface MobileMenuProps {
   user?: AuthUser | null;
@@ -184,7 +186,7 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                     <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
                       Navigation
                     </h4>
-                    <NavLink href="/courses" icon={BookOpen}>
+                    <NavLink href={ROUTES.public.courses.root} icon={BookOpen}>
                       Browse Courses
                     </NavLink>
                     {user && (
@@ -200,47 +202,56 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                       <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
                         Personal
                       </h4>
-                      <NavLink href="/wishlist" icon={Heart}>
+                      <NavLink href={ROUTES.student.wishlist} icon={Heart}>
                         Saved Courses
                       </NavLink>
-                      <NavLink href="/cart" icon={ShoppingCart}>
+                      <NavLink href={ROUTES.student.cart} icon={ShoppingCart}>
                         Shopping Cart
                       </NavLink>
-                      <NavLink href="/notifications" icon={Bell}>
+                      <NavLink href={ROUTES.student.notifications} icon={Bell}>
                         Notifications
                       </NavLink>
                     </div>
                   )}
 
                   {/* Management Nav */}
-                  {(user?.role === 'instructor' ||
-                    user?.role === 'admin' ||
-                    user?.role === 'student') && (
-                    <div className="space-y-1">
-                      <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
-                        Management
-                      </h4>
-                      {user?.role === 'instructor' && (
-                        <NavLink href="/instructor" icon={GraduationCap} className="text-primary">
-                          Instructor Dashboard
-                        </NavLink>
-                      )}
-                      {user?.role === 'admin' && (
-                        <NavLink href="/admin/dashboard" icon={Shield} className="text-destructive">
-                          Admin Dashboard
-                        </NavLink>
-                      )}
-                      {user?.role === 'student' && (
-                        <NavLink
-                          href="/become-instructor"
-                          icon={GraduationCap}
-                          className="text-primary"
-                        >
-                          Teach on EduLearn
-                        </NavLink>
-                      )}
-                    </div>
-                  )}
+                  {user &&
+                    (getUserRole(user!) === 'instructor' ||
+                      getUserRole(user!) === 'admin' ||
+                      getUserRole(user!) === 'student') && (
+                      <div className="space-y-1">
+                        <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
+                          Management
+                        </h4>
+                        {getUserRole(user!) === 'instructor' && (
+                          <NavLink
+                            href={ROUTES.instructor.root}
+                            icon={GraduationCap}
+                            className="text-primary"
+                          >
+                            Instructor Dashboard
+                          </NavLink>
+                        )}
+                        {getUserRole(user!) === 'admin' && (
+                          <NavLink
+                            href={ROUTES.admin.root}
+                            icon={Shield}
+                            className="text-destructive"
+                          >
+                            Admin Dashboard
+                          </NavLink>
+                        )}
+                        {getUserRole(user!) === 'student' && (
+                          <NavLink
+                            href={ROUTES.public.becomeInstructor.root}
+                            icon={GraduationCap}
+                            className="text-primary"
+                          >
+                            Teach on EduLearn
+                          </NavLink>
+                        )}
+                      </div>
+                    )}
                 </div>
               </div>
             </div>

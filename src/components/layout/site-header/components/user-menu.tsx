@@ -14,6 +14,7 @@ import { useAuth } from '../../../../hooks/use-auth';
 import Link from 'next/link';
 import { AuthUser } from '@/types/auth';
 import React, { useCallback, memo, useState, useRef } from 'react';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface UserMenuProps {
   user: AuthUser;
@@ -31,31 +32,31 @@ const getInitials = (name: string = ''): string => {
 
 const menuItems = [
   {
-    href: '/profile',
+    href: ROUTES.student.profile.root,
     label: 'Profile',
     icon: User,
     'data-testid': 'user-menu-profile',
   },
   {
-    href: '/profile/my-courses',
+    href: ROUTES.student.courses.root,
     label: 'My Learning',
     icon: BookOpen,
     'data-testid': 'user-menu-learning',
   },
   {
-    href: '/wishlist',
+    href: ROUTES.student.wishlist,
     label: 'Wishlist',
     icon: Heart,
     'data-testid': 'user-menu-wishlist',
   },
   {
-    href: '/cart',
+    href: ROUTES.student.cart,
     label: 'Cart',
     icon: ShoppingCart,
     'data-testid': 'user-menu-cart',
   },
   {
-    href: '/notifications',
+    href: ROUTES.student.notifications,
     label: 'Notifications',
     icon: Bell,
     'data-testid': 'user-menu-notifications',
@@ -142,7 +143,7 @@ export const UserMenu = memo(function UserMenu({ user }: UserMenuProps) {
 
         <DropdownMenuItem asChild className="rounded-md">
           <Link
-            href="/profile/security"
+            href={ROUTES.student.profile.security}
             className="cursor-pointer flex items-center w-full py-2 hover:bg-muted transition-colors"
           >
             <Settings className="mr-3 h-4 w-4 opacity-70" />

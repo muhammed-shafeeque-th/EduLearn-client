@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/services/ws/notification/hooks/use-notifications';
 import { formatDistanceToNow } from 'date-fns';
+import { ROUTES } from '@/lib/constants/routes';
 
 // Keeps dropdown item count consistent and maintainable
 const DROPDOWN_MAX_ITEMS = 5;
@@ -192,7 +193,7 @@ export function NotificationButton() {
               <p className="text-xs text-muted-foreground mt-0.5">{unreadCount} unread</p>
             )}
           </div>
-          <Link href="/notifications" passHref legacyBehavior>
+          <Link href={ROUTES.student.notifications} passHref legacyBehavior>
             <Button
               asChild
               variant="ghost"
@@ -298,7 +299,7 @@ export function NotificationButton() {
           <>
             <DropdownMenuSeparator />
             <div className="p-2">
-              <Link href="/notifications" passHref legacyBehavior>
+              <Link href={ROUTES.student.notifications} passHref legacyBehavior>
                 <Button
                   asChild
                   variant="ghost"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useDebounce } from '@/hooks/use-debounce';
+import { ROUTES } from '@/lib/constants/routes';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
@@ -21,7 +22,9 @@ export function useSearch() {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (debouncedSearch.trim()) {
-        router.push(`/courses?q=${encodeURIComponent(debouncedSearch.trim())}`);
+        router.push(
+          `${ROUTES.public.courses.root}?q=${encodeURIComponent(debouncedSearch.trim())}`
+        );
       }
     },
     [debouncedSearch, router]
