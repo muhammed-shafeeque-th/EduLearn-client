@@ -28,6 +28,7 @@ import { handleInstructorAction } from '../libs/actions';
 import { InstructorMeta } from '@/types/user';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface InstructorActionsProps {
   instructor: InstructorMeta;
@@ -71,7 +72,9 @@ export function InstructorActions({ instructor }: InstructorActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => router.push(`/admin/instructors/${instructor.id}`)}>
+          <DropdownMenuItem
+            onClick={() => router.push(ROUTES.admin.instructors.instructor(instructor.id))}
+          >
             <Eye className="mr-2 h-4 w-4" />
             View Profile
           </DropdownMenuItem>

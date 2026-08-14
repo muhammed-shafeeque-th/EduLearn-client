@@ -1,3 +1,4 @@
+import { ROUTES } from '@/lib/constants/routes';
 import Link from 'next/link';
 
 export default function AdminNotFound() {
@@ -8,7 +9,7 @@ export default function AdminNotFound() {
         Sorry, the page you are looking for does not exist.
       </p>
       <Link
-        href="/admin"
+        href={ROUTES.admin.root}
         className="px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary-hover transition"
       >
         Go to Admin Dashboard

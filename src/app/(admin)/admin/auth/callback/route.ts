@@ -1,4 +1,5 @@
 import { verifyAccessToken } from '@/lib/auth/token-utils';
+import { ROUTES } from '@/lib/constants/routes';
 import { serverAdminRefresh } from '@/lib/server-apis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return res;
   } catch {
-    const loginUrl = new URL('/admin/auth/login', req.url);
+    const loginUrl = new URL(ROUTES.admin.auth.login, req.url);
     loginUrl.searchParams.set('next', next);
     loginUrl.searchParams.set('session_expired', 'true');
 

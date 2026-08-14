@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import React from 'react';
+import { ROUTES } from '@/lib/constants/routes';
 
 function Logo() {
   return (
-    <Link href="/admin" className="flex items-center space-x-2">
+    <Link href={ROUTES.admin.root} className="flex items-center space-x-2">
       <motion.div
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}

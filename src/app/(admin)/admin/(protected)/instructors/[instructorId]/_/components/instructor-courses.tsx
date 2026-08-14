@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Course, CourseMeta } from '@/types/course';
 import Image from 'next/image';
 import { useAdminInstructorCourses } from '@/states/server/admin/use-admin-course';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface InstructorCoursesProps {
   instructorId: string;
@@ -110,7 +111,7 @@ function CourseListItem({ course, instructorId }: { course: CourseMeta; instruct
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <Link href={`/admin/instructors/${instructorId}/courses/${id}`} passHref legacyBehavior>
+            <Link href={ROUTES.admin.instructors.course(instructorId, id)} passHref legacyBehavior>
               <DropdownMenuItem asChild>
                 <div className="flex items-center">
                   <Eye className="mr-2 h-4 w-4" />
@@ -174,7 +175,7 @@ export function InstructorCourses({ instructorId }: InstructorCoursesProps) {
             <BookOpen className="h-5 w-5" />
             <span>Course Overview</span>
           </CardTitle>
-          <Link href={`/admin/instructors/${instructorId}/courses`} passHref legacyBehavior>
+          <Link href={ROUTES.admin.instructors.courses(instructorId)} passHref legacyBehavior>
             <Button size="sm">View All Courses</Button>
           </Link>
         </div>

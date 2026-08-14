@@ -2,6 +2,7 @@ import { AdminSidebar } from './_components/sidebar';
 import { AdminHeader } from './_components/header';
 import { authGuard } from '@/lib/auth/auth-guard';
 import { getAdmin } from '@/lib/auth/auth-user';
+import { ROUTES } from '@/lib/constants/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     getUser: getAdmin,
     roles: ['admin'],
     // permissions: [Permissions.ADMIN_DASHBOARD],
-    redirectTo: '/admin/auth/login',
+    redirectTo: ROUTES.admin.auth.login,
   });
 
   return (

@@ -8,12 +8,12 @@ import { StatsCardsSkeleton } from '../../_/components/skeletons/course-card-ske
 import { TableSkeleton } from '../../_/components/skeletons/table-skeleton';
 
 interface InstructorCoursesPageProps {
-  params: { instructorId: string };
-  searchParams: { search?: string; status?: string; page?: string };
+  params: Promise<{ instructorId: string }>;
+  searchParams: Promise<{ search?: string; status?: string; page?: string }>;
 }
 
 export async function generateMetadata({ params }: InstructorCoursesPageProps) {
-  const { instructorId } = params;
+  const { instructorId } = await params;
   const instructor = await getInstructor(instructorId);
 
   if (!instructor) {
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: InstructorCoursesPageProps) {
 }
 
 export default async function InstructorCoursesPage({ params }: InstructorCoursesPageProps) {
-  const { instructorId } = params;
+  const { instructorId } = await params;
 
   const instructor = await getInstructor(instructorId);
 

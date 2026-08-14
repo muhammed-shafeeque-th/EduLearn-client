@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import MarkdownRenderer from '@/app/(common)/courses/[slug]/_/components/markdown-renderer';
+import MarkdownRenderer from '@/app/(public)/courses/[slug]/_/components/markdown-renderer';
 import { Instructor } from '@/types/user';
 import { formatDate } from '@/lib/utils';
 import { useAdminUser } from '@/states/server/admin/use-admin-users';

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlayCircle, FileText, Clock, BookOpen, Video, CheckCircle2 } from 'lucide-react';
-import MarkdownRenderer from '@/app/(common)/courses/[slug]/_/components/markdown-renderer';
+import MarkdownRenderer from '@/app/(public)/courses/[slug]/_/components/markdown-renderer';
 import { useCourseById } from '@/states/server/course/use-courses';
 
 /**

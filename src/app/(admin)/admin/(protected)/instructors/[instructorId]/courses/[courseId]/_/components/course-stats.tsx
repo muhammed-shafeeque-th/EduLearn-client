@@ -1,6 +1,6 @@
 'use client';
 
-import { StatsSkeleton } from '@/app/admin/(protected)/(dashboard)/@stats/_/stats-skeleton';
+import { StatsSkeleton } from '@/app/(admin)/admin/(protected)/(dashboard)/@stats/_/stats-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useInstructorCourseStats } from '@/states/server/admin/use-admin-stats';

@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/constants/routes';
 import { InstructorMeta } from '@/types/user';
 import { useRouter } from 'next/navigation';
 
@@ -13,7 +14,7 @@ export function InstructorRow({ instructor }: InstructorRowProps) {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/admin/instructors/${instructor.id}`);
+    router.push(ROUTES.admin.instructors.instructor(instructor.id));
   };
 
   return (

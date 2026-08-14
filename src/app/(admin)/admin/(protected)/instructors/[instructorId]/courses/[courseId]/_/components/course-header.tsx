@@ -130,7 +130,7 @@ export function CourseHeader({ course: c, instructor }: CourseHeaderProps) {
 
   // const handlePreview = () => {
   //   // Replace below with actual destination for course preview if applicable
-  //   router.push(`/courses/${course.id}/preview`);
+  //   router.push(`${ROUTES.public.courses.root}/${course.id}/preview`);
   // };
 
   return (

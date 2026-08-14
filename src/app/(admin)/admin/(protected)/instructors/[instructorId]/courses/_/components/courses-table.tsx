@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ColumnDef,
   flexRender,
@@ -33,6 +33,7 @@ import Pagination from '@/components/ui/pagination';
 import { CourseMeta } from '@/types/course';
 import Image from 'next/image';
 import { useAdminInstructorCourses } from '@/states/server/admin/use-admin-course';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface CoursesTableProps {
   instructorId: string;
@@ -65,7 +66,7 @@ export function CoursesTable({ instructorId }: CoursesTableProps) {
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [search, setSearch] = useState(urlSearchParams.get('search') || '');
+  const [search] = useState(urlSearchParams.get('search') || '');
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -116,7 +117,7 @@ export function CoursesTable({ instructorId }: CoursesTableProps) {
 
   const handleNavigateToCourse = useCallback(
     (courseId: string) => {
-      router.push(`/admin/instructors/${instructorId}/courses/${courseId}`);
+      router.push(ROUTES.admin.instructors.course(instructorId, courseId));
     },
     [router, instructorId]
   );

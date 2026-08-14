@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   GraduationCap,
-  BookOpen,
   // Settings,
   // BarChart3,
   Menu,
