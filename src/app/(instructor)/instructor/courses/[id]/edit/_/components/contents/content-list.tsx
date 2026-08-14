@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Video, FileText, Headphones, ExternalLink, Eye } from 'lucide-react';
 import { Content } from '../../schemas/curriculum-schema';
 import { formatFileSize } from '../../utils/curriculum-utils';
-import { ContentType } from '../../../__/schemas/curriculum-schema';
+import { ContentType } from '@/types/course';
 
 interface ContentListProps {
   content?: Content;

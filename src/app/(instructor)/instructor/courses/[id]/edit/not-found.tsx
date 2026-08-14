@@ -1,3 +1,4 @@
+import { ROUTES } from '@/lib/constants/routes';
 import Link from 'next/link';
 
 export default function CourseNotFound() {
@@ -12,7 +13,7 @@ export default function CourseNotFound() {
           The course you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
         </p>
         <Link
-          href="/instructor/courses"
+          href={ROUTES.instructor.courses.root}
           className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
         >
           Back to Courses

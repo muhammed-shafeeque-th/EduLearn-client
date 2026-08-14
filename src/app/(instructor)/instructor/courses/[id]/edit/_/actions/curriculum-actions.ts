@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { serverCourseService } from '@/services/server-service-clients';
+import { ROUTES } from '@/lib/constants/routes';
 
 // Validation schemas
 const moduleSchema = z.object({
@@ -82,7 +83,7 @@ export async function createModuleAction(courseId: string, data: z.infer<typeof 
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -103,7 +104,7 @@ export async function updateModuleAction(
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -120,7 +121,7 @@ export async function deleteModuleAction(courseId: string, moduleId: string) {
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -152,7 +153,7 @@ export async function reorderModulesAction(
     }
 
     revalidatePath(`/instructor/courses/${courseId}/edit`);
-    revalidatePath(`/instructor/courses/${courseId}`);
+    revalidatePath(ROUTES.instructor.courses.course(courseId));
 
     return { success: true };
   } catch (error) {
@@ -174,7 +175,7 @@ export async function createLessonAction(
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -196,7 +197,7 @@ export async function updateLessonAction(
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -213,7 +214,7 @@ export async function deleteLessonAction(courseId: string, moduleId: string, les
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -266,7 +267,7 @@ export async function createQuizAction(
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -288,7 +289,7 @@ export async function updateQuizAction(
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;
@@ -305,7 +306,7 @@ export async function deleteQuizAction(courseId: string, moduleId: string, quizI
 
     if (result.success) {
       revalidatePath(`/instructor/courses/${courseId}/edit`);
-      revalidatePath(`/instructor/courses/${courseId}`);
+      revalidatePath(ROUTES.instructor.courses.course(courseId));
     }
 
     return result;

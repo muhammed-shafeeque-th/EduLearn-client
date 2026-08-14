@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CurriculumFormData } from '../../_/schemas/curriculum-schema';
+import { CurriculumFormData } from '../schemas/curriculum-schema';
 import { validateCurriculumData } from '../utils/curriculum-utils';
 import { toast } from 'sonner';
 
