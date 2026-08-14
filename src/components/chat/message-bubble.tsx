@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useRef, useCallback, memo } from 'react';
@@ -6,29 +7,31 @@ import {
   Play,
   Pause,
   Download,
-  Reply,
-  MoreHorizontal,
+  // Reply,
+  // MoreHorizontal,
   Check,
   CheckCheck,
-  Copy,
-  Forward,
-  Trash2,
-  Edit2,
-  Pin,
+  // Copy,
+  // Forward,
+  // Trash2,
+  // Edit2,
+  // Pin,
   Volume2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Message } from '@/types/chat';
+import { Message as Messages } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import { UserInfo } from '@/types/user';
 import { format } from 'date-fns';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+
+interface Message extends Messages {
+  fileUrl: any;
+  fileName: string;
+  type: any;
+  voiceDuration: any;
+  fileSize: any;
+}
 
 interface MessageBubbleProps {
   message: Message;
@@ -48,7 +51,7 @@ interface MessageBubbleProps {
   onSelect?: () => void;
 }
 
-const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+// const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
 export const MessageBubble = memo(function MessageBubble({
   message,
@@ -57,18 +60,18 @@ export const MessageBubble = memo(function MessageBubble({
   showTimestamp = true,
   sender,
   currentUserId,
-  onReply,
+  // onReply,
   onAddReaction,
   onRemoveReaction,
-  onEdit,
-  onDelete,
+  // onEdit,
+  // onDelete,
   className,
   isSelected = false,
   isSelectionMode = false,
   onSelect,
 }: MessageBubbleProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  // const [menuOpen, setMenuOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -133,11 +136,11 @@ export const MessageBubble = memo(function MessageBubble({
   }, [message.fileUrl, isPlaying]);
 
   // - Copy handlers --
-  const handleCopyMessage = useCallback(() => {
-    if (!message.content) return;
-    navigator.clipboard.writeText(message.content);
-    toast.success('Message copied');
-  }, [message.content]);
+  // const handleCopyMessage = useCallback(() => {
+  //   if (!message.content) return;
+  //   navigator.clipboard.writeText(message.content);
+  //   toast.success('Message copied');
+  // }, [message.content]);
 
   // - Download handler --
   const handleDownload = useCallback(() => {

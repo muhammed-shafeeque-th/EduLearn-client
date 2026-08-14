@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ProfileSidebar } from '../../app/(common)/(protected)/profile/_/components/profile-sidebar';
+import { ProfileSidebar } from '../../app/(student)/profile/_/components/profile-sidebar';
 import MobileProfileMenu from './mobile-profileMenu';
 import type { User } from '@/types/user';
 

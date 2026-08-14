@@ -5,6 +5,7 @@ import FacebookIcon from './facebook-icon';
 import GoogleIcon from './google-icon';
 import { signIn } from 'next-auth/react';
 import React from 'react';
+import { ROUTES } from '@/lib/constants/routes';
 
 /**
  * SocialAuthOptions provides social login buttons and legal links.
@@ -47,11 +48,17 @@ const SocialAuthOptions: React.FC = () => {
       {/*Terms of service */}
       <p className="text-center text-xs text-gray-600 mt-4">
         By signing up, you agree to our{' '}
-        <Link href={'/terms'} className="text-violet-600 hover:text-violet-800 font-medium">
+        <Link
+          href={ROUTES.public.terms}
+          className="text-violet-600 hover:text-violet-800 font-medium"
+        >
           Terms of Use
         </Link>{' '}
         and{' '}
-        <Link href={'/privacy'} className="text-violet-600 hover:text-violet-800 font-medium">
+        <Link
+          href={ROUTES.public.privacy}
+          className="text-violet-600 hover:text-violet-800 font-medium"
+        >
           Privacy Policy
         </Link>
       </p>
