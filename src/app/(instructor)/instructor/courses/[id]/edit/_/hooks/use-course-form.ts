@@ -35,7 +35,7 @@ export const useCourseForm = ({ course }: { course: Course }) => {
   );
 
   const basicForm = useForm({
-    resolver: zodResolver(basicInfoSchema),
+    resolver: zodResolver(basicInfoSchema) as any,
     defaultValues: basicDefaults,
     mode: 'onChange',
   });

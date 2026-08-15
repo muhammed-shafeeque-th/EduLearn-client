@@ -156,7 +156,7 @@ export const ContentModal = ({
       }
 
       const newContent: Omit<Content, 'id'> = {
-        type: formState.type,
+        type: formState.type as 'video',
         file:
           uploadedFile && uploadState.uploadedUrl
             ? {

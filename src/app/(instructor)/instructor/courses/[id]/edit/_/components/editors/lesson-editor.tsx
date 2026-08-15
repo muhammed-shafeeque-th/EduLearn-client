@@ -366,9 +366,9 @@ export const LessonEditor = ({
                             {lesson?.content?.file?.name || lesson?.content?.url || 'Content'}
                           </h6>
                         </div>
-                        {!!lesson?.content?.duration && (
+                        {!!lesson?.content?.file?.duration && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                            Duration: {formatDuration(lesson.content.duration)}
+                            Duration: {formatDuration(lesson.content.file.duration)}
                           </p>
                         )}
                       </div>

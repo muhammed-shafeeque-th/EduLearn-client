@@ -64,7 +64,7 @@ export function EnrollmentTrendChart({ data }: EnrollmentTrendChartProps) {
             borderWidth: 1,
             callbacks: {
               label: function (context) {
-                return `${context.parsed.y.toLocaleString()} enrollments`;
+                return `${context.parsed.y?.toLocaleString()} enrollments`;
               },
             },
           },

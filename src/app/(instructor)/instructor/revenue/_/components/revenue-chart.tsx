@@ -141,7 +141,7 @@ export const RevenueChart: React.FC<{
                   label += new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: currency || 'USD',
-                  }).format(context.parsed.y);
+                  }).format(context.parsed.y ?? 0);
                   return label;
                 },
               },
