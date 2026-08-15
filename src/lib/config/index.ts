@@ -1,6 +1,8 @@
 export const config = {
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1',
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9000',
+  twitterHandle: process.env.NEXT_TWITTER_HANDLE || 'http://localhost:9000',
+  googleSiteVerification: process.env.NEXT_GOOGLE_SITE_VERIFICATION || 'http://localhost:9000',
   environment: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
   isDevelopment: process.env.NODE_ENV === 'development',
