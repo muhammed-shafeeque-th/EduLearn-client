@@ -21,18 +21,23 @@ const SOCIALS = [
 ];
 
 const linkClass =
-  'text-sm font-medium text-[#F8F7F2]/65 hover:text-[#A9812F] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#A9812F] rounded-sm';
+  'text-sm text-slate-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm';
 
 export default function SiteFooter() {
   return (
-    <footer className="w-full bg-[#14213D] text-[#F8F7F2]/70">
+    <footer className="w-full bg-slate-900 text-slate-300">
       <div className="max-w-7xl mx-auto px-6 py-16 flex flex-wrap gap-y-12 gap-x-8 md:flex-nowrap md:justify-between md:items-start">
         {/* Company info */}
         <section className="flex flex-col gap-4 flex-1 min-w-[240px] max-w-sm">
-          <Link href={ROUTES.public.home} aria-label="EduLearn home">
-            <Logo variant="full" theme="dark" className="h-9 w-auto" />
+          <Link
+            href={ROUTES.public.home}
+            aria-label="EduLearn home"
+            className="inline-flex items-center gap-2.5"
+          >
+            <Logo />
+            <span className="text-xl font-bold text-white">EduLearn</span>
           </Link>
-          <p className="text-sm leading-relaxed text-[#F8F7F2]/60">
+          <p className="text-sm leading-relaxed text-slate-400">
             EduLearn is a leading online learning platform dedicated to accessible, engaging, and
             affordable education &mdash; taught by people still working in the field.
           </p>
@@ -40,7 +45,7 @@ export default function SiteFooter() {
 
         {/* Get help */}
         <nav aria-label="Get help" className="flex flex-col gap-2.5 flex-1 min-w-[130px]">
-          <h3 className="font-mono text-xs tracking-[0.2em] uppercase text-[#A9812F] mb-1.5">
+          <h3 className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-1.5">
             Get Help
           </h3>
           <Link href={ROUTES.public.contact} className={linkClass}>
@@ -59,7 +64,7 @@ export default function SiteFooter() {
 
         {/* Programs */}
         <nav aria-label="Programs" className="flex flex-col gap-2.5 flex-1 min-w-[150px]">
-          <h3 className="font-mono text-xs tracking-[0.2em] uppercase text-[#A9812F] mb-1.5">
+          <h3 className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-1.5">
             Programs
           </h3>
           {PROGRAMS.map((program) => (
@@ -72,17 +77,17 @@ export default function SiteFooter() {
         {/* Contact */}
         <address className="not-italic flex flex-col gap-4 flex-1 min-w-[240px]">
           <div className="space-y-1.5">
-            <h3 className="font-mono text-xs tracking-[0.2em] uppercase text-[#A9812F] mb-1.5">
+            <h3 className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-1.5">
               Contact Us
             </h3>
-            <p className="text-sm text-[#F8F7F2]/60">148 Franklin Street, Boston, MA 02110</p>
-            <p className="text-sm text-[#F8F7F2]/60">
+            <p className="text-sm text-slate-400">148 Franklin Street, Boston, MA 02110</p>
+            <p className="text-sm text-slate-400">
               Tel:{' '}
               <a href="tel:+16175550148" className={linkClass}>
                 +1 (617) 555-0148
               </a>
             </p>
-            <p className="text-sm text-[#F8F7F2]/60">
+            <p className="text-sm text-slate-400">
               Mail:{' '}
               <a href="mailto:support@edulearn.com" className={linkClass}>
                 support@edulearn.com
@@ -98,7 +103,7 @@ export default function SiteFooter() {
                   aria-label={label}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="w-9 h-9 flex items-center justify-center rounded-sm border border-[#F8F7F2]/15 hover:border-[#A9812F] text-[#F8F7F2]/70 hover:text-[#A9812F] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#A9812F]"
+                  className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-700 hover:border-primary hover:bg-primary/10 text-slate-400 hover:text-primary transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                 >
                   <Icon className="w-4 h-4" aria-hidden />
                 </a>
@@ -108,10 +113,10 @@ export default function SiteFooter() {
         </address>
       </div>
 
-      <div className="border-t border-[#F8F7F2]/10 w-full" />
+      <div className="border-t border-slate-800 w-full" />
 
       <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row justify-between items-center gap-4">
-        <span className="text-xs text-[#F8F7F2]/50">&copy; {CURRENT_YEAR} EduLearn, Inc.</span>
+        <span className="text-xs text-slate-500">&copy; {CURRENT_YEAR} EduLearn, Inc.</span>
         <nav aria-label="Legal" className="flex items-center gap-6">
           <Link href={ROUTES.public.privacy} className={linkClass}>
             Privacy Policy

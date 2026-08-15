@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Category } from '../types';
+import { Category } from '../types/index';
 
 const mockCategories: Category[] = [
   {

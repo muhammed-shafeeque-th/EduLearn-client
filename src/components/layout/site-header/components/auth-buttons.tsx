@@ -43,7 +43,7 @@ const AuthButtons = React.memo(function AuthButtons({ isLoading }: AuthButtonsPr
         className="dark:text-white"
         asChild
       >
-        <Link href={ROUTES.auth.login}>Sign Up</Link>
+        <Link href={ROUTES.auth.register}>Sign Up</Link>
       </MotionButton>
     </div>
   );
