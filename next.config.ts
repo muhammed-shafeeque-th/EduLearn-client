@@ -5,10 +5,10 @@ const isProd = config.environment === 'production';
 
 const nextConfig: NextConfig = {
   eslint: {
-    ignoreDuringBuilds: isProd || true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: isProd || true,
+    ignoreBuildErrors: false,
   },
   // i18n: isProd
   //   ? {
@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: '**.cloudinary.com' },
       { protocol: 'https', hostname: '**.amazonaws.com' },
+      { protocol: 'https', hostname: '**.muhammedshafeeque.**' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'media.istockphoto.com' },
