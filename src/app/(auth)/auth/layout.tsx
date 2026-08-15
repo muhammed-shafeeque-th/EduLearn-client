@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import { RouteFallback } from '@/components/ui/route-fallback';
 import { authGuard } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import SiteFooter from '@/components/layout/site-footer';
+import { SiteHeader } from '@/components/layout/site-header';
 
 export const metadata: Metadata = {
   title: 'Authentication ',
@@ -22,9 +24,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8"> */}
+      <SiteHeader />
       <Suspense fallback={<RouteFallback />}>{children}</Suspense>
-      {/* </div> */}
+      <SiteFooter />
     </div>
   );
 }

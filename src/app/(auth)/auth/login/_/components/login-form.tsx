@@ -153,7 +153,7 @@ export function SigninForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <Link href={ROUTES.auth.login} className="font-medium text-primary hover:underline">
+          <Link href={ROUTES.auth.register} className="font-medium text-primary hover:underline">
             Sign up for free
           </Link>
         </p>
