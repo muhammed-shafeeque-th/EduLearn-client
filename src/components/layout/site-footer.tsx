@@ -35,7 +35,6 @@ export default function SiteFooter() {
             className="inline-flex items-center gap-2.5"
           >
             <Logo />
-            <span className="text-xl font-bold text-white">EduLearn</span>
           </Link>
           <p className="text-sm leading-relaxed text-slate-400">
             EduLearn is a leading online learning platform dedicated to accessible, engaging, and
@@ -80,11 +79,11 @@ export default function SiteFooter() {
             <h3 className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-1.5">
               Contact Us
             </h3>
-            <p className="text-sm text-slate-400">148 Franklin Street, Boston, MA 02110</p>
+            <p className="text-sm text-slate-400"> Karuvarakundu town, Malappuram, Kerala, India</p>
             <p className="text-sm text-slate-400">
               Tel:{' '}
               <a href="tel:+16175550148" className={linkClass}>
-                +1 (617) 555-0148
+                +91 9744491844
               </a>
             </p>
             <p className="text-sm text-slate-400">
