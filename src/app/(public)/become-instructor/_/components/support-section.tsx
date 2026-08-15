@@ -74,7 +74,7 @@ export function SupportSection(): React.JSX.Element {
           >
             <div className="relative">
               <Image
-                src="/instructors/support-team.jpg"
+                src="/images/instructors/support-team.jpg"
                 alt="Support team members"
                 width={600}
                 height={600}

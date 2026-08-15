@@ -33,7 +33,7 @@ export function ProfileSidebar({ user, className }: ProfileSidebarProps) {
             <div className="absolute -inset-1 bg-linear-to-r from-blue-500 to-emerald-500 rounded-full blur-sm opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
             <div className="relative w-28 h-28">
               <Image
-                src={user.avatar || '/fallback-user-avatar.jpg'}
+                src={user.avatar || '/images/fallback-user-avatar.jpg'}
                 alt={`${user.firstName} ${user.lastName}`}
                 fill
                 className="rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-xl"

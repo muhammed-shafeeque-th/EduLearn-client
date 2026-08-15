@@ -47,7 +47,7 @@ export default function HeroSection() {
               <div className="relative z-10">
                 <div className="w-80 h-80 md:w-96 md:h-96 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
                   <Image
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
+                    src="/images/man-face.png"
                     alt="Student learning"
                     width={200}
                     height={200}

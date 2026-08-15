@@ -59,7 +59,7 @@ export function CallToActionSection() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-yellow-400 rounded-3xl blur-2xl opacity-30 animate-pulse pointer-events-none" />
               <Image
-                src="/instructors/inspiring-instructor.png"
+                src="/images/instructors/inspiring-instructor.png"
                 alt="Inspiring instructor"
                 width={500}
                 height={500}

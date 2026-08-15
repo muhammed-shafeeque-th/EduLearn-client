@@ -75,7 +75,7 @@ export function RulesSection(): JSX.Element {
           >
             <div className="relative">
               <Image
-                src="/instructors/instructor-rules.jpg"
+                src="/images/instructors/instructor-rules.jpg"
                 alt="Instructor working on laptop"
                 width={600}
                 height={600}

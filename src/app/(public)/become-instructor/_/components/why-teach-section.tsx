@@ -116,7 +116,7 @@ export function WhyTeachSection(): React.JSX.Element {
           >
             <div className="relative bg-white dark:bg-gray-700 rounded-3xl p-8 shadow-2xl">
               <Image
-                src="/instructors/teaching-platform.jpg"
+                src="/images/instructors/teaching-platform.jpg"
                 alt="Teaching platform interface"
                 width={600}
                 height={400}

@@ -13,14 +13,14 @@ type Instructor = {
 
 // Data: Array of instructor profiles
 const INSTRUCTORS: Instructor[] = [
-  { id: 1, image: '/instructors/instructor-1.jpg', name: 'Sarah Johnson' },
-  { id: 2, image: '/instructors/instructor-2.jpg', name: 'Mike Chen' },
-  { id: 3, image: '/instructors/instructor-3.jpg', name: 'Emily Davis' },
-  { id: 4, image: '/instructors/instructor-4.jpg', name: 'David Wilson' },
-  { id: 5, image: '/instructors/instructor-5.jpg', name: 'Lisa Brown' },
-  { id: 6, image: '/instructors/instructor-6.jpg', name: 'John Smith' },
-  { id: 7, image: '/instructors/instructor-7.jpg', name: 'Anna Lee' },
-  { id: 8, image: '/instructors/instructor-8.jpg', name: 'Carlos Rodriguez' },
+  { id: 1, image: '/images/instructors/instructor-1.jpg', name: 'Sarah Johnson' },
+  { id: 2, image: '/images/instructors/instructor-2.jpg', name: 'Mike Chen' },
+  { id: 3, image: '/images/instructors/instructor-3.jpg', name: 'Emily Davis' },
+  { id: 4, image: '/images/instructors/instructor-4.jpg', name: 'David Wilson' },
+  { id: 5, image: '/images/instructors/instructor-5.jpg', name: 'Lisa Brown' },
+  { id: 6, image: '/images/instructors/instructor-6.jpg', name: 'John Smith' },
+  { id: 7, image: '/images/instructors/instructor-7.jpg', name: 'Anna Lee' },
+  { id: 8, image: '/images/instructors/instructor-8.jpg', name: 'Carlos Rodriguez' },
 ];
 
 // Animation variants for performance and scalability

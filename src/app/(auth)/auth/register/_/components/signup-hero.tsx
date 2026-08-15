@@ -14,7 +14,7 @@ export function SignupHero() {
       >
         <div className="relative w-full max-w-lg aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
           <Image
-            src="/register-bg.png"
+            src="/images/register-bg.png"
             alt="Student learning online"
             fill
             className="object-cover"

@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 
 const HERO_IMAGE = {
-  src: '/instructors/instructors-gathering.jpg',
+  src: '/images/instructors/instructors-gathering.jpg',
   alt: 'Excited instructor with books',
   width: 500,
   height: 600,

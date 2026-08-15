@@ -90,7 +90,7 @@ export const UserMenu = memo(function UserMenu({ user }: UserMenuProps) {
     }, 150); // Slightly longer delay for better user experience
   };
 
-  const avatarSrc = user?.avatar || '/fallback-user-avatar.jpg';
+  const avatarSrc = user?.avatar || '/images/fallback-user-avatar.jpg';
   const avatarAlt = user?.username || 'User avatar';
   const initials = getInitials(user?.username);
 
