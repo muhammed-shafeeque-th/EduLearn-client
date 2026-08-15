@@ -83,6 +83,11 @@ interface Instructor {
   name: string;
   email?: string;
   avatar?: string;
+  bio?: string;
+  totalCourses?: number;
+  totalStudents?: number;
+  totalReviews?: number;
+  rating?: number;
 }
 
 export interface CourseInfo {
