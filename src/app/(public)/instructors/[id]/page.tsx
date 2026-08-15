@@ -6,7 +6,7 @@ import { Instructor, User } from '@/types/user';
 import { InstructorPageSkeleton } from '../_/components/skeletons/instructor-page-skeleton';
 import { fetchApi } from '@/lib/server-apis/server-apis';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
-import { getAllInstructorIds } from '@/lib/seo/seo-sources';
+import { getAllInstructorIds, getInstructorById } from '@/lib/seo/seo-sources';
 import { buildInstructorMetadata } from '@/lib/seo/metadata';
 import { ROUTES } from '@/lib/constants/routes';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
@@ -29,7 +29,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: InstructorPageProps): Promise<Metadata> {
   const { id } = await params;
 
-  const instructor = await getInstructor(id);
+  const instructor = await getInstructorById(id);
   if (!instructor) return {};
   return buildInstructorMetadata(instructor);
 }
