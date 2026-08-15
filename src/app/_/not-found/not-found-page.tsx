@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { NotFoundIllustration } from './not-found-illustration';
 // import { NotFoundSkeleton } from './skeletons/not-found-skeleton';
 import Link from 'next/link';
-import CommonHeader from '@/app/_/header';
+import { ROUTES } from '@/lib/constants/routes';
+import { SiteHeader } from '@/components/layout/site-header';
 
 export function NotFoundPage() {
   // const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +41,7 @@ export function NotFoundPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-white to-primary/5 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       {/* Common Header Only */}
-      <CommonHeader />
+      <SiteHeader />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 md:py-16 flex-1">
@@ -132,7 +133,7 @@ export function NotFoundPage() {
                     (link, index) => (
                       <motion.a
                         key={link}
-                        href={`/courses?categories=${link.toLowerCase().replace(/ /g, '-')}`}
+                        href={`${ROUTES.public.courses.root}?categories=${link.toLowerCase().replace(/ /g, '-')}`}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.8 + index * 0.1 }}
