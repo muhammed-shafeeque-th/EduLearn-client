@@ -5,7 +5,11 @@ import { motion } from 'framer-motion';
 import React from 'react';
 import { ROUTES } from '@/lib/constants/routes';
 
-export function Logo() {
+interface LogoProps {
+  mode?: 'dark' | 'auto';
+}
+
+export function Logo({ mode }: LogoProps) {
   return (
     <Link href={ROUTES.public.home} className="flex items-center space-x-2">
       <motion.div
@@ -45,7 +49,9 @@ export function Logo() {
             />
           </svg>
         </div>
-        <span className="text-xl font-bold text-foreground">EduLearn</span>
+        <span className={`text-xl font-bold text-foreground ${mode == 'dark' ? 'text-white' : ''}`}>
+          EduLearn
+        </span>
       </motion.div>
     </Link>
   );
