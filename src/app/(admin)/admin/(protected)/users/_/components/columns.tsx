@@ -71,7 +71,7 @@ export const columns: ColumnDef<Partial<User>>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => getNavigator()?.clipboard.writeText(user.userId!)}>
+            <DropdownMenuItem onClick={() => getNavigator()?.clipboard.writeText(user.id!)}>
               Copy user ID
             </DropdownMenuItem>
             <DropdownMenuItem

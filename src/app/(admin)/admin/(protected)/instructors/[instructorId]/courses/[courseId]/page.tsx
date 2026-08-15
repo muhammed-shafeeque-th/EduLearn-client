@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { getCourse, getInstructor } from '../../../_/libs/apis';
 import { CourseHeader } from './_/components/course-header';
 import { CourseContent } from './_/components/course-content';
 // import { CourseStudents } from  './_/components/course-students';
 import CourseStats from './_/components/course-stats';
 import { StatsCardsSkeleton } from '../../../_/components/skeletons/course-card-skeleton';
+import { getCourse, getInstructor } from '../../../_/libs/apis';
 
 interface CourseDetailPageProps {
   params: Promise<{ instructorId: string; courseId: string }>;

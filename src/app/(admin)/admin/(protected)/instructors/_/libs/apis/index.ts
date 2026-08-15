@@ -1,15 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import { Course } from '@/types/course';
+import { Course, CourseAnalytics } from '@/types/course';
 import { Instructor } from '@/types/user';
 import {
   serverAdminService,
   serverCourseService,
   serverUserService,
 } from '@/services/server-service-clients';
-import { CourseAnalytics } from '@/services/_/course.service';
 
 export interface InstructorsStats {
   total: number;
@@ -191,7 +191,7 @@ export const getInstructorCourseStats = unstable_cache(
         throw new Error(response.message);
       }
 
-      return response.data;
+      return response.data as any;
     } catch (error) {
       console.error(error);
       return null;
@@ -234,7 +234,7 @@ export const getCourseStats = cache(
     };
 
     try {
-      const response = await serverAdminService.getCourseAnalytics(instructorId, courseId);
+      const response = (await serverAdminService.getCourseAnalytics(instructorId, courseId)) as any;
 
       if (!response.success || !response.data) {
         console.warn(

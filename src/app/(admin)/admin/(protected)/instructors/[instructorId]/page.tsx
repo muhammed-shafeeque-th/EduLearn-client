@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ProfileSkeleton } from '../_/components/skeletons/profile-skeleton';
-import { getInstructor } from '../_/libs/apis';
 import { InstructorProfile } from './_/components/instructor-profile';
 import { InstructorCourses } from './_/components/instructor-courses';
 import { InstructorStats } from './_/components/instructor-stats';
+import { getInstructor } from '../_/libs/apis';
 
 interface InstructorPageProps {
   params: Promise<{ instructorId: string }>;

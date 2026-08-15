@@ -32,7 +32,7 @@ interface InstructorSettingsProps {
 export function InstructorSettings({ instructor }: InstructorSettingsProps) {
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { blockUser, unblockUser, deleteUser } = useAdminUser(instructor.id);
+  const { blockAccount, unblockAccount, deleteUser } = useAdminUser(instructor.id);
 
   // Handle block/unblock action
   const handleBlockToggle = useCallback(() => {
@@ -40,9 +40,9 @@ export function InstructorSettings({ instructor }: InstructorSettingsProps) {
       try {
         let result;
         if (instructor.status === 'blocked') {
-          result = await unblockUser(instructor.id);
+          result = await unblockAccount(instructor.id);
         } else {
-          result = await blockUser(instructor.id);
+          result = await blockAccount(instructor.id);
         }
         if (result?.success) {
           toast.success({
@@ -57,7 +57,7 @@ export function InstructorSettings({ instructor }: InstructorSettingsProps) {
         toast.error({ title: getErrorMessage(error) });
       }
     });
-  }, [blockUser, unblockUser, instructor.instructorProfile, instructor.status]);
+  }, [blockAccount, unblockAccount, instructor.instructorProfile, instructor.status]);
 
   // Handle delete action
   const handleDelete = useCallback(() => {
