@@ -53,7 +53,7 @@ export async function getInstructorById(id: string): Promise<Instructor | null> 
     });
 
     if (!userResponse.success) return null;
-    if (userResponse.data.role !== 'instructor') return null;
+    if (userResponse.data?.role !== 'instructor') return null;
 
     return userResponse.data as Instructor;
   } catch (error) {
