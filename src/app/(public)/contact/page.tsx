@@ -41,7 +41,7 @@ const CHANNELS = [
 
 export default function ContactPage() {
   return (
-    <main className="bg-[#F8F7F2] min-h-screen">
+    <main className="bg-background min-h-screen">
       <JsonLd data={contactPageJsonLd()} />
 
       <PageHero
@@ -60,22 +60,24 @@ export default function ContactPage() {
             {CHANNELS.map((channel) => (
               <div
                 key={channel.title}
-                className="flex gap-4 p-5 bg-white border border-[#14213D]/10 rounded-sm"
+                className="flex gap-4 p-5 bg-card border rounded-2xl shadow-sm"
               >
-                <channel.icon className="w-5 h-5 text-[#A9812F] shrink-0 mt-0.5" aria-hidden />
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <channel.icon className="w-5 h-5 text-primary" aria-hidden />
+                </div>
                 <div>
-                  <h2 className="font-display font-semibold text-[#14213D]">{channel.title}</h2>
+                  <h2 className="font-semibold text-foreground">{channel.title}</h2>
                   {channel.href ? (
                     <a
                       href={channel.href}
-                      className="text-sm text-slate-600 hover:text-[#A9812F] transition-colors"
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
                       {channel.detail}
                     </a>
                   ) : (
-                    <p className="text-sm text-slate-600">{channel.detail}</p>
+                    <p className="text-sm text-muted-foreground">{channel.detail}</p>
                   )}
-                  <p className="font-mono text-[11px] uppercase tracking-wide text-slate-400 mt-1">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground/70 mt-1">
                     {channel.note}
                   </p>
                 </div>

@@ -31,13 +31,13 @@ export function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 bg-white p-6 md:p-8 rounded-sm border border-[#14213D]/10"
+      className="space-y-5 bg-card p-6 md:p-8 rounded-2xl border shadow-sm"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="space-y-2">
           <label
             htmlFor="contact-name"
-            className="font-mono text-xs uppercase tracking-wide text-slate-500"
+            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
           >
             Name
           </label>
@@ -46,13 +46,13 @@ export function ContactForm() {
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
             placeholder="Jordan Lee"
-            className="rounded-sm"
+            className="rounded-xl"
           />
         </div>
         <div className="space-y-2">
           <label
             htmlFor="contact-email"
-            className="font-mono text-xs uppercase tracking-wide text-slate-500"
+            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
           >
             Email
           </label>
@@ -62,7 +62,7 @@ export function ContactForm() {
             value={form.email}
             onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
             placeholder="jordan@example.com"
-            className="rounded-sm"
+            className="rounded-xl"
           />
         </div>
       </div>
@@ -70,7 +70,7 @@ export function ContactForm() {
       <div className="space-y-2">
         <label
           htmlFor="contact-subject"
-          className="font-mono text-xs uppercase tracking-wide text-slate-500"
+          className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
         >
           Subject
         </label>
@@ -79,14 +79,14 @@ export function ContactForm() {
           value={form.subject}
           onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
           placeholder="What's this about?"
-          className="rounded-sm"
+          className="rounded-xl"
         />
       </div>
 
       <div className="space-y-2">
         <label
           htmlFor="contact-message"
-          className="font-mono text-xs uppercase tracking-wide text-slate-500"
+          className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
         >
           Message
         </label>
@@ -96,15 +96,14 @@ export function ContactForm() {
           value={form.message}
           onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
           placeholder="Tell us how we can help."
-          className="rounded-sm resize-none"
+          className="rounded-xl resize-none"
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={submitting}
-        className="w-full font-medium bg-[#14213D] hover:bg-[#14213D]/90 text-[#F8F7F2] rounded-sm"
-      >
+      {/* No color override here — Button's default variant already reads
+          the app's real primary (blue) theme token, so it matches the
+          Sign Up / Start your instructor journey buttons elsewhere. */}
+      <Button type="submit" disabled={submitting} className="w-full font-medium rounded-xl">
         {submitting ? 'Sending…' : 'Send message'}
       </Button>
     </form>
