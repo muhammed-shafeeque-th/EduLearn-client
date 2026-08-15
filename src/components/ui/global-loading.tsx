@@ -27,7 +27,7 @@ export function GlobalLoading({
       <div className="flex flex-col items-center space-y-4">
         {/* Animated Logo */}
         <div className="relative">
-          <Logo size="xl" animated className="drop-shadow-lg" />
+          <Logo />
 
           {/* Pulsing Ring */}
           <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" />

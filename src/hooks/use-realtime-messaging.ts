@@ -64,7 +64,7 @@ export function useRealTimeMessaging({
       const fullMessage: Message = {
         ...message,
         id: generateId(),
-        timestamp: new Date().toISOString(),
+        createdAt: Date.now(),
         status: 'sending',
       };
 

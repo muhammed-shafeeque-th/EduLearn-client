@@ -1,4 +1,4 @@
-import { UserRole } from '../auth-guard/types';
+import { UserRole } from '@/types/auth';
 
 export type AuthPayload = {
   id: string;

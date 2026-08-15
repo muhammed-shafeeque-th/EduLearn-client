@@ -1,4 +1,4 @@
-import { AdminLoginSchemaType } from '@/app/admin/auth/login/_/schemas';
+import { AdminLoginSchemaType } from '@/app/(admin)/admin/auth/login/_/schemas';
 import { adminRefreshApi } from '@/lib/auth/client-refresh';
 import { adminLocalStoreKey } from '@/lib/constants';
 import {

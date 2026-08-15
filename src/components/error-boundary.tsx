@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw, Home, Bug, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -254,7 +255,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   Reload Page
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="/" className="flex items-center gap-2">
+                  <Link href={ROUTES.public.home} className="flex items-center gap-2">
                     <Home className="w-4 h-4" />
                     Go Home
                   </Link>
@@ -322,7 +323,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <div className="text-center text-sm text-muted-foreground">
                 <p>If this problem persists, please contact our support team.</p>
                 <Button variant="link" size="sm" asChild className="mt-2">
-                  <Link href="/support">Contact Support</Link>
+                  <Link href={ROUTES.public.support}>Contact Support</Link>
                 </Button>
               </div>
             </CardContent>

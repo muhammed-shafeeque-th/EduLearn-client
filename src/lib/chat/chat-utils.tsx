@@ -181,7 +181,7 @@ interface ConnectionStatusProps {
 export function ConnectionStatus({ isConnected, className }: ConnectionStatusProps) {
   const [visible, setVisible] = useState(false);
   const [wasDisconnected, setWasDisconnected] = useState(false);
-  const [connectionQuality, setConnectionQuality] = useState<'good' | 'poor' | 'offline'>('good');
+  const [, setConnectionQuality] = useState<'good' | 'poor' | 'offline'>('good');
 
   useEffect(() => {
     if (!isConnected) {

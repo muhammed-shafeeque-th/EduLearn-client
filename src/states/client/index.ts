@@ -35,8 +35,12 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const useAuthUserSelector: () => AuthUser | null = () =>
   useAppSelector((state) => state.auth.user);
 export const useAuthSelector: () => AuthState = () => useAppSelector((state) => state.auth);
-export const useAuthIsAuthenticated: () => boolean = () =>
+
+export const useIsAuthenticatedSelector: () => boolean = () =>
   useAppSelector((state) => state.auth.status === 'authenticated');
+
+/** @deprecated use `useIsAuthenticatedSelector` instead */
+export const useAuthIsAuthenticated = useIsAuthenticatedSelector;
 
 export const useAdminSelector: () => AdminState = () => useAppSelector((state) => state.admin);
 

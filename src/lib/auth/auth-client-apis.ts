@@ -1,7 +1,6 @@
 'use client';
 
 import { refreshToken } from '@/states/client/slices/auth-slice';
-import { AuthPlugin } from '../providers';
 import { adminRefresh } from '@/states/client/slices/admin-slice';
 import { getStore } from '../../states/client';
 
@@ -49,7 +48,7 @@ export async function authAdminRefresh() {
   return { token: (response.payload as { data: { token: string } })?.data?.token };
 }
 
-export function createAuthPlugin(): AuthPlugin {
+export function createAuthPlugin() {
   return {
     refreshToken: () => authRefreshToken(),
   };

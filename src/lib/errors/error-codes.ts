@@ -2,7 +2,7 @@
  * Error Code Entity
  * -----------------
  * Centralized definition of all error codes.
- * e.g. redirect(`/checkout?error_code=${ERROR_CODES.ORDER_NOT_FOUND_OR_INVALID}`)
+ * e.g. redirect(`ROUTES.student.checkout?error_code=${ERROR_CODES.ORDER_NOT_FOUND_OR_INVALID}`)
  */
 
 // Enum for error codes for type-safety and autocompletion

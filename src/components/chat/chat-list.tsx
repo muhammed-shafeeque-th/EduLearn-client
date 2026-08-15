@@ -4,8 +4,6 @@ import { useMemo, useState, useCallback, memo } from 'react';
 import Image from 'next/image';
 import {
   Search,
-  Pin,
-  MoreVertical,
   MessageSquarePlus,
   BellOff,
   Archive,
@@ -26,7 +24,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';

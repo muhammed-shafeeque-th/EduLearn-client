@@ -5,8 +5,9 @@ import type { AuthGuardOptions, AuthUser } from './types';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { getUser as getAuthUser } from '../auth-user';
 import { isDynamicServerError } from 'next/dist/client/components/hooks-server-context';
+import { ROUTES } from '@/lib/constants/routes';
 
-const DEFAULT_LOGIN_REDIRECT = '/auth/login';
+const DEFAULT_LOGIN_REDIRECT = ROUTES.auth.login;
 const DEFAULT_HOME_REDIRECT = '/';
 const DEFAULT_FORBIDDEN_REDIRECT = '/403';
 

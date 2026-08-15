@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { ProfileSidebar } from '../../app/(common)/(protected)/profile/_/components/profile-sidebar';
+import { ProfileSidebar } from '../../app/(student)/profile/_/components/profile-sidebar';
 import { User } from '@/types/user';
 
 interface MobileProfileMenuProps {

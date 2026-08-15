@@ -1,4 +1,4 @@
-import { AuthProvider, AuthType, UserRoles } from './auth.type';
+import { AuthProvider, AuthType, UserRole } from './auth.type';
 
 export interface LoginCredentials {
   email: string;
@@ -10,7 +10,7 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
-  role: UserRoles;
+  role: UserRole;
   password?: string;
   confirmPassword: string;
   avatar?: string;

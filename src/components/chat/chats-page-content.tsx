@@ -15,11 +15,12 @@ import { useMessaging, type ChatRole } from '@/services/ws/chat/hooks/use-messag
 import { toast } from 'sonner';
 import { AlertCircle, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/constants/routes';
 
 // Route config per role
 const ROUTE_MAP: Record<ChatRole, { base: string }> = {
-  instructor: { base: '/instructor/chats' },
-  student: { base: '/profile/my-chats' },
+  instructor: { base: ROUTES.instructor.chats.root as string },
+  student: { base: ROUTES.student.chats.root as string },
 };
 
 // Props
@@ -326,7 +327,7 @@ export function ChatsPageContent({ chatId, role }: ChatsPageContentProps) {
           </div>
           <h2 className="text-2xl font-bold">Authentication Required</h2>
           <p className="text-muted-foreground">Please log in to access your messages.</p>
-          <Button onClick={() => router.push('/login')} className="mt-4">
+          <Button onClick={() => router.push(ROUTES.auth.login)} className="mt-4">
             Go to Login
           </Button>
         </div>
