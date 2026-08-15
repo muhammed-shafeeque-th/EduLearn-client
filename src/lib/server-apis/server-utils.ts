@@ -6,6 +6,7 @@ import { apiClient } from '../utils/api-client';
 import { ApiResponse } from '@/types/api-response';
 import { AuthResponse } from '@/types/auth';
 import { sleep } from '../utils';
+import { ROUTES } from '../constants/routes';
 
 export async function getCookieFromServer(name: string): Promise<string | undefined> {
   const cookieStore = await cookies();
@@ -42,7 +43,7 @@ export const serverRefreshApi = async () => {
   while (attempt < maxRetries) {
     try {
       const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        '/auth/refresh',
+        ROUTES.auth.callback,
         {},
         {
           headers: {
@@ -74,7 +75,7 @@ export const serverAdminRefreshApi = async () => {
   while (attempt < maxRetries) {
     try {
       const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        '/admin/auth/refresh',
+        ROUTES.admin.auth.callback,
         {},
         {
           headers: {

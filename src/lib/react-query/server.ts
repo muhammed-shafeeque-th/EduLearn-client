@@ -23,7 +23,7 @@ export async function prefetchCurrentUser() {
 
   try {
     await queryClient.prefetchQuery({
-      queryKey: QUERY_KEYS.users.current(""),
+      queryKey: QUERY_KEYS.users.current(''),
       queryFn: () => serverUserService.getCurrentUser(),
     });
   } catch (error) {

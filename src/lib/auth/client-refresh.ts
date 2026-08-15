@@ -10,6 +10,7 @@ import { getDocument, getWindow } from '../utils';
 import { ERROR_CODES } from '../errors/error-codes';
 import { AxiosError } from 'axios';
 import { getStore } from '@/states/client';
+import { ROUTES } from '../constants/routes';
 
 // ---------------------------------------------------------------------------
 // CSRF helper — reads the CSRF token from the __Host-csrf cookie.
@@ -35,7 +36,7 @@ export const clientRefreshApi = async () => {
       // /api/v1/auth/refresh is exempt from CSRF — no header needed here.
       // We still attach it as a best-practice defensive header.
       const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        '/auth/refresh',
+        ROUTES.auth.callback,
         {},
         {
           headers: {
@@ -80,9 +81,9 @@ export const adminRefreshApi = async () => {
   let lastError;
   while (attempt < maxRetries) {
     try {
-      // /admin/auth/refresh is NOT exempt from CSRF — must send the token header.
+      // /admin/auth/callback is NOT exempt from CSRF — must send the token header.
       const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        '/admin/auth/refresh',
+        ROUTES.admin.auth.callback,
         {},
         {
           headers: {
