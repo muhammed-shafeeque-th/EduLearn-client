@@ -22,7 +22,7 @@ export default function BlogIndexPage() {
   );
 
   return (
-    <main className="bg-[#F8F7F2] min-h-screen">
+    <main className="bg-background min-h-screen">
       <JsonLd
         data={blogListJsonLd(
           sorted.map((post) => ({

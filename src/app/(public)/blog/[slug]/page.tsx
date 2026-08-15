@@ -1,10 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { articleJsonLd } from '@/lib/seo/json-ld';
+import { articleJsonLd, buildMetadata } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/json-ld';
 import { BLOG_POSTS, getBlogPost } from './_/data/blog-data';
-import { buildMetadata } from '@/lib/seo';
 import { ROUTES } from '@/lib/constants/routes';
 import { BlogCard } from './_/components/blog-card';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
@@ -13,10 +12,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Pre-renders every post to static HTML at build time (true SSG). New posts
-// added to BLOG_POSTS get picked up on the next build; revalidate below
-// covers edits to existing posts without a full redeploy once this is
-// backed by a CMS.
 export function generateStaticParams() {
   return BLOG_POSTS.map((post) => ({ slug: post.slug }));
 }
@@ -25,7 +20,6 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-
   const post = getBlogPost(slug);
   if (!post) return {};
 
@@ -47,14 +41,13 @@ function formatDate(iso: string) {
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-
   const post = getBlogPost(slug);
   if (!post) notFound();
 
   const related = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
-    <main className="bg-[#F8F7F2] min-h-screen">
+    <main className="bg-background min-h-screen">
       <JsonLd
         data={articleJsonLd({
           title: post.title,
@@ -66,7 +59,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         })}
       />
 
-      <header className="border-b border-[#14213D]/10 bg-[#F8F7F2]">
+      <header className="border-b bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
         <div className="max-w-3xl mx-auto px-6 pt-10 pb-14 md:pt-14 md:pb-16">
           <Breadcrumbs
             items={[
@@ -76,22 +69,19 @@ export default async function BlogPostPage({ params }: PageProps) {
             ]}
           />
 
-          <div className="mt-8 flex items-center gap-3">
-            <span aria-hidden className="h-px w-8 bg-[#A9812F]" />
-            <span className="font-mono text-xs tracking-[0.2em] uppercase text-[#A9812F]">
-              {post.category}
-            </span>
-          </div>
+          <span className="mt-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+            {post.category}
+          </span>
 
-          <h1 className="font-display mt-4 text-3xl md:text-5xl font-semibold text-[#14213D] leading-[1.15]">
+          <h1 className="mt-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.15]">
             {post.title}
           </h1>
 
-          <div className="mt-6 flex items-center gap-3 text-sm text-slate-500">
+          <div className="mt-6 flex items-center gap-3 text-sm text-muted-foreground">
             <span>{post.author}</span>
-            <span className="text-[#14213D]/20">&middot;</span>
+            <span className="text-muted-foreground/30">&middot;</span>
             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
-            <span className="text-[#14213D]/20">&middot;</span>
+            <span className="text-muted-foreground/30">&middot;</span>
             <span>{post.readingMinutes} min read</span>
           </div>
         </div>
@@ -101,22 +91,25 @@ export default async function BlogPostPage({ params }: PageProps) {
         {post.body.map((block, index) => (
           <section key={index} className="mb-8 last:mb-0">
             {block.heading && (
-              <h2 className="font-display text-xl md:text-2xl font-semibold text-[#14213D] mb-3">
+              <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">
                 {block.heading}
               </h2>
             )}
             {block.paragraphs.map((paragraph, pIndex) => (
-              <p key={pIndex} className="text-base text-slate-600 leading-relaxed mb-4 last:mb-0">
+              <p
+                key={pIndex}
+                className="text-base text-muted-foreground leading-relaxed mb-4 last:mb-0"
+              >
                 {paragraph}
               </p>
             ))}
           </section>
         ))}
 
-        <div className="mt-12 pt-8 border-t border-[#14213D]/10">
+        <div className="mt-12 pt-8 border-t">
           <Link
             href={ROUTES.public.blog}
-            className="text-sm font-medium text-[#14213D] hover:text-[#A9812F] transition-colors"
+            className="text-sm font-medium text-primary hover:underline"
           >
             &larr; Back to all articles
           </Link>
@@ -124,9 +117,9 @@ export default async function BlogPostPage({ params }: PageProps) {
       </article>
 
       {related.length > 0 && (
-        <section className="border-t border-[#14213D]/10 bg-white">
+        <section className="border-t bg-card">
           <div className="max-w-3xl mx-auto px-6 py-14 md:py-16">
-            <span className="font-mono text-xs tracking-[0.2em] uppercase text-[#A9812F]">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
               Keep reading
             </span>
             <div className="mt-6">

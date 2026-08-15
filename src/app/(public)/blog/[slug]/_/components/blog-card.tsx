@@ -12,36 +12,32 @@ function formatDate(iso: string) {
 
 export function BlogCard({ post, index }: { post: BlogPost; index: number }) {
   return (
-    <Link
-      href={ROUTES.public.blogPost(post.slug)}
-      className="group block border-b border-[#14213D]/10 py-8 first:pt-0"
-    >
+    <Link href={ROUTES.public.blogPost(post.slug)} className="group block border-b py-8 first:pt-0">
       <div className="flex gap-5">
-        <span className="font-mono text-xs text-[#A9812F] pt-1.5 shrink-0 w-6">
+        <span className="text-xs font-bold text-primary pt-1.5 shrink-0 w-6">
           {String(index).padStart(2, '0')}
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3 mb-2">
-            <span className="font-mono text-[11px] uppercase tracking-wide text-[#A9812F]">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
               {post.category}
             </span>
-            <span className="text-[#14213D]/20">&middot;</span>
-            <time dateTime={post.publishedAt} className="text-xs text-slate-500">
+            <time dateTime={post.publishedAt} className="text-xs text-muted-foreground">
               {formatDate(post.publishedAt)}
             </time>
-            <span className="text-[#14213D]/20">&middot;</span>
-            <span className="text-xs text-slate-500">{post.readingMinutes} min read</span>
+            <span className="text-muted-foreground/40">&middot;</span>
+            <span className="text-xs text-muted-foreground">{post.readingMinutes} min read</span>
           </div>
 
-          <h2 className="font-display text-xl md:text-2xl font-semibold text-[#14213D] leading-snug group-hover:text-[#A9812F] transition-colors">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
             {post.title}
           </h2>
 
-          <p className="mt-2 text-sm md:text-base text-slate-600 leading-relaxed max-w-2xl">
+          <p className="mt-2 text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
             {post.description}
           </p>
 
-          <span className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-[#14213D] group-hover:text-[#A9812F] transition-colors">
+          <span className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-primary">
             Read article
             <svg
               viewBox="0 0 12 8"
