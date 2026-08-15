@@ -2,9 +2,6 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { NotificationList } from './_/components/notification-list';
 import { NotificationSkeleton } from './_/components/skeletons';
-import { fetchApi } from '@/lib/server-apis/server-apis';
-import { Notification } from '@/types/notification';
-import { getServerAuthToken } from '@/lib/server-apis/server-utils';
 import { getServerQueryClient } from '@/lib/react-query/server';
 import { authGuard } from '@/lib/auth';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
@@ -17,31 +14,6 @@ export const metadata: Metadata = {
   title: 'Notifications - EduLearn',
   description: 'View and manage your notifications',
 };
-
-// Server-side data fetching
-export async function getInitialNotifications() {
-  try {
-    const token = await getServerAuthToken();
-
-    if (!token) {
-      return [];
-    }
-
-    const response = await fetchApi<Notification[]>(`notifications?page=1&pageSize=20`, {
-      next: { revalidate: 0 },
-      token,
-    });
-
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to fetch notifications');
-    }
-
-    return response.data || [];
-  } catch (error) {
-    console.error('Error fetching initial notifications:', error);
-    return [];
-  }
-}
 
 export default async function NotificationsPage() {
   const queryClient = getServerQueryClient();

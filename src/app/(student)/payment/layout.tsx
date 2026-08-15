@@ -16,7 +16,6 @@ export const metadata: Metadata = {
 };
 
 interface PaymentLayoutProps {
-  params: Promise<{ courseId: string }>;
   children: React.ReactNode;
 }
 

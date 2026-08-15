@@ -7,6 +7,7 @@ import { Order } from '@/types/order';
 import { fetchApi } from '@/lib/server-apis';
 import { config } from '@/lib/config';
 import { ROUTES } from '@/lib/constants/routes';
+import { PaymentProvider } from '@/services/payment';
 
 interface OrderData {
   courseIds: string[];
@@ -106,16 +107,16 @@ export async function createStripePaymentSession(sessionData: PaymentSessionData
   try {
     const session = await serverPaymentService.createPayment({
       orderId: sessionData.orderId,
-      provider: 'stripe',
-      successUrl: sessionData.successUrl,
-      cancelUrl: sessionData.cancelUrl,
+      // provider: 'stripe',
+      // successUrl: sessionData.successUrl,
+      // cancelUrl: sessionData.cancelUrl,
     });
     if (!session.success) {
       throw new Error(session.message);
     }
     console.log('Server Resposen + ' + JSON.stringify(session, null, 2));
 
-    return { success: true, data: session.data?.stripe };
+    return { success: true, data: session.data };
   } catch (error) {
     console.log('Server error + ' + JSON.stringify(error, null, 2));
     return {
@@ -129,14 +130,14 @@ export async function createPayPalOrder(sessionData: PaymentSessionData) {
   try {
     const order = await serverPaymentService.createPayment({
       orderId: sessionData.orderId,
-      provider: 'paypal',
+      // provider: 'paypal',
     });
     if (!order.success) {
       throw new Error(order.message);
     }
     console.log('Server Resposen + ' + JSON.stringify(order, null, 2));
 
-    return { success: true, data: order.data?.paypal };
+    return { success: true, data: order.data };
   } catch (error) {
     console.log('Server error + ' + JSON.stringify(error, null, 2));
     return {
@@ -150,7 +151,7 @@ export async function createRazorpayOrder(sessionData: PaymentSessionData) {
   try {
     const order = await serverPaymentService.createPayment({
       orderId: sessionData.orderId,
-      provider: 'razorpay',
+      // provider: 'razorpay',
     });
     if (!order.success) {
       throw new Error(order.message);
@@ -158,7 +159,7 @@ export async function createRazorpayOrder(sessionData: PaymentSessionData) {
 
     console.log('Server Resposen + ' + JSON.stringify(order, null, 2));
 
-    return { success: true, data: order.data?.razorpay };
+    return { success: true, data: order.data };
   } catch (error) {
     console.log('Server error + ' + JSON.stringify(error, null, 2));
     return {
@@ -170,9 +171,9 @@ export async function createRazorpayOrder(sessionData: PaymentSessionData) {
 
 export async function verifyStripePayment(verificationData: PaymentVerificationData) {
   try {
-    const result = await serverPaymentService.verifyPayment({
-      orderId: verificationData.providerOrderId,
-      sessionId: verificationData.providerSessionId,
+    const result = await serverPaymentService.resolvePayment({
+      provider: verificationData.paymentMethod as PaymentProvider,
+      // sessionId: verificationData.providerSessionId,
     });
 
     if (result.success) {
@@ -190,10 +191,10 @@ export async function verifyStripePayment(verificationData: PaymentVerificationD
 
 export async function verifyPayPalPayment(verificationData: PaymentVerificationData) {
   try {
-    const result = await serverPaymentService.verifyPayment({
-      orderId: verificationData.orderId,
-      paymentId: verificationData.paymentId,
-      providerOrderId: verificationData.providerOrderId,
+    const result = await serverPaymentService.resolvePayment({
+      provider: verificationData.paymentMethod as PaymentProvider,
+      // paymentId: verificationData.paymentId,
+      // providerOrderId: verificationData.providerOrderId,
     });
 
     if (result.success) {
@@ -211,11 +212,11 @@ export async function verifyPayPalPayment(verificationData: PaymentVerificationD
 
 export async function verifyRazorpayPayment(verificationData: PaymentVerificationData) {
   try {
-    const result = await serverPaymentService.verifyPayment({
-      paymentId: verificationData.paymentId,
-      razorpayOrderId: verificationData.providerOrderId,
-      razorpayPaymentId: verificationData.providerSessionId!,
-      razorpaySignature: verificationData.providerSignature,
+    const result = await serverPaymentService.resolvePayment({
+      provider: verificationData.paymentMethod as PaymentProvider,
+      // razorpayOrderId: verificationData.providerOrderId,
+      // razorpayPaymentId: verificationData.providerSessionId!,
+      // razorpaySignature: verificationData.providerSignature,
     });
 
     if (result.success) {
