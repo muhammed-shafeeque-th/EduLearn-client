@@ -24,7 +24,7 @@ const STATS = [
 
 export default function AboutPage() {
   return (
-    <main className="bg-[#F8F7F2] min-h-screen">
+    <main className="bg-background min-h-screen">
       <JsonLd data={organizationJsonLd()} />
 
       <PageHero
@@ -38,15 +38,13 @@ export default function AboutPage() {
       />
 
       <section className="max-w-4xl mx-auto px-6 py-6">
-        <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 py-10 border-b border-[#14213D]/10">
+        <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 py-10 border-b">
           {STATS.map((stat) => (
             <div key={stat.label}>
-              <dt className="font-mono text-[11px] uppercase tracking-wide text-slate-500 mb-1">
+              <dt className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
                 {stat.label}
               </dt>
-              <dd className="font-display text-2xl md:text-3xl font-semibold text-[#14213D]">
-                {stat.value}
-              </dd>
+              <dd className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</dd>
             </div>
           ))}
         </dl>

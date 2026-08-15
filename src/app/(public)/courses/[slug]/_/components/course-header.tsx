@@ -201,8 +201,8 @@ export function CourseHeader({ course }: CourseHeaderProps) {
             <InstructorCard
               id={course.instructor.id}
               name={course.instructor.name}
-              totalCourses={course.instructor.totalCourses}
-              totalStudents={course.instructor.totalStudents}
+              totalCourses={course.instructor.totalCourses ?? 0}
+              totalStudents={course.instructor.totalStudents ?? 0}
             />
 
             <div className="flex justify-between items-center pt-2">

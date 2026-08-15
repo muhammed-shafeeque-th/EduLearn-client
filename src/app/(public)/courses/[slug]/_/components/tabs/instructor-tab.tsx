@@ -60,7 +60,7 @@ export function InstructorTab({ course }: InstructorTabProps) {
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <CardTitle className="text-2xl mb-2">{instructor.name}</CardTitle>
-                <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">{instructor.title}</p>
+                <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">{instructor.name}</p>
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                   <Badge
                     variant="secondary"

@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { CourseFilters } from '../types';
+import { CourseLevel } from '@/types/course';
 
 interface UseOptimizedFiltersOptions {
   filters: CourseFilters;
@@ -31,10 +32,10 @@ export function useOptimizedFilters({ filters, onFiltersChange }: UseOptimizedFi
 
   const handleLevelChange = useCallback(
     (level: string) => {
-      const newLevels = filters.level.includes(level)
+      const newLevels = filters.level.includes(level as CourseLevel)
         ? filters.level.filter((l) => l !== level)
         : [...filters.level, level];
-      onFiltersChange({ level: newLevels });
+      onFiltersChange({ level: newLevels as CourseLevel[] });
     },
     [filters.level, onFiltersChange]
   );

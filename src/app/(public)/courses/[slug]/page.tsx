@@ -84,7 +84,7 @@ export async function generateMetadata({
   const url = `${config.siteUrl}/courses/${course.slug}`;
 
   return {
-    title: `${course.title} | EduLearn`,
+    title: course.title,
     description: course.description?.slice(0, 150),
     keywords: [
       course.title,
