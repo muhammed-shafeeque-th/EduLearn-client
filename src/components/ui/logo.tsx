@@ -1,96 +1,54 @@
-interface LogoProps {
-  /** 'mark' = icon only (square). 'full' = icon + wordmark. */
-  variant?: 'mark' | 'full';
-  /** Which background this sits on, so text/ring colors stay legible. */
-  theme?: 'light' | 'dark';
-  className?: string;
-}
+'use client';
 
-/**
- * Inline SVG brand mark — renders crisp at any size with zero network
- * request, and can be recolored per-theme via the `theme` prop. Use this
- * instead of an <img> for the header/footer lockup; use the generated
- * PNGs (public/logo.png, public/logo-lockup-*.png) only where a raster
- * file is required (emails, share cards, external tools).
- */
-export function Logo({ variant = 'full', theme = 'light', className }: LogoProps) {
-  const ink = '#14213D';
-  const paper = '#F8F7F2';
-  const brass = '#A9812F';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import React from 'react';
+import { ROUTES } from '@/lib/constants/routes';
 
-  const boxFill = theme === 'dark' ? paper : ink;
-  const glyphFill = theme === 'dark' ? ink : paper;
-  const wordmarkFill = theme === 'dark' ? paper : ink;
-
-  if (variant === 'mark') {
-    return (
-      <svg viewBox="0 0 140 140" className={className} role="img" aria-label="EduLearn">
-        <rect width="140" height="140" rx="30" fill={boxFill} />
-        <rect
-          x="7"
-          y="7"
-          width="126"
-          height="126"
-          rx="24"
-          fill="none"
-          stroke={brass}
-          strokeWidth="1"
-          opacity="0.55"
-        />
-        <text
-          x="70"
-          y="97"
-          textAnchor="middle"
-          fontFamily="Georgia, 'Times New Roman', serif"
-          fontWeight="700"
-          fontSize="80"
-          fill={glyphFill}
-        >
-          E
-        </text>
-        <rect x="47" y="103" width="46" height="4" rx="2" fill={brass} />
-      </svg>
-    );
-  }
-
+export function Logo() {
   return (
-    <svg viewBox="0 0 620 140" className={className} role="img" aria-label="EduLearn">
-      <rect width="140" height="140" rx="30" fill={boxFill} />
-      <rect
-        x="7"
-        y="7"
-        width="126"
-        height="126"
-        rx="24"
-        fill="none"
-        stroke={brass}
-        strokeWidth="1"
-        opacity="0.55"
-      />
-      <text
-        x="70"
-        y="97"
-        textAnchor="middle"
-        fontFamily="Georgia, 'Times New Roman', serif"
-        fontWeight="700"
-        fontSize="80"
-        fill={glyphFill}
+    <Link href={ROUTES.public.home} className="flex items-center space-x-2">
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="flex items-center space-x-2"
       >
-        E
-      </text>
-      <rect x="47" y="103" width="46" height="4" rx="2" fill={brass} />
-
-      <text
-        x="172"
-        y="88"
-        fontFamily="Georgia, 'Times New Roman', serif"
-        fontWeight="600"
-        fontSize="56"
-        fill={wordmarkFill}
-      >
-        EduLearn
-      </text>
-      <rect x="174" y="102" width="200" height="2" fill={brass} opacity="0.65" />
-    </svg>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-green-500">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-white"
+          >
+            <path
+              d="M12 2L2 7L12 12L22 7L12 2Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2 17L12 22L22 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2 12L12 17L22 12"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <span className="text-xl font-bold text-foreground">EduLearn</span>
+      </motion.div>
+    </Link>
   );
 }
+
+export default Logo;

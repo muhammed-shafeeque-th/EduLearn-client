@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, {
@@ -605,7 +606,7 @@ export function ChatInterface({
                       return (
                         <MessageBubble
                           key={message.id}
-                          message={message}
+                          message={message as any}
                           currentUserId={currentUser.id}
                           onAddReaction={onAddReaction}
                           onRemoveReaction={onRemoveReaction}

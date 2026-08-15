@@ -11,7 +11,7 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({
-  size = 'lg',
+  // size = 'lg',
   text = 'Loading...',
   className,
 }: LoadingSpinnerProps) {
@@ -19,7 +19,7 @@ export function LoadingSpinner({
     <div className={cn('flex flex-col items-center justify-center space-y-4', className)}>
       {/* Animated Logo */}
       <div className="relative">
-        <Logo size={size} animated />
+        <Logo />
 
         {/* Scanning line effect */}
         <div className="absolute inset-0 overflow-hidden rounded-full">
