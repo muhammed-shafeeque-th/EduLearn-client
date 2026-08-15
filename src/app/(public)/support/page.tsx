@@ -44,7 +44,7 @@ const TOPICS = [
 
 export default function SupportPage() {
   return (
-    <main className="bg-[#F8F7F2] min-h-screen">
+    <main className="bg-background min-h-screen">
       <PageHero
         eyebrow="Help Center"
         title="How can we help?"
@@ -61,17 +61,17 @@ export default function SupportPage() {
             <Link
               key={topic.title}
               href={topic.href}
-              className="group flex items-start gap-4 p-6 bg-white border border-[#14213D]/10 rounded-sm hover:border-[#A9812F]/50 transition-colors"
+              className="group flex items-start gap-4 p-6 bg-card border rounded-2xl shadow-sm hover:border-primary/50 transition-colors"
             >
-              <topic.icon className="w-5 h-5 text-[#A9812F] shrink-0 mt-1" aria-hidden />
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <topic.icon className="w-5 h-5 text-primary" aria-hidden />
+              </div>
               <div className="flex-1">
-                <h2 className="font-display text-lg font-semibold text-[#14213D] mb-1">
-                  {topic.title}
-                </h2>
-                <p className="text-sm text-slate-600">{topic.description}</p>
+                <h2 className="text-lg font-semibold text-foreground mb-1">{topic.title}</h2>
+                <p className="text-sm text-muted-foreground">{topic.description}</p>
               </div>
               <ArrowRight
-                className="w-4 h-4 text-[#14213D]/30 group-hover:text-[#A9812F] group-hover:translate-x-0.5 transition-all shrink-0 mt-1"
+                className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-1"
                 aria-hidden
               />
             </Link>
@@ -79,24 +79,24 @@ export default function SupportPage() {
         </div>
       </section>
 
-      <section className="border-t border-[#14213D]/10 bg-white">
+      <section className="border-t bg-card">
         <div className="max-w-4xl mx-auto px-6 py-14 md:py-20 text-center">
-          <span className="font-mono text-xs tracking-[0.2em] uppercase text-[#A9812F]">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
             Didn&rsquo;t find it?
           </span>
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-[#14213D] mt-3 mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-4 mb-4">
             Browse the full FAQ or write to us
           </h2>
           <div className="flex items-center justify-center gap-4 mt-8">
             <Link
               href={ROUTES.public.faq}
-              className="px-6 py-3 rounded-sm bg-[#14213D] text-[#F8F7F2] text-sm font-medium hover:bg-[#14213D]/90 transition-colors"
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               Browse FAQ
             </Link>
             <Link
               href={ROUTES.public.contact}
-              className="px-6 py-3 rounded-sm border border-[#14213D]/15 text-[#14213D] text-sm font-medium hover:border-[#A9812F] hover:text-[#A9812F] transition-colors"
+              className="px-6 py-3 rounded-xl border text-foreground text-sm font-medium hover:border-primary hover:text-primary transition-colors"
             >
               Contact us
             </Link>
