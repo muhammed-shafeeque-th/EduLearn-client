@@ -56,7 +56,7 @@ export function buildMetadata({
   const url = absoluteUrl(path);
   const safeTitle = truncate(title, TITLE_MAX);
   const safeDescription = truncate(description, DESC_MAX);
-  const fullTitle = `${safeTitle} | ${SITE_NAME}`;
+  const fullTitle = `${safeTitle}`;
 
   return {
     title: fullTitle,

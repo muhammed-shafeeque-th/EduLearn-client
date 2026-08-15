@@ -6,29 +6,36 @@
  */
 
 export async function getAllCourseSlugs(): Promise<{ slug: string; updatedAt: Date }[]> {
+  return [];
   throw new Error('TODO: wire up to your courses table/CMS');
 }
 
 export async function getCourseBySlug(slug: string) {
+  return {};
   throw new Error('TODO: wire up to your courses table/CMS');
 }
 
 export async function searchCourses(params: { category?: string; page?: string; search?: string }) {
+  return [];
   throw new Error('TODO: wire up to your courses table/CMS');
 }
 
 export async function getAllInstructorIds(): Promise<{ id: string; updatedAt: Date }[]> {
+  return [];
   throw new Error('TODO: wire up to your instructors table');
 }
 
 export async function getInstructorById(id: string) {
+  return {};
   throw new Error('TODO: wire up to your instructors table');
 }
 
 export async function getAllBlogSlugs(): Promise<{ slug: string; updatedAt: Date }[]> {
+  return [];
   throw new Error('TODO: wire up to your blog CMS');
 }
 
 export async function getBlogPostBySlug(slug: string) {
+  return {};
   throw new Error('TODO: wire up to your blog CMS');
 }
