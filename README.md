@@ -1,8 +1,14 @@
 # EduLearn Client
 
+[![Next.js](https://img.shields.io/badge/Next.js-15.3.0-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.0.0-blue)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 > Modern, scalable, and production-ready learning platform frontend built with Next.js, TypeScript, and a cloud-native microservices backend.
 
-![EduLearn Banner](docs/images/banner.png)
+![EduLearn Banner](docs/images/app-image-1.png)
 
 ## Overview
 
@@ -18,35 +24,35 @@ The frontend follows a modular architecture with clear separation of concerns, r
 
 ### Student Features
 
-* User registration and authentication
-* Course discovery and search
-* Course enrollment
-* Learning dashboard
-* Wishlist management
-* Shopping cart
-* Checkout and payment
-* Progress tracking
-* Course reviews and ratings
-* Profile management
-* Wallet management
+- User registration and authentication
+- Course discovery and search
+- Course enrollment
+- Learning dashboard
+- Wishlist management
+- Shopping cart
+- Checkout and payment
+- Progress tracking
+- Course reviews and ratings
+- Profile management
+- Wallet management
 
 ### Instructor Features
 
-* Instructor onboarding
-* Course creation
-* Course management
-* Student analytics
-* Revenue tracking
-* Profile management
+- Instructor onboarding
+- Course creation
+- Course management
+- Student analytics
+- Revenue tracking
+- Profile management
 
 ### Administrative Features
 
-* User management
-* Instructor approval
-* Course moderation
-* Platform analytics
-* Category management
-* System monitoring
+- User management
+- Instructor approval
+- Course moderation
+- Platform analytics
+- Category management
+- System monitoring
 
 ---
 
@@ -132,14 +138,14 @@ src/
 
 ### Architectural Principles
 
-* Feature-based structure
-* Reusable UI components
-* Separation of business logic
-* Strong typing with TypeScript
-* SOLID-inspired frontend design
-* Strategy Pattern where appropriate
-* Server-first architecture
-* Scalable state management
+- Feature-based structure
+- Reusable UI components
+- Separation of business logic
+- Strong typing with TypeScript
+- SOLID-inspired frontend design
+- Strategy Pattern where appropriate
+- Server-first architecture
+- Scalable state management
 
 ---
 
@@ -172,27 +178,27 @@ src/
 
 Used for:
 
-* Landing pages
-* Course pages
-* SEO-sensitive content
-* Marketing pages
+- Landing pages
+- Course pages
+- SEO-sensitive content
+- Marketing pages
 
 ### Client-Side Rendering (CSR)
 
 Used for:
 
-* Dashboards
-* Settings pages
-* User interactions
-* Real-time features
+- Dashboards
+- Settings pages
+- User interactions
+- Real-time features
 
 ### Parallel Routing
 
 Used for:
 
-* Dashboard layouts
-* Multi-pane interfaces
-* Complex application workflows
+- Dashboard layouts
+- Multi-pane interfaces
+- Complex application workflows
 
 ---
 
@@ -202,27 +208,27 @@ Used for:
 
 Used for:
 
-* Authentication state
-* User session state
-* UI preferences
-* Global application state
+- Authentication state
+- User session state
+- UI preferences
+- Global application state
 
 ### TanStack Query
 
 Used for:
 
-* API data fetching
-* Request caching
-* Background synchronization
-* Optimistic updates
+- API data fetching
+- Request caching
+- Background synchronization
+- Optimistic updates
 
 ### XState
 
 Used for:
 
-* Checkout workflow
-* Order lifecycle
-* Complex user flows
+- Checkout workflow
+- Order lifecycle
+- Complex user flows
 
 ---
 
@@ -251,12 +257,12 @@ Secure Session
 
 ### Features
 
-* JWT authentication
-* Refresh token flow
-* Role-based access control
-* Route protection
-* Session persistence
-* Secure logout
+- JWT authentication
+- Refresh token flow
+- Role-based access control
+- Route protection
+- Session persistence
+- Secure logout
 
 ---
 
@@ -264,8 +270,8 @@ Secure Session
 
 ### Supported Providers
 
-* Stripe
-* Razorpay
+- Stripe
+- Razorpay
 
 ### Design Pattern
 
@@ -304,22 +310,22 @@ The application is optimized for search engines and AI-powered search platforms.
 
 ### SEO Features
 
-* Server-side rendering
-* Metadata generation
-* Structured data
-* Open Graph tags
-* Twitter Cards
-* Sitemap generation
-* Robots configuration
-* Canonical URLs
+- Server-side rendering
+- Metadata generation
+- Structured data
+- Open Graph tags
+- Twitter Cards
+- Sitemap generation
+- Robots configuration
+- Canonical URLs
 
 ### AI Search Optimization
 
-* Semantic HTML
-* Structured content
-* Rich metadata
-* Accessible markup
-* Knowledge graph-friendly pages
+- Semantic HTML
+- Structured content
+- Rich metadata
+- Accessible markup
+- Knowledge graph-friendly pages
 
 ---
 
@@ -327,26 +333,26 @@ The application is optimized for search engines and AI-powered search platforms.
 
 ### Frontend
 
-* Code splitting
-* Dynamic imports
-* Route-based chunking
-* Image optimization
-* Font optimization
-* Suspense boundaries
-* Streaming SSR
+- Code splitting
+- Dynamic imports
+- Route-based chunking
+- Image optimization
+- Font optimization
+- Suspense boundaries
+- Streaming SSR
 
 ### Data Layer
 
-* Query caching
-* Request deduplication
-* Optimistic updates
-* Lazy loading
+- Query caching
+- Request deduplication
+- Optimistic updates
+- Lazy loading
 
 ### Rendering
 
-* Server Components
-* Partial hydration
-* Incremental rendering
+- Server Components
+- Partial hydration
+- Incremental rendering
 
 ---
 
@@ -354,20 +360,20 @@ The application is optimized for search engines and AI-powered search platforms.
 
 ### Application Security
 
-* Secure JWT handling
-* Route authorization
-* Input validation with Zod
-* XSS protection
-* CSRF mitigation
-* Secure HTTP headers
-* Content Security Policy
+- Secure JWT handling
+- Route authorization
+- Input validation with Zod
+- XSS protection
+- CSRF mitigation
+- Secure HTTP headers
+- Content Security Policy
 
 ### Platform Security
 
-* API Gateway protection
-* HTTPS enforcement
-* Secure cookie policies
-* Least privilege access
+- API Gateway protection
+- HTTPS enforcement
+- Secure cookie policies
+- Least privilege access
 
 ---
 
@@ -377,21 +383,21 @@ The client participates in the platform-wide observability architecture.
 
 ### Logging
 
-* Structured client logs
-* Error tracking
-* Request diagnostics
+- Structured client logs
+- Error tracking
+- Request diagnostics
 
 ### Metrics
 
-* Performance monitoring
-* Web Vitals
-* Page load metrics
+- Performance monitoring
+- Web Vitals
+- Page load metrics
 
 ### Tracing
 
-* OpenTelemetry browser instrumentation
-* Distributed tracing propagation
-* Request correlation
+- OpenTelemetry browser instrumentation
+- Distributed tracing propagation
+- Request correlation
 
 ### Platform Monitoring
 
@@ -490,19 +496,19 @@ yarn build
 
 # Related Repositories
 
-| Repository                    | Description                                                   |
-| ----------------------------- | ------------------------------------------------------------- |
-| [edulearn-platform](https://github.com/muhammed-shafeeque-th/edulearn-platform)             | Platform orchestration repository                             |
-| [edulearn-api-gateway](https://github.com/muhammed-shafeeque-th/edulearn-api-gateawy)          | API Gateway                                                   |
-| [edulearn-user-service](https://github.com/muhammed-shafeeque-th/edulearn-user-srv)         | User profile service                                          |
-| [edulearn-course-service](https://github.com/muhammed-shafeeque-th/edulearn-course-srv)       | Course management service                                     |
-| [edulearn-payment-service](https://github.com/muhammed-shafeeque-th/edulearn-payment-srv)      | Payment processing service                                    |
-| [edulearn-auth-service](https://github.com/muhammed-shafeeque-th/edulearn-auth-srv)      | Authentication service                                    |
-| [edulearn-order-service](https://github.com/muhammed-shafeeque-th/edulearn-order-srv)        | Order management service                                      |
+| Repository                                                                                          | Description                                                   |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [edulearn-platform](https://github.com/muhammed-shafeeque-th/edulearn-platform)                     | Platform orchestration repository                             |
+| [edulearn-api-gateway](https://github.com/muhammed-shafeeque-th/edulearn-api-gateawy)               | API Gateway                                                   |
+| [edulearn-user-service](https://github.com/muhammed-shafeeque-th/edulearn-user-srv)                 | User profile service                                          |
+| [edulearn-course-service](https://github.com/muhammed-shafeeque-th/edulearn-course-srv)             | Course management service                                     |
+| [edulearn-payment-service](https://github.com/muhammed-shafeeque-th/edulearn-payment-srv)           | Payment processing service                                    |
+| [edulearn-auth-service](https://github.com/muhammed-shafeeque-th/edulearn-auth-srv)                 | Authentication service                                        |
+| [edulearn-order-service](https://github.com/muhammed-shafeeque-th/edulearn-order-srv)               | Order management service                                      |
 | [edulearn-notification-service](https://github.com/muhammed-shafeeque-th/edulearn-notification-srv) | Notification service                                          |
-| [edulearn-auth-service](https://github.com/muhammed-shafeeque-th/edulearn-auth-srv)         | Authentication service                                        |
-| [@edulearn/core](https://github.com/muhammed-shafeeque-th/edulearn-core)                | Shared logging, metrics, tracing, Redis, Kafka, health checks |
-| [@edulearn/nest](https://github.com/muhammed-shafeeque-th/edulearn-nest)                | Shared NestJS infrastructure package                          |
+| [edulearn-auth-service](https://github.com/muhammed-shafeeque-th/edulearn-auth-srv)                 | Authentication service                                        |
+| [@edulearn/core](https://github.com/muhammed-shafeeque-th/edulearn-core)                            | Shared logging, metrics, tracing, Redis, Kafka, health checks |
+| [@edulearn/nest](https://github.com/muhammed-shafeeque-th/edulearn-nest)                            | Shared NestJS infrastructure package                          |
 
 ---
 
