@@ -9,7 +9,7 @@ import { config } from '@/lib/config';
 import { SITE_NAME } from '@/lib/constants';
 import { absoluteUrl } from '@/lib/constants/routes';
 import { JsonLd } from '@/components/seo/json-ld';
-import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
+import { siteJsonLd } from '@/lib/seo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,6 +33,10 @@ export const metadata: Metadata = {
     apple: '/icons/apple-icon.png',
     shortcut: ['/favicon.ico'],
   },
+  appleWebApp: {
+    capable: true,
+  },
+  applicationName: 'Edulearn',
   openGraph: {
     title: 'Structured courses, taught by practitioners',
     description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [
       {
-        url: absoluteUrl('/images/opengraph-image.png'),
+        url: absoluteUrl('/og/og-root-image.png'),
         width: 1200,
         height: 630,
         alt: 'Structured courses, taught by practitioners',
@@ -56,8 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased`}>
         {/* Sitewide structured data */}
-        <JsonLd data={organizationJsonLd()} />
-        <JsonLd data={websiteJsonLd()} />
+        <JsonLd data={siteJsonLd()} />
         <RootProviders>
           <ThemeProvider
             attribute="class"

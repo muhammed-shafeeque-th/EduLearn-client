@@ -40,13 +40,13 @@ export function buildMetadata({
   const url = absoluteUrl(path);
 
   return {
-    title: `${title} | ${SITE_NAME}`,
+    title: `${title}`,
     description,
     keywords: keywords?.join(', '),
     alternates: { canonical: url },
     robots: index ? { index: true, follow: true } : { index: false, follow: false },
     openGraph: {
-      title: `${og?.title || title} | ${SITE_NAME}`,
+      title: `${og?.title || title}`,
       description: og?.description || description,
       url,
       siteName: SITE_NAME,
@@ -55,7 +55,7 @@ export function buildMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${og?.title || title} | ${SITE_NAME}`,
+      title: `${og?.title || title}`,
       description,
       images: [absoluteUrl(og?.image || ogImage)],
     },
