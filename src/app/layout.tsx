@@ -9,7 +9,7 @@ import { config } from '@/lib/config';
 import { SITE_NAME } from '@/lib/constants';
 import { absoluteUrl } from '@/lib/constants/routes';
 import { JsonLd } from '@/components/seo/json-ld';
-import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
+import { siteJsonLd } from '@/lib/seo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -56,8 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased`}>
         {/* Sitewide structured data */}
-        <JsonLd data={organizationJsonLd()} />
-        <JsonLd data={websiteJsonLd()} />
+        <JsonLd data={siteJsonLd()} />
         <RootProviders>
           <ThemeProvider
             attribute="class"
