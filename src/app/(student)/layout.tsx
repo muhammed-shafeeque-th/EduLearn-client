@@ -6,8 +6,15 @@ import SiteFooter from '@/components/layout/site-footer';
 import { RouteFallback } from '@/components/ui/route-fallback';
 import { authGuard } from '@/lib/auth';
 import { getServerAuthSession } from '@/lib/auth/get-server-auth-session';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Student Dashboard',
+  description: 'Edulearn student dashboard - view your profile information and preferences',
+  robots: { index: false, follow: false },
+};
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   await authGuard({
