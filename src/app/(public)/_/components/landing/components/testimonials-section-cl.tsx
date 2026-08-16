@@ -17,7 +17,7 @@ const TestimonialsSection = () => {
   const testimonials = [
     {
       id: 1,
-      name: 'Jane Doe',
+      name: 'Muhammed Najin N',
       role: 'Designer',
       avatar:
         'https://images.unsplash.com/photo-1494790108755-2616b9c57449?w=60&h=60&fit=crop&crop=face',
@@ -26,7 +26,7 @@ const TestimonialsSection = () => {
     },
     {
       id: 2,
-      name: 'Alex Smith',
+      name: 'Muhammed K',
       role: 'Developer',
       avatar:
         'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face',
@@ -35,7 +35,7 @@ const TestimonialsSection = () => {
     },
     {
       id: 3,
-      name: 'Sarah Johnson',
+      name: 'Binsiya TH',
       role: 'Product Manager',
       avatar:
         'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face',
