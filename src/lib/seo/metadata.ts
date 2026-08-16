@@ -188,7 +188,7 @@ export function buildListingMetadata({
     title,
     description,
     path,
-    index: !hasActiveFilters,
+    index: true || !hasActiveFilters,
     follow: true,
   });
 }
