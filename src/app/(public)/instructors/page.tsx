@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import InstructorsPageContent from './_/components/instructors-page-content';
-import { ROUTES } from '@/lib/constants/routes';
+import { absoluteUrl, ROUTES } from '@/lib/constants/routes';
 import { InstructorPageSkeleton } from './_/components/skeletons/instructor-page-skeleton';
+import { SITE_NAME } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: 'Instructors | Find Top Teachers',
@@ -24,6 +25,15 @@ export const metadata: Metadata = {
       'Explore instructor profiles and find your next teacher or mentor on our platform.',
     type: 'website',
     url: ROUTES.public.instructors.root,
+    siteName: SITE_NAME,
+    images: [
+      {
+        url: absoluteUrl('/og/og-instructors.png'),
+        width: 1200,
+        height: 630,
+        alt: 'Structured courses, taught by practitioners',
+      },
+    ],
   },
 };
 
