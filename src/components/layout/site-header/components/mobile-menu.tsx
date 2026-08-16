@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import {
   Menu,
   X,
@@ -12,6 +13,7 @@ import {
   ShoppingCart,
   Bell,
   Shield,
+  LogOut,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { ROUTES } from '@/lib/constants/routes';
+import { PUBLIC_NAV_LINKS } from '@/lib/constants/nav-links';
 import { getUserRole } from '@/lib/utils/user.utils';
 import { Logo } from '@/components/ui/logo';
 
@@ -39,8 +42,10 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   const { logout } = useAuth();
+  const role = user ? getUserRole(user) : null;
 
   const handleLogout = useCallback(() => {
     setIsOpen(false);
@@ -65,10 +70,10 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
 
   const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
-      setIsOpen(false);
-    }
+    const trimmed = searchQuery.trim();
+    if (!trimmed) return;
+    setIsOpen(false);
+    router.push(`${ROUTES.public.courses.root}?search=${encodeURIComponent(trimmed)}`);
   };
 
   const NavLink = ({
@@ -181,19 +186,19 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
 
                 {/* Navigation Groups */}
                 <div className="space-y-8">
-                  {/* General Nav */}
+                  {/* Public marketing nav — previously missing entirely from
+                      the mobile menu (Pricing, Blog, About, FAQ, Contact),
+                      even though the same links exist in the desktop nav.
+                      Sourced from one shared list so this can't drift again. */}
                   <div className="space-y-1">
                     <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
-                      Navigation
+                      Explore
                     </h4>
-                    <NavLink href={ROUTES.public.courses.root} icon={BookOpen}>
-                      Browse Courses
-                    </NavLink>
-                    {user && (
-                      <NavLink href="/my-learning" icon={BookOpen}>
-                        My Learning
+                    {PUBLIC_NAV_LINKS.map((link) => (
+                      <NavLink key={link.href} href={link.href} icon={link.icon}>
+                        {link.label}
                       </NavLink>
-                    )}
+                    ))}
                   </div>
 
                   {/* Personal Nav */}
@@ -202,6 +207,9 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                       <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
                         Personal
                       </h4>
+                      <NavLink href={ROUTES.student.courses.root} icon={BookOpen}>
+                        My Learning
+                      </NavLink>
                       <NavLink href={ROUTES.student.wishlist} icon={Heart}>
                         Saved Courses
                       </NavLink>
@@ -215,43 +223,40 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                   )}
 
                   {/* Management Nav */}
-                  {user &&
-                    (getUserRole(user!) === 'instructor' ||
-                      getUserRole(user!) === 'admin' ||
-                      getUserRole(user!) === 'student') && (
-                      <div className="space-y-1">
-                        <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
-                          Management
-                        </h4>
-                        {getUserRole(user!) === 'instructor' && (
-                          <NavLink
-                            href={ROUTES.instructor.root}
-                            icon={GraduationCap}
-                            className="text-primary"
-                          >
-                            Instructor Dashboard
-                          </NavLink>
-                        )}
-                        {getUserRole(user!) === 'admin' && (
-                          <NavLink
-                            href={ROUTES.admin.root}
-                            icon={Shield}
-                            className="text-destructive"
-                          >
-                            Admin Dashboard
-                          </NavLink>
-                        )}
-                        {getUserRole(user!) === 'student' && (
-                          <NavLink
-                            href={ROUTES.public.becomeInstructor.root}
-                            icon={GraduationCap}
-                            className="text-primary"
-                          >
-                            Teach on EduLearn
-                          </NavLink>
-                        )}
-                      </div>
-                    )}
+                  {user && (role === 'instructor' || role === 'admin' || role === 'student') && (
+                    <div className="space-y-1">
+                      <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-3">
+                        Management
+                      </h4>
+                      {role === 'instructor' && (
+                        <NavLink
+                          href={ROUTES.instructor.root}
+                          icon={GraduationCap}
+                          className="text-primary"
+                        >
+                          Instructor Dashboard
+                        </NavLink>
+                      )}
+                      {role === 'admin' && (
+                        <NavLink
+                          href={ROUTES.admin.root}
+                          icon={Shield}
+                          className="text-destructive"
+                        >
+                          Admin Dashboard
+                        </NavLink>
+                      )}
+                      {role === 'student' && (
+                        <NavLink
+                          href={ROUTES.public.becomeInstructor.root}
+                          icon={GraduationCap}
+                          className="text-primary"
+                        >
+                          Teach on EduLearn
+                        </NavLink>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -264,7 +269,7 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                   className="w-full justify-start gap-3 h-12 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
                   onClick={handleLogout}
                 >
-                  <X className="h-5 w-5" />
+                  <LogOut className="h-5 w-5" />
                   Sign Out
                 </Button>
               </div>
