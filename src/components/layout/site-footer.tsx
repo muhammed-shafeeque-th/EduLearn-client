@@ -79,7 +79,10 @@ export default function SiteFooter() {
             <h3 className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-1.5">
               Contact Us
             </h3>
-            <p className="text-sm text-slate-400"> Karuvarakundu town 676525 , Malappuram, Kerala, India</p>
+            <p className="text-sm text-slate-400">
+              {' '}
+              Karuvarakundu town 676525 , Malappuram, Kerala, India
+            </p>
             <p className="text-sm text-slate-400">
               Tel:{' '}
               <a href="tel:+919744491844" className={linkClass}>
