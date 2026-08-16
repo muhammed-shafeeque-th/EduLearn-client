@@ -33,6 +33,10 @@ export const metadata: Metadata = {
     apple: '/icons/apple-icon.png',
     shortcut: ['/favicon.ico'],
   },
+  appleWebApp: {
+    capable: true,
+  },
+  applicationName: 'Edulearn',
   openGraph: {
     title: 'Structured courses, taught by practitioners',
     description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [
       {
-        url: absoluteUrl('/images/opengraph-image.png'),
+        url: absoluteUrl('/og/og-root-image.png'),
         width: 1200,
         height: 630,
         alt: 'Structured courses, taught by practitioners',
