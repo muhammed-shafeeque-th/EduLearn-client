@@ -60,7 +60,7 @@ The frontend follows a modular architecture with clear separation of concerns, r
 
 ### Landing Page
 
-![Landing Page](docs/images/screenshots/home.png)
+![Landing Page](docs/images/app-image-1.png)
 
 ### Course Catalog
 
