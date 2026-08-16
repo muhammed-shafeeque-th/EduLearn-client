@@ -3,10 +3,29 @@ import { SITE_NAME } from '../constants';
 import { config } from '../config';
 import { Instructor } from '@/types/user';
 
+const SITE_URL = config.siteUrl;
+
+const WEBSITE_ID = `${SITE_URL}#website`;
+const ORGANIZATION_ID = `${SITE_URL}#organization`;
+const LOGO_ID = `${SITE_URL}#logo`;
+
+const organizationRef = {
+  '@id': ORGANIZATION_ID,
+};
+
+const websiteRef = {
+  '@id': WEBSITE_ID,
+};
+
 /** BreadcrumbList structured data — pass the same items rendered by <Breadcrumbs />. */
 export function breadcrumbJsonLd(items: { label: string; path: string }[]) {
+  const lastPath = items[items.length - 1]?.path ?? '/';
+  const breadcrumbId = `${absoluteUrl(lastPath)}#breadcrumb`;
+
   return {
     '@context': 'https://schema.org',
+    '@id': breadcrumbId,
+
     '@type': 'BreadcrumbList',
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
@@ -17,7 +36,14 @@ export function breadcrumbJsonLd(items: { label: string; path: string }[]) {
   };
 }
 
-/** FAQPage structured data — powers the rich "People also ask" search result. */
+/**
+ * FAQPage structured data.
+ *
+ * Use only when the FAQ questions and answers are actually
+ * visible on the page.
+ *
+ * Note: FAQ structured data does not guarantee a Google rich result.
+ */
 export function faqPageJsonLd(faqs: { question: string; answer: string }[]) {
   return {
     '@context': 'https://schema.org',
@@ -34,57 +60,69 @@ export function faqPageJsonLd(faqs: { question: string; answer: string }[]) {
 }
 
 /**
- * Organization structured data — include ONCE sitewide (root layout is the
- * usual spot), not per-page. Duplicating it on every page adds no value and
- * bloats the DOM.
+ * Global EduLearn identity graph.
+ *
+ * Include this on the public homepage.
+ *
+ * Defines:
+ * - WebSite
+ * - Organization
+ * - Logo
+ *
+ * All other page-level JSON-LD can reference these entities
+ * using their stable @id values.
  */
-export function organizationJsonLd() {
+export function siteJsonLd() {
   return {
     '@context': 'https://schema.org',
-    '@type': 'EducationalOrganization',
-    name: SITE_NAME,
-    url: config.siteUrl,
-    logo: absoluteUrl('/logo.png'),
-    sameAs: [
-      'https://github.com/muhammed-shafeeque-th',
-      'https://instagram.com/web-edulearn',
-      'https://facebook.com/edulearn',
-      'https://twitter.com/edulearn',
-      'https://linkedin.com/company/edulearn',
-    ],
-  };
-}
-
-/**
- * WebSite structured data with a SearchAction — this is what unlocks the
- * "sitelinks search box" under your result on Google. Include once, same
- * place as organizationJsonLd (root layout).
- */
-export function websiteJsonLd() {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: SITE_NAME,
-    url: config.siteUrl,
-    alternateName: 'EduLearn Online Learning Platform',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${config.siteUrl}/courses?search={search_term_string}`,
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': WEBSITE_ID,
+        url: SITE_URL,
+        name: SITE_NAME,
+        alternateName: 'EduLearn Online Learning Platform',
+        description:
+          'EduLearn is an online learning platform offering practical courses in software development and technology.',
+        publisher: organizationRef,
       },
-      'query-input': 'required name=search_term_string',
-    },
+
+      {
+        '@type': 'Organization',
+        '@id': ORGANIZATION_ID,
+        name: SITE_NAME,
+        url: SITE_URL,
+        logo: {
+          '@type': 'ImageObject',
+          '@id': LOGO_ID,
+          url: absoluteUrl('/logo.png'),
+          contentUrl: absoluteUrl('/logo.png'),
+        },
+        sameAs: [
+          'https://github.com/muhammed-shafeeque-th',
+          'https://instagram.com/web-edulearn',
+          'https://facebook.com/edulearn',
+          'https://twitter.com/edulearn',
+          'https://linkedin.com/company/edulearn',
+        ],
+      },
+    ],
   };
 }
 
 /** ContactPage structured data. */
 export function contactPageJsonLd() {
+  const url = absoluteUrl('/contact');
+
   return {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
+    '@id': `${url}#webpage`,
     name: `Contact ${SITE_NAME}`,
-    url: absoluteUrl('/contact'),
+    url,
+
+    isPartOf: websiteRef,
+    about: organizationRef,
   };
 }
 
@@ -107,17 +145,16 @@ export function courseJsonLd(course: {
   level?: 'Beginner' | 'Intermediate' | 'Advanced';
   language?: string;
 }) {
+  const url = absoluteUrl(`/courses/${course.slug}`);
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: course.title,
+    '@id': `${url}#course`,
+    url,
+
     description: course.description,
-    url: absoluteUrl(`/courses/${course.slug}`),
-    provider: {
-      '@type': 'EducationalOrganization',
-      name: SITE_NAME,
-      sameAs: config.siteUrl,
-    },
+    provider: organizationRef,
     ...(course.instructorName
       ? { instructor: { '@type': 'Person', name: course.instructorName } }
       : {}),
@@ -139,32 +176,46 @@ export function courseJsonLd(course: {
           },
         }
       : {}),
-    ...(course.ratingValue && course.ratingCount
-      ? {
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: course.ratingValue,
-            ratingCount: course.ratingCount,
-          },
-        }
-      : {}),
   };
 }
 
 /** Person structured data for instructor profile pages. */
 export function personJsonLd(instructor: Instructor) {
+  const url = absoluteUrl(`/instructors/${instructor.id}`);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
+    '@id': `${url}#person`,
+
     name: instructor.username,
-    url: absoluteUrl(`/instructors/${instructor.id}`),
-    jobTitle: instructor.instructorProfile?.headline,
-    ...(instructor.instructorProfile?.bio
-      ? { description: instructor.instructorProfile?.bio }
+    url,
+
+    ...(instructor.instructorProfile?.headline
+      ? {
+          jobTitle: instructor.instructorProfile.headline,
+        }
       : {}),
-    ...(instructor.avatar ? { image: absoluteUrl(instructor.avatar) } : {}),
-    ...(instructor.socials?.length ? { sameAs: instructor.socials.map((s) => s.profileUrl) } : {}),
-    worksFor: { '@type': 'EducationalOrganization', name: SITE_NAME },
+
+    ...(instructor.instructorProfile?.bio
+      ? {
+          description: instructor.instructorProfile.bio,
+        }
+      : {}),
+
+    ...(instructor.avatar
+      ? {
+          image: absoluteUrl(instructor.avatar),
+        }
+      : {}),
+
+    ...(instructor.socials?.length
+      ? {
+          sameAs: instructor.socials.map((s) => s.profileUrl),
+        }
+      : {}),
+
+    worksFor: organizationRef,
   };
 }
 
@@ -177,23 +228,44 @@ export function blogPostingJsonLd(post: {
   publishedAt: string;
   updatedAt?: string;
   authorName: string;
+  authorUrl?: string;
 }) {
+  const url = absoluteUrl(`/blog/${post.slug}`);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+
     headline: post.title,
     description: post.excerpt,
-    url: absoluteUrl(`/blog/${post.slug}`),
+    url,
+
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${url}#webpage`,
+    },
+
+    author: {
+      '@type': 'Person',
+      name: post.authorName,
+      ...(post.authorUrl
+        ? {
+            url: absoluteUrl(post.authorUrl),
+          }
+        : {}),
+    },
+
+    publisher: organizationRef,
+
     datePublished: post.publishedAt,
     dateModified: post.updatedAt ?? post.publishedAt,
-    author: { '@type': 'Person', name: post.authorName },
-    publisher: {
-      '@type': 'Organization',
-      name: SITE_NAME,
-      logo: { '@type': 'ImageObject', url: absoluteUrl('/logo.png') },
-    },
-    ...(post.coverImageUrl ? { image: absoluteUrl(post.coverImageUrl) } : {}),
-    mainEntityOfPage: { '@type': 'WebPage', '@id': absoluteUrl(`/blog/${post.slug}`) },
+
+    ...(post.coverImageUrl
+      ? {
+          image: [absoluteUrl(post.coverImageUrl)],
+        }
+      : {}),
   };
 }
 
@@ -244,18 +316,35 @@ export function articleJsonLd(input: {
 }
 
 /** Blog listing structured data — an ItemList of the posts shown on /blog. */
-export function blogListJsonLd(posts: { title: string; path: string; publishedAt: string }[]) {
+export function blogListJsonLd(
+  posts: {
+    title: string;
+    path: string;
+    publishedAt: string;
+  }[]
+) {
+  const url = absoluteUrl('/blog');
+
   return {
     '@context': 'https://schema.org',
-    '@type': 'Blog',
+    '@type': 'CollectionPage',
+    '@id': `${url}#webpage`,
+
     name: `${SITE_NAME} Blog`,
-    url: absoluteUrl('/blog'),
-    blogPost: posts.map((post) => ({
-      '@type': 'BlogPosting',
-      headline: post.title,
-      url: absoluteUrl(post.path),
-      datePublished: post.publishedAt,
-    })),
+    url,
+
+    isPartOf: websiteRef,
+
+    mainEntity: {
+      '@type': 'ItemList',
+      '@id': `${url}#itemlist`,
+      itemListElement: posts.map((post, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: post.title,
+        url: absoluteUrl(post.path),
+      })),
+    },
   };
 }
 
@@ -272,12 +361,10 @@ export function becomeInstructorPageJsonLd() {
         name: 'Become an Instructor | Teach on EduLearn',
         description:
           'Join EduLearn as an instructor and share your knowledge with learners. Learn about instructor benefits, requirements, and how to start teaching on EduLearn.',
-        isPartOf: {
-          '@id': `${absoluteUrl('/')}#website`,
-        },
-        about: {
-          '@id': `${absoluteUrl('/')}#organization`,
-        },
+
+        isPartOf: websiteRef,
+        about: organizationRef,
+
         breadcrumb: {
           '@id': `${url}#breadcrumb`,
         },
@@ -291,7 +378,7 @@ export function becomeInstructorPageJsonLd() {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: absoluteUrl('/'),
+            item: SITE_URL,
           },
           {
             '@type': 'ListItem',
