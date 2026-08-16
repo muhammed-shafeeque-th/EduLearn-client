@@ -10,6 +10,11 @@ interface PageSeoInput {
   /** Set false for utility/legal pages you don't want indexed yet (e.g. staging). */
   index?: boolean;
   ogImage?: string;
+  og?: {
+    title?: string;
+    description?: string;
+    image?: string;
+  };
 }
 
 /**
@@ -30,6 +35,7 @@ export function buildMetadata({
   keywords,
   index = true,
   ogImage = '/og/default.png',
+  og,
 }: PageSeoInput): Metadata {
   const url = absoluteUrl(path);
 
@@ -40,18 +46,18 @@ export function buildMetadata({
     alternates: { canonical: url },
     robots: index ? { index: true, follow: true } : { index: false, follow: false },
     openGraph: {
-      title: `${title} | ${SITE_NAME}`,
-      description,
+      title: `${og?.title || title} | ${SITE_NAME}`,
+      description: og?.description || description,
       url,
       siteName: SITE_NAME,
       type: 'website',
-      images: [{ url: absoluteUrl(ogImage), width: 1200, height: 630, alt: title }],
+      images: [{ url: absoluteUrl(og?.image || ogImage), width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | ${SITE_NAME}`,
+      title: `${og?.title || title} | ${SITE_NAME}`,
       description,
-      images: [absoluteUrl(ogImage)],
+      images: [absoluteUrl(og?.image || ogImage)],
     },
   };
 }

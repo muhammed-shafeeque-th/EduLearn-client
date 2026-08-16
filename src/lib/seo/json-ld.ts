@@ -258,3 +258,49 @@ export function blogListJsonLd(posts: { title: string; path: string; publishedAt
     })),
   };
 }
+
+export function becomeInstructorPageJsonLd() {
+  const url = absoluteUrl('/become-instructor');
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${url}#webpage`,
+        url,
+        name: 'Become an Instructor | Teach on EduLearn',
+        description:
+          'Join EduLearn as an instructor and share your knowledge with learners. Learn about instructor benefits, requirements, and how to start teaching on EduLearn.',
+        isPartOf: {
+          '@id': `${absoluteUrl('/')}#website`,
+        },
+        about: {
+          '@id': `${absoluteUrl('/')}#organization`,
+        },
+        breadcrumb: {
+          '@id': `${url}#breadcrumb`,
+        },
+      },
+
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${url}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: absoluteUrl('/'),
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Become an Instructor',
+            item: url,
+          },
+        ],
+      },
+    ],
+  };
+}

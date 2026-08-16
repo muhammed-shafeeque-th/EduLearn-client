@@ -4,6 +4,7 @@ import { InstructorRegistrationForm } from './_/components/registration-form';
 import RegistrationHero from './_/components/registration-hero';
 import { RegistrationBenefits } from './_/components/registration-benefits';
 import { RegistrationSkeleton } from './_/components/skeletons/registration-skeleton';
+import { authGuard } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Become an Instructor - Start Teaching Today',
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function InstructorRegisterPage() {
+  await authGuard({});
+
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={<RegistrationSkeleton />}>

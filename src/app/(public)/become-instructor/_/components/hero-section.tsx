@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import React from 'react';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/routes';
 
 const HERO_IMAGE = {
   src: '/images/instructors/instructors-gathering.jpg',
@@ -15,12 +17,12 @@ const HERO_IMAGE = {
 };
 
 export function BecomeInstructorHero() {
-  const router = useRouter();
+  // const router = useRouter();
 
-  // Navigation handler as a callback for better optimization
-  const handleRegisterClick = React.useCallback(() => {
-    router.push('/become-instructor/register');
-  }, [router]);
+  // // Navigation handler as a callback for better optimization
+  // const handleRegisterClick = React.useCallback(() => {
+  //   router.push('/become-instructor/register');
+  // }, [router]);
 
   return (
     <section
@@ -91,13 +93,16 @@ export function BecomeInstructorHero() {
             {/* Call to Action */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button
-                onClick={handleRegisterClick}
+                // onClick={handleRegisterClick}
+                asChild
                 size="lg"
                 className="bg-primary/80 hover:bg-primary text-white px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                 aria-label="Register as Instructor"
               >
-                <span>Register Now</span>
-                <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                <Link href={ROUTES.public.becomeInstructor.register}>
+                  <span>Register Now</span>
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                </Link>
               </Button>
             </div>
           </motion.div>
