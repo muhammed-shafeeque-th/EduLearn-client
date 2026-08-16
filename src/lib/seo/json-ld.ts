@@ -46,10 +46,11 @@ export function organizationJsonLd() {
     url: config.siteUrl,
     logo: absoluteUrl('/logo.png'),
     sameAs: [
+      'https://github.com/muhammed-shafeeque-th',
+      'https://instagram.com/web-edulearn',
       'https://facebook.com/edulearn',
       'https://twitter.com/edulearn',
       'https://linkedin.com/company/edulearn',
-      'https://instagram.com/edulearn',
     ],
   };
 }
@@ -65,6 +66,7 @@ export function websiteJsonLd() {
     '@type': 'WebSite',
     name: SITE_NAME,
     url: config.siteUrl,
+    alternateName: 'EduLearn Online Learning Platform',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
