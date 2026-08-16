@@ -34,7 +34,7 @@ export default function SiteFooter() {
             aria-label="EduLearn home"
             className="inline-flex items-center gap-2.5"
           >
-            <Logo />
+            <Logo mode="dark" />
           </Link>
           <p className="text-sm leading-relaxed text-slate-400">
             EduLearn is a leading online learning platform dedicated to accessible, engaging, and
@@ -79,16 +79,16 @@ export default function SiteFooter() {
             <h3 className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-1.5">
               Contact Us
             </h3>
-            <p className="text-sm text-slate-400"> Karuvarakundu town, Malappuram, Kerala, India</p>
+            <p className="text-sm text-slate-400"> Karuvarakundu town 676525 , Malappuram, Kerala, India</p>
             <p className="text-sm text-slate-400">
               Tel:{' '}
-              <a href="tel:+16175550148" className={linkClass}>
+              <a href="tel:+919744491844" className={linkClass}>
                 +91 9744491844
               </a>
             </p>
             <p className="text-sm text-slate-400">
               Mail:{' '}
-              <a href="mailto:support@edulearn.com" className={linkClass}>
+              <a href="mailto:mhdshafeequeofficial@gmail.com" className={linkClass}>
                 support@edulearn.com
               </a>
             </p>

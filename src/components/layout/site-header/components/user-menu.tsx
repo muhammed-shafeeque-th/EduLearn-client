@@ -1,6 +1,16 @@
 'use client';
 
-import { User, Settings, BookOpen, Heart, ShoppingCart, LogOut, Bell } from 'lucide-react';
+import {
+  User,
+  Settings,
+  BookOpen,
+  Heart,
+  ShoppingCart,
+  LogOut,
+  Bell,
+  GraduationCap,
+  Shield,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +20,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../../../../hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { AuthUser } from '@/types/auth';
-import React, { useCallback, memo, useState, useRef } from 'react';
+import { useCallback, memo } from 'react';
 import { ROUTES } from '@/lib/constants/routes';
+import { getUserRole } from '@/lib/utils/user.utils';
 
 interface UserMenuProps {
   user: AuthUser;
@@ -49,12 +60,7 @@ const menuItems = [
     icon: Heart,
     'data-testid': 'user-menu-wishlist',
   },
-  {
-    href: ROUTES.student.cart,
-    label: 'Cart',
-    icon: ShoppingCart,
-    'data-testid': 'user-menu-cart',
-  },
+  { href: ROUTES.student.cart, label: 'Cart', icon: ShoppingCart, 'data-testid': 'user-menu-cart' },
   {
     href: ROUTES.student.notifications,
     label: 'Notifications',
@@ -65,8 +71,7 @@ const menuItems = [
 
 export const UserMenu = memo(function UserMenu({ user }: UserMenuProps) {
   const { logout } = useAuth();
-  const [, setOpen] = useState(false);
-  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
+  const role = getUserRole(user);
 
   const handleLogout = useCallback(
     (e: React.MouseEvent) => {
@@ -76,25 +81,9 @@ export const UserMenu = memo(function UserMenu({ user }: UserMenuProps) {
     [logout]
   );
 
-  const handleMouseEnter = () => {
-    if (closeTimeout.current) {
-      clearTimeout(closeTimeout.current);
-      closeTimeout.current = null;
-    }
-    setOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    closeTimeout.current = setTimeout(() => {
-      setOpen(false);
-    }, 150); // Slightly longer delay for better user experience
-  };
-
   const avatarSrc = user?.avatar || '/images/fallback-user-avatar.jpg';
   const avatarAlt = user?.username || 'User avatar';
   const initials = getInitials(user?.username);
-
-  console.log('User avatar : ' + avatarSrc);
 
   return (
     <DropdownMenu>
@@ -115,8 +104,6 @@ export const UserMenu = memo(function UserMenu({ user }: UserMenuProps) {
         className="w-64 p-2 shadow-xl border-border/50 backdrop-blur-sm"
         align="end"
         sideOffset={8}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
       >
         <div className="flex flex-col space-y-1 p-3 leading-none rounded-lg bg-muted/30 mb-2">
           <p className="font-bold text-sm">{user?.username || 'User'}</p>
@@ -138,6 +125,50 @@ export const UserMenu = memo(function UserMenu({ user }: UserMenuProps) {
             </DropdownMenuItem>
           ))}
         </div>
+
+        {/* Role-based dashboard link — previously only present in the
+            mobile menu, so instructors/admins had no way to reach their
+            dashboard from the desktop header at all. */}
+        {(role === 'instructor' || role === 'admin' || role === 'student') && (
+          <>
+            <DropdownMenuSeparator className="my-2" />
+            <div className="space-y-1">
+              {role === 'instructor' && (
+                <DropdownMenuItem asChild className="rounded-md">
+                  <Link
+                    href={ROUTES.instructor.root}
+                    className="cursor-pointer flex items-center w-full py-2 hover:bg-primary/10 text-primary transition-colors"
+                  >
+                    <GraduationCap className="mr-3 h-4 w-4" />
+                    <span className="text-sm font-medium">Instructor Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {role === 'admin' && (
+                <DropdownMenuItem asChild className="rounded-md">
+                  <Link
+                    href={ROUTES.admin.root}
+                    className="cursor-pointer flex items-center w-full py-2 hover:bg-destructive/10 text-destructive transition-colors"
+                  >
+                    <Shield className="mr-3 h-4 w-4" />
+                    <span className="text-sm font-medium">Admin Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {role === 'student' && (
+                <DropdownMenuItem asChild className="rounded-md">
+                  <Link
+                    href={ROUTES.public.becomeInstructor.root}
+                    className="cursor-pointer flex items-center w-full py-2 hover:bg-primary/10 text-primary transition-colors"
+                  >
+                    <GraduationCap className="mr-3 h-4 w-4" />
+                    <span className="text-sm font-medium">Teach on EduLearn</span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
+            </div>
+          </>
+        )}
 
         <DropdownMenuSeparator className="my-2" />
 
