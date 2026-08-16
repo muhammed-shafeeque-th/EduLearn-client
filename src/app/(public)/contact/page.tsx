@@ -34,7 +34,7 @@ const CHANNELS = [
   {
     icon: MapPin,
     title: 'Office',
-    detail: '148 Franklin Street, Boston, MA',
+    detail: 'Karuvarakundu town 676525 , Malappuram, Kerala, India',
     note: 'By appointment only',
   },
 ];

@@ -45,7 +45,7 @@ export function ContactForm() {
             id="contact-name"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            placeholder="Jordan Lee"
+            placeholder="Muhammed Shafeeque"
             className="rounded-xl"
           />
         </div>
@@ -61,7 +61,7 @@ export function ContactForm() {
             type="email"
             value={form.email}
             onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-            placeholder="jordan@example.com"
+            placeholder="shafeeque@example.com"
             className="rounded-xl"
           />
         </div>
