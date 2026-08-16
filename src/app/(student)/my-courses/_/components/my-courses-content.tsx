@@ -11,6 +11,7 @@ import { RefreshCw, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEnrollmentInfinite } from '@/states/server/enrollment/use-enrollment';
 import { ROUTES } from '@/lib/constants/routes';
+import Link from 'next/link';
 
 export function MyCoursesContent() {
   const router = useRouter();
@@ -105,8 +106,8 @@ export function MyCoursesContent() {
           <p className="text-muted-foreground mb-6">
             Start your learning journey by enrolling in your first course.
           </p>
-          <Button onClick={() => router.push(ROUTES.public.courses.root)} size="lg">
-            Browse Courses
+          <Button asChild size="lg">
+            <Link href={ROUTES.public.courses.root}>Browse Courses</Link>{' '}
           </Button>
         </div>
       </div>
