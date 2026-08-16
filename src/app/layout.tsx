@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [
       {
-        url: absoluteUrl('/images/courses/opengraph-image.png'),
+        url: absoluteUrl('/images/opengraph-image.png'),
         width: 1200,
         height: 630,
         alt: 'Structured courses, taught by practitioners',
