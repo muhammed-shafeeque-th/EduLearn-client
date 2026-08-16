@@ -8,6 +8,8 @@ import React from 'react';
 import { config } from '@/lib/config';
 import { SITE_NAME } from '@/lib/constants';
 import { absoluteUrl } from '@/lib/constants/routes';
+import { JsonLd } from '@/components/seo/json-ld';
+import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,9 +28,13 @@ export const metadata: Metadata = {
   description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
   robots: 'index, follow',
   metadataBase: new URL(config.siteUrl),
-  icons: { icon: '/icons/icon.png', apple: '/icons/apple-icon.png' },
+  icons: {
+    icon: [{ url: '/icons/icon.png', type: 'image/png' }],
+    apple: '/icons/apple-icon.png',
+    shortcut: ['/favicon.ico'],
+  },
   openGraph: {
-    title: "Structured courses, taught by practitioners'",
+    title: 'Structured courses, taught by practitioners',
     description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
     url: new URL(config.siteUrl),
     siteName: SITE_NAME,
@@ -49,6 +55,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased`}>
+        {/* Sitewide structured data */}
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
         <RootProviders>
           <ThemeProvider
             attribute="class"
