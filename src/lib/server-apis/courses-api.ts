@@ -1,6 +1,6 @@
 'use server';
 
-import { fetchApi, FetchOptions } from './server-apis';
+import { fetchApi, FetchOptions } from './fetch-api';
 import { Course } from '@/types/course';
 
 export interface CourseParams {

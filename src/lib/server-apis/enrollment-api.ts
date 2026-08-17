@@ -1,7 +1,7 @@
 'use server';
 
 import { serverEnrollmentService } from '@/services/server-service-clients';
-import { fetchApi, FetchOptions } from './server-apis';
+import { fetchApi, FetchOptions } from './fetch-api';
 import { Course } from '@/types/course';
 import { cache } from 'react';
 import { RequestOptions } from '@/services/base-service';
