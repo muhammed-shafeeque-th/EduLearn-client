@@ -174,7 +174,7 @@ export function SuccessContent({
           >
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
-                onClick={() => router.push(ROUTES.student.courses.root)}
+                onClick={() => router.push(ROUTES.student.profile.courses.root)}
                 size="lg"
                 className="flex items-center gap-2"
               >

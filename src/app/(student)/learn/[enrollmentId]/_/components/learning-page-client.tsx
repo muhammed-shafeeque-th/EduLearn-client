@@ -261,7 +261,7 @@ export function EnrollmentLearningClient({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push(ROUTES.student.courses.root)}
+              onClick={() => router.push(ROUTES.student.profile.courses.root)}
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
