@@ -2,43 +2,37 @@
 import { config } from '@/lib/config';
 import { decode } from 'jsonwebtoken';
 
-export const getAccessTokenOptions = (token?: string) => {
-  let expiresAtDate, maxAge;
+const getBaseCookieOptions = (token?: string) => {
+  let expiresAtDate: Date | undefined;
+  let maxAge: number | undefined;
+
   if (token) {
     const jwtPayload: any = decode(token);
-    expiresAtDate = new Date(jwtPayload.exp * 1000);
-    maxAge = (jwtPayload.exp - jwtPayload.iat) * 1000;
+    if (jwtPayload?.exp) {
+      expiresAtDate = new Date(jwtPayload.exp * 1000);
+      maxAge = (jwtPayload.exp - jwtPayload.iat) * 1000;
+    }
   }
 
-  const cookie = {
+  return {
     expires: expiresAtDate,
-    httpOnly: true || config.environment === 'production',
     maxAge: maxAge,
+    httpOnly: true,
+    secure: true, // Required when sameSite is 'none'
     sameSite: 'none',
-    secure: true,
-    path: config.appBaseUrl,
+    domain: config.appBaseDomain, // Shared across api.* and edulearn.*
+    path: '/', // Keep path as root so it's sent on all requests
   };
+};
 
-  return cookie;
+export const getAccessTokenOptions = (token?: string) => {
+  return getBaseCookieOptions(token);
 };
 
 export const getRefreshTokenOptions = (token?: string) => {
-  let expiresAtDate, maxAge;
-  if (token) {
-    const jwtPayload: any = decode(token);
-    expiresAtDate = new Date(jwtPayload.exp * 1000);
-    maxAge = (jwtPayload.exp - jwtPayload.iat) * 1000;
-  }
-
-  const cookie = {
-    expires: expiresAtDate,
-    httpOnly: true || config.environment === 'production',
-    maxAge: maxAge,
-    sameSite: 'none',
-    secure: true,
-    // path: '/api/v1/auth',
-    path: config.appBaseUrl,
+  return {
+    ...getBaseCookieOptions(token),
+    // Optional: /api/v1/auth/refresh
+    path: '/',
   };
-
-  return cookie;
 };
