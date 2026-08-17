@@ -5,20 +5,38 @@ import { Metadata } from 'next';
 import { fetchServerCourses } from '@/lib/server-apis';
 import type { CourseMeta } from '@/types/course';
 import { buildListingMetadata } from '@/lib/seo/metadata';
-import { ROUTES } from '@/lib/constants/routes';
+import { absoluteUrl, ROUTES } from '@/lib/constants/routes';
 import { itemListJsonLd } from '@/lib/seo/json-ld';
 import { JsonLd } from '@/components/seo/json-ld';
+import { SITE_NAME } from '@/lib/constants';
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const { search, page } = await searchParams;
-  const hasActiveFilters = Boolean(search || (page && page !== '1'));
+export async function generateMetadata({}: PageProps): Promise<Metadata> {
+  // const { search, page } = await searchParams;
+  // const hasActiveFilters = Boolean(search || (page && page !== '1'));
 
-  return buildListingMetadata({
-    title: 'Browse Courses',
-    description: 'Browse expert-led online courses across design, tech, business, and more.',
-    path: ROUTES.public.courses.root,
-    hasActiveFilters,
-  });
+  return {
+    ...buildListingMetadata({
+      title: 'Browse Courses',
+      description: 'Browse expert-led online courses across design, tech, business, and more.',
+      path: ROUTES.public.courses.root,
+    }),
+    openGraph: {
+      title: 'Browse Courses, taught by practitioners',
+      description: 'Browse expert-led online courses across design, tech, business, and more',
+      url: absoluteUrl(ROUTES.public.courses.root),
+      siteName: SITE_NAME,
+      type: 'website',
+      locale: 'en_US',
+      images: [
+        {
+          url: absoluteUrl('/og/og-explore-courses.png'),
+          width: 1200,
+          height: 630,
+          alt: 'Structured courses, taught by practitioners',
+        },
+      ],
+    },
+  };
 }
 
 export const revalidate = 60;
