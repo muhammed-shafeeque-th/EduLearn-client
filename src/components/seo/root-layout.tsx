@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { SITE_NAME } from '@/lib/constants';
 import { config } from '@/lib/config';
 import { JsonLd } from './json-ld';
-import { websiteJsonLd, organizationJsonLd } from '@/lib/seo/json-ld';
+import { siteJsonLd } from '@/lib/seo';
 
 // Sitewide default metadata. Individual pages override title/description via
 // buildMetadata(); metadataBase makes every relative OG/Twitter image
@@ -22,8 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         {/* Sitewide structured data — render once here, never on individual pages */}
-        <JsonLd data={organizationJsonLd()} />
-        <JsonLd data={websiteJsonLd()} />
+        <JsonLd data={siteJsonLd()} />
         {children}
       </body>
     </html>

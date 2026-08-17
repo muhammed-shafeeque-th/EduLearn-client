@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { buildMetadata, organizationJsonLd } from '@/lib/seo';
+import { aboutPageJsonLd, buildMetadata } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/json-ld';
 import { PageHero } from '@/components/layout/page-hero';
 import { NumberedSection } from '@/components/layout/numbered-section';
@@ -25,7 +25,7 @@ const STATS = [
 export default function AboutPage() {
   return (
     <main className="bg-background min-h-screen">
-      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={aboutPageJsonLd()} />
 
       <PageHero
         eyebrow="About EduLearn"

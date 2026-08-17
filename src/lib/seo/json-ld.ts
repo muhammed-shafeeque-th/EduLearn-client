@@ -125,6 +125,21 @@ export function contactPageJsonLd() {
     about: organizationRef,
   };
 }
+/** About Page structured data. */
+export function aboutPageJsonLd() {
+  const url = absoluteUrl('/about');
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${url}#webpage`,
+    name: `About ${SITE_NAME}`,
+    url,
+
+    isPartOf: websiteRef,
+    mainEntity: organizationRef,
+  };
+}
 
 /**
  * Course structured data — this is the highest-value schema on the whole
