@@ -4,7 +4,7 @@ import { InstructorPageContent } from './_/components/instructor-page-content';
 import type { Metadata } from 'next';
 import { Instructor, User } from '@/types/user';
 import { InstructorPageSkeleton } from '../_/components/skeletons/instructor-page-skeleton';
-import { fetchApi } from '@/lib/server-apis/server-apis';
+import { fetchApi } from '@/lib/server-apis';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 import { getAllInstructorIds, getInstructorById } from '@/lib/seo/seo-sources';
 import { buildInstructorMetadata } from '@/lib/seo/metadata';

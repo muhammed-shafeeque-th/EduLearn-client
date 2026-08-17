@@ -2,9 +2,9 @@
 
 import { useCurrentUser } from '@/states/server/user/use-current-user';
 import { MyCoursesPageSkeleton } from './skeletons/my-course-page-skeletons';
-import { ProfileSidebar } from '../../../profile/_/components/profile-sidebar';
-import { MobileSidebar } from '../../../profile/_/components/mobile-sidebar';
 import { getWindow } from '@/lib/utils';
+import { ProfileSidebar } from '../../../_/components/profile-sidebar';
+import { MobileSidebar } from '../../../_/components/mobile-sidebar';
 
 interface MyCoursesLayoutClientProps {
   children: React.ReactNode;

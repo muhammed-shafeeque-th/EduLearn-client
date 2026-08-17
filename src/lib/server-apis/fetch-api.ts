@@ -62,7 +62,7 @@ export async function fetchApi<T = any>(
         let refreshFn = authRefresh;
 
         if (!refreshFn) {
-          // Dynamic import guarantees 'cookies()' module isn't loaded during static analysis
+          // Dynamic import guarantees dynamic modules isn't loaded during static analysis
           const { serverRefresh } = await import('@/lib/server-apis/server-apis');
           refreshFn = serverRefresh;
         }
