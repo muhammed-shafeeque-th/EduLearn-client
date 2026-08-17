@@ -8,7 +8,6 @@ import { buildListingMetadata } from '@/lib/seo/metadata';
 import { ROUTES } from '@/lib/constants/routes';
 import { itemListJsonLd } from '@/lib/seo/json-ld';
 import { JsonLd } from '@/components/seo/json-ld';
-import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { search, page } = await searchParams;
@@ -81,12 +80,7 @@ export default async function CoursesPage({ searchParams }: PageProps) {
           courses.map((c) => ({ name: c.title, path: ROUTES.public.courses.course(c.slug) }))
         )}
       />
-      <Breadcrumbs
-        items={[
-          { label: 'Home', path: ROUTES.public.home },
-          { label: 'Courses', path: ROUTES.public.courses.root },
-        ]}
-      />
+
       <Suspense fallback={<CoursesPageSkeleton />}>
         <CoursesPageContainer initialPage={initialPage} />
       </Suspense>
