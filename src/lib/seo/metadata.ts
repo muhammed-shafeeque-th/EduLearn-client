@@ -182,7 +182,7 @@ export function buildListingMetadata({
   title: string;
   description: string;
   path: string;
-  hasActiveFilters: boolean;
+  hasActiveFilters?: boolean;
 }): Metadata {
   return buildMetadata({
     title,
