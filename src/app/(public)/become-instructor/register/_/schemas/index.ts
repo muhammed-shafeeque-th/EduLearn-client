@@ -38,11 +38,11 @@ export const personalInfoSchema = z.object({
   // Username (as first name, but field name is `username`)
   username: z
     .string()
-    .min(2, { message: 'First name must be at least 2 characters' })
-    .max(50, { message: 'First name must be less than 50 characters' })
+    .min(2, { message: 'Username must be at least 2 characters' })
+    .max(50, { message: 'Username must be less than 50 characters' })
     .trim()
     .regex(/^[a-zA-Z\s'-]+$/, {
-      message: 'First name can only contain letters, spaces, hyphens, and apostrophes',
+      message: 'Username can only contain letters, spaces, hyphens, and apostrophes',
     }),
 
   // Professional Headline
