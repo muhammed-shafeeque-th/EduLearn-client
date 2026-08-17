@@ -28,7 +28,7 @@ export const metadata: Metadata = buildMetadata({
   og: {
     title: 'Become an Instructor',
     description: 'Share your knowledge with millions of students worldwide',
-    image: '/og/og-become-instructor.jpg',
+    image: '/og/og-become-instructor.png',
   },
 });
 
