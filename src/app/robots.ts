@@ -21,7 +21,12 @@ export default function robots(): MetadataRoute.Robots {
       // open to real search engines — adjust or remove as needed.
       // { userAgent: 'GPTBot', disallow: '/' },
     ],
-    sitemap: `${config.siteUrl}/sitemap.xml`,
+    sitemap: [
+      `${config.siteUrl}/sitemap/static.xml`,
+      `${config.siteUrl}/sitemap/courses.xml`,
+      `${config.siteUrl}/sitemap/instructors.xml`,
+      `${config.siteUrl}/sitemap/blog.xml`,
+    ],
     host: config.siteUrl,
   };
 }
