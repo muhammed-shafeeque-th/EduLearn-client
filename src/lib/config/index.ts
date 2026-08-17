@@ -5,8 +5,12 @@ export const config = {
   twitterHandle: process.env.NEXT_TWITTER_HANDLE || 'http://localhost:9000',
   googleSiteVerification: process.env.NEXT_GOOGLE_SITE_VERIFICATION || 'http://localhost:9000',
   environment: process.env.NODE_ENV || 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-  isDevelopment: process.env.NODE_ENV === 'development',
+  get isProduction() {
+    return config.environment === 'production';
+  },
+  get isDevelopment() {
+    return config.environment === 'development';
+  },
   googlePublicClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
