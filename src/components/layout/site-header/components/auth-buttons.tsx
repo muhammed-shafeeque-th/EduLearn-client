@@ -14,7 +14,7 @@ type AuthButtonsProps = {
 
 const MotionButton = motion(Button);
 
-const AuthButtons = React.memo(function AuthButtons({ isLoading }: AuthButtonsProps) {
+function AuthButtons({ isLoading }: AuthButtonsProps) {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2" aria-label="Authentication loading">
@@ -47,8 +47,6 @@ const AuthButtons = React.memo(function AuthButtons({ isLoading }: AuthButtonsPr
       </MotionButton>
     </div>
   );
-});
-
-AuthButtons.displayName = 'AuthButtons';
+}
 
 export default AuthButtons;

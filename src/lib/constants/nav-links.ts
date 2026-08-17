@@ -1,4 +1,4 @@
-import { BookOpen, Tag, Newspaper, Info, HelpCircle, Mail, type LucideIcon } from 'lucide-react';
+import { BookOpen, Newspaper, Info, HelpCircle, Mail, Users, type LucideIcon } from 'lucide-react';
 import { ROUTES } from './routes';
 
 export interface NavLinkConfig {
@@ -15,7 +15,7 @@ export interface NavLinkConfig {
  */
 export const PUBLIC_NAV_LINKS: NavLinkConfig[] = [
   { href: ROUTES.public.courses.root, label: 'Courses', icon: BookOpen },
-  { href: ROUTES.public.pricing, label: 'Pricing', icon: Tag },
+  { href: ROUTES.public.instructors.root, label: 'Instructors', icon: Users },
   { href: ROUTES.public.blog, label: 'Blog', icon: Newspaper },
   { href: ROUTES.public.about, label: 'About', icon: Info },
   { href: ROUTES.public.faq, label: 'FAQ', icon: HelpCircle },
