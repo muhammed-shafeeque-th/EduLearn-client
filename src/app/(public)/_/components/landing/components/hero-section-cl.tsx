@@ -1,31 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Play, Users, BookOpen, Star } from 'lucide-react';
 import Image from 'next/image';
-import { toast } from 'sonner';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/routes';
 
 const HeroSection = () => {
-  const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleGetStarted = async () => {
-    if (!email) {
-      toast.error('Please enter your email address');
-      return;
-    }
-
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    toast.success('Welcome to EduLearn! Check your email for next steps.');
-    setEmail('');
-    setIsLoading(false);
-  };
-
   return (
     <section className="relative min-h-screen flex items-center py-20 px-4 overflow-hidden">
       {/* Background gradient */}
@@ -70,29 +53,11 @@ const HeroSection = () => {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="space-y-4"
             >
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email to get started"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 text-base"
-                  />
-                </div>
-                <Button
-                  onClick={handleGetStarted}
-                  disabled={isLoading}
-                  className="h-12 px-8 text-base font-semibold"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      <span>Starting...</span>
-                    </div>
-                  ) : (
-                    'Start your instructor journey'
-                  )}
+              <div className="flex">
+                <Button className="h-12 px-8 text-base font-semibold" asChild>
+                  <Link href={ROUTES.public.becomeInstructor.root}>
+                    Start your instructor journey
+                  </Link>
                 </Button>
               </div>
 
