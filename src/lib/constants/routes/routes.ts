@@ -64,21 +64,20 @@ export const ROUTES = {
       security: '/profile/security',
       certificates: '/profile/certificates',
       certificate: (certificateId: string) => `/profile/certificates/${certificateId}`,
-    },
+      orders: {
+        root: '/profile/orders',
+        order: (id: string) => `/profile/orders/${id}`,
+      },
 
-    orders: {
-      root: '/orders',
-      order: (id: string) => `/orders/${id}`,
-    },
+      courses: {
+        root: '/profile/my-courses',
+        course: (id: string) => `/profile/my-courses/${id}`,
+      },
 
-    courses: {
-      root: '/my-courses',
-      course: (id: string) => `/my-courses/${id}`,
-    },
-
-    chats: {
-      root: '/chats',
-      chat: (id: string) => `/chats/${id}`,
+      chats: {
+        root: '/profile/chats',
+        chat: (id: string) => `/profile/chats/${id}`,
+      },
     },
 
     cart: '/cart',

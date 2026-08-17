@@ -49,7 +49,7 @@ const menuItems = [
     'data-testid': 'user-menu-profile',
   },
   {
-    href: ROUTES.student.courses.root,
+    href: ROUTES.student.profile.courses.root,
     label: 'My Learning',
     icon: BookOpen,
     'data-testid': 'user-menu-learning',

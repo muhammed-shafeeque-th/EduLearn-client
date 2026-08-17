@@ -349,7 +349,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                   className="w-full h-10 flex items-center justify-center gap-2 bg-green-400 hover:bg-green-600 text-white"
                   size="lg"
                 >
-                  <Link href={ROUTES.student.courses.root}>
+                  <Link href={ROUTES.student.profile.courses.root}>
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}

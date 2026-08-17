@@ -54,7 +54,7 @@ export const OrdersContent = memo(function OrdersContent() {
         params.delete('status');
       }
       params.delete('page');
-      router.push(`${ROUTES.student.orders}${params.size > 0 ? `?${params}` : ''}`, {
+      router.push(`${ROUTES.student.profile.orders}${params.size > 0 ? `?${params}` : ''}`, {
         scroll: false,
       });
     });

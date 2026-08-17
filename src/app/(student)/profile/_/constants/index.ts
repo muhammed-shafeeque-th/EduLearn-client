@@ -9,7 +9,7 @@ export const PROFILE_NAVIGATION = [
     description: 'Edit your profile information',
   },
   {
-    href: ROUTES.student.courses.root,
+    href: ROUTES.student.profile.courses.root,
     label: 'My Courses',
     icon: BookOpen,
     description: 'View your enrolled courses',
@@ -21,13 +21,13 @@ export const PROFILE_NAVIGATION = [
     description: 'View your course certificates',
   },
   {
-    href: ROUTES.student.chats.root,
+    href: ROUTES.student.profile.chats.root,
     label: 'My Chats',
     icon: MessageCircle,
     description: 'Chat with teachers',
   },
   {
-    href: ROUTES.student.chats.root,
+    href: ROUTES.student.profile.chats.root,
     label: 'My Orders',
     icon: BookOpen,
     description: 'View and manage your course orders and purchases',

@@ -259,7 +259,7 @@ const CourseCardComponent: React.FC<CourseCardProps> = ({ course }) => {
                         className="h-9 px-4 rounded-lg text-xs font-semibold"
                         asChild
                       >
-                        <Link href={ROUTES.student.courses.root}>Enrolled</Link>
+                        <Link href={ROUTES.student.profile.courses.root}>Enrolled</Link>
                       </Button>
                     ) : (
                       <Button

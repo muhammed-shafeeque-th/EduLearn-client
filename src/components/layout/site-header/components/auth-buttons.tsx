@@ -12,8 +12,6 @@ type AuthButtonsProps = {
   isLoading: boolean;
 };
 
-const MotionButton = motion(Button);
-
 function AuthButtons({ isLoading }: AuthButtonsProps) {
   if (isLoading) {
     return (
@@ -25,26 +23,38 @@ function AuthButtons({ isLoading }: AuthButtonsProps) {
   }
 
   return (
-    <div className="flex items-center gap-2" aria-label="Authentication actions">
-      <MotionButton
-        variant="ghost"
+    <div className="relative z-10 flex items-center gap-2" aria-label="Authentication actions">
+      <motion.div
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-        asChild
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 20,
+        }}
       >
-        <Link href={ROUTES.auth.login}>Log In</Link>
-      </MotionButton>
+        <Button variant="ghost" asChild>
+          <Link href={ROUTES.auth.login} className="touch-manipulation">
+            Log In
+          </Link>
+        </Button>
+      </motion.div>
 
-      <MotionButton
+      <motion.div
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-        className="dark:text-white"
-        asChild
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 20,
+        }}
       >
-        <Link href={ROUTES.auth.register}>Sign Up</Link>
-      </MotionButton>
+        <Button asChild className="dark:text-white">
+          <Link href={ROUTES.auth.register} className="touch-manipulation">
+            Sign Up
+          </Link>
+        </Button>
+      </motion.div>
     </div>
   );
 }

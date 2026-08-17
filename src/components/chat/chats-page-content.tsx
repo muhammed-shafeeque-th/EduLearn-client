@@ -20,7 +20,7 @@ import { ROUTES } from '@/lib/constants/routes';
 // Route config per role
 const ROUTE_MAP: Record<ChatRole, { base: string }> = {
   instructor: { base: ROUTES.instructor.chats.root as string },
-  student: { base: ROUTES.student.chats.root as string },
+  student: { base: ROUTES.student.profile.chats.root as string },
 };
 
 // Props
