@@ -187,7 +187,11 @@ export abstract class BaseService {
 
       async (error: AxiosError) => {
         if (!isAxiosError(error)) {
-          return Promise.reject(new Error('Unknown network error'));
+          console.error('[BaseService] Non-Axios error:', error);
+
+          this.hooks?.onError?.(error);
+
+          return Promise.reject(error);
         }
 
         const originalRequest = normalizeRequestConfig(error);
