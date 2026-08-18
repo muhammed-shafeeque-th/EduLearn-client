@@ -1,9 +1,13 @@
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError as is_axios_error } from 'axios';
 import { RequestOptions } from './types';
 import { AppError, ErrorDetail } from '@/lib/errors/app-error';
 
 export function isAxiosError(error: unknown): error is AxiosError {
-  return typeof error === 'object' && error !== null && (error as AxiosError).isAxiosError === true;
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    ((error as AxiosError).isAxiosError === true || is_axios_error(error))
+  );
 }
 
 export function hasErrorMessage(obj: unknown): obj is { error: { message: string } } {
