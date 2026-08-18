@@ -47,6 +47,22 @@ export const metadata: Metadata = {
     capable: true,
   },
   applicationName: 'Edulearn',
+  twitter: {
+    card: 'summary_large_image',
+    title: 'EduLearn - Learn Anything, Anytime',
+    description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
+    images: [
+      {
+        url: absoluteUrl('/og/og-root-image.png'),
+        width: 1200,
+        height: 630,
+        alt: 'Structured courses, taught by practitioners',
+      },
+    ],
+  },
+  facebook: {
+    appId: config.facebookClientId!,
+  },
   openGraph: {
     title: 'Structured courses, taught by practitioners',
     description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
@@ -54,6 +70,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     type: 'website',
     locale: 'en_US',
+
     images: [
       {
         url: absoluteUrl('/og/og-root-image.png'),

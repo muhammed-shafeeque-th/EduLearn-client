@@ -83,24 +83,24 @@ export function CourseDetailHeader({ course }: CourseDetailHeaderProps) {
         toast.error({ title: 'Sharing not supported in this environment.' });
         return;
       }
-      const url = window.location.href;
+      const url = ROUTES.public.courses.course(course.slug);
       if (navigator.share) {
         await navigator.share({
           title: course.title,
           text: course.description,
           url,
         });
-        toast.success({ title: 'Course shared successfully!' });
+        // toast.success({ title: 'Course shared successfully!' });
       } else if (navigator.clipboard && url) {
         await navigator.clipboard.writeText(url);
-        toast.success({ title: 'Course link copied to clipboard!' });
+        // toast.success({ title: 'Course link copied to clipboard!' });
       } else {
         toast.error({ title: 'Sharing not supported in this browser.' });
       }
     } catch (error) {
       toast.error({ title: 'Failed to share', description: getErrorMessage(error) });
     }
-  }, [course.title, course.description]);
+  }, [course.title, course.description, course.slug]);
 
   // const handleExport = useCallback(async () => {
   //   return toast.info({ title: 'Coming soon' });
