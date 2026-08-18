@@ -177,18 +177,18 @@ export function buildListingMetadata({
   title,
   description,
   path,
-  hasActiveFilters,
+  index,
 }: {
   title: string;
   description: string;
   path: string;
-  hasActiveFilters?: boolean;
+  index?: boolean;
 }): Metadata {
   return buildMetadata({
     title,
     description,
     path,
-    index: true || !hasActiveFilters,
+    index: !!index,
     follow: true,
   });
 }

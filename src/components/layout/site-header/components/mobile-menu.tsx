@@ -224,9 +224,9 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                  */}
             <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <div className="p-5">
-                {/* -----------------------------------------------------------
+                {/* 
                     User / Authentication
-                    ----------------------------------------------------------- */}
+                     */}
                 {user ? (
                   <div className="mb-6">
                     <div
@@ -268,9 +268,9 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                   </div>
                 )}
 
-                {/* -----------------------------------------------------------
+                {/* 
                     Search
-                    ----------------------------------------------------------- */}
+                     */}
                 <form onSubmit={handleSearchSubmit} className="relative z-10 mb-8">
                   <Search
                     className={cn(
@@ -295,33 +295,10 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                   />
                 </form>
 
-                {/* -----------------------------------------------------------
+                {/* 
                     Navigation
-                    ----------------------------------------------------------- */}
+                     */}
                 <div className="space-y-8">
-                  {/* =========================================================
-                      Explore
-                      ========================================================= */}
-                  <section>
-                    <h4
-                      className={cn(
-                        'mb-2 px-3',
-                        'text-[11px] font-bold uppercase',
-                        'tracking-widest text-muted-foreground/60'
-                      )}
-                    >
-                      Explore
-                    </h4>
-
-                    <div className="space-y-1">
-                      {PUBLIC_NAV_LINKS.map((link) => (
-                        <NavLink key={link.href} href={link.href} icon={link.icon}>
-                          {link.label}
-                        </NavLink>
-                      ))}
-                    </div>
-                  </section>
-
                   {/* =========================================================
                       Personal
                       ========================================================= */}
@@ -356,6 +333,29 @@ export function MobileMenu({ user, isAuthLoading }: MobileMenuProps) {
                       </div>
                     </section>
                   )}
+
+                  {/* =========================================================
+                      Explore
+                      ========================================================= */}
+                  <section>
+                    <h4
+                      className={cn(
+                        'mb-2 px-3',
+                        'text-[11px] font-bold uppercase',
+                        'tracking-widest text-muted-foreground/60'
+                      )}
+                    >
+                      Explore
+                    </h4>
+
+                    <div className="space-y-1">
+                      {PUBLIC_NAV_LINKS.map((link) => (
+                        <NavLink key={link.href} href={link.href} icon={link.icon}>
+                          {link.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </section>
 
                   {/* =========================================================
                       Management

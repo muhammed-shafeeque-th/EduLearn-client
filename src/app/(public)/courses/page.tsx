@@ -11,19 +11,33 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { SITE_NAME } from '@/lib/constants';
 
 export async function generateMetadata({}: PageProps): Promise<Metadata> {
-  // const { search, page } = await searchParams;
-  // const hasActiveFilters = Boolean(search || (page && page !== '1'));
+  const title = 'Browse Courses | Online Learning Platform';
+  const description =
+    'Discover expert-led online courses across design, tech, business, and more. Learn from industry practitioners with structured, practical courses.';
+  const courseUrl = absoluteUrl(ROUTES.public.courses.root);
 
   return {
     ...buildListingMetadata({
-      title: 'Browse Courses',
-      description: 'Browse expert-led online courses across design, tech, business, and more.',
+      title,
+      description,
       path: ROUTES.public.courses.root,
     }),
+
+    description,
+    keywords: [
+      'online courses',
+      'learn design',
+      'tech courses',
+      'business courses',
+      'skill development',
+      'expert-led courses',
+      'online learning',
+    ],
+
     openGraph: {
-      title: 'Browse Courses, taught by practitioners',
-      description: 'Browse expert-led online courses across design, tech, business, and more',
-      url: absoluteUrl(ROUTES.public.courses.root),
+      title,
+      description,
+      url: courseUrl,
       siteName: SITE_NAME,
       type: 'website',
       locale: 'en_US',
@@ -33,8 +47,27 @@ export async function generateMetadata({}: PageProps): Promise<Metadata> {
           width: 1200,
           height: 630,
           alt: 'Structured courses, taught by practitioners',
+          type: 'image/png',
         },
       ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [absoluteUrl('/og/og-explore-courses.png')],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      nocache: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
     },
   };
 }
