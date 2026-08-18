@@ -58,19 +58,10 @@ export async function fetchApi<T = any>(
       if (skipAll) return response as unknown as ApiResponse<T>;
 
       if (response.status === 401 && authRefresh) {
-        // Resolve the refresh handler: use custom handler if passed, or dynamically load serverRefresh
-        let refreshFn = authRefresh;
-
-        if (!refreshFn) {
-          // Dynamic import guarantees dynamic modules isn't loaded during static analysis
-          const { serverRefresh } = await import('@/lib/server-apis/server-apis');
-          refreshFn = serverRefresh;
-        }
-
-        const refreshed = await refreshFn();
+        const refreshed = await authRefresh();
         if (refreshed?.token) {
           localToken = refreshed.token;
-          continue;
+          continue; // Retry the same request with new token
         }
         throw new Error('Authentication failed. Please log in again.');
       }
