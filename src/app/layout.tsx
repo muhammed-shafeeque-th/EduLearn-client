@@ -28,11 +28,21 @@ export const metadata: Metadata = {
   description: 'EduLearn is a modern e-learning platform offering high-quality online courses.',
   robots: 'index, follow',
   metadataBase: new URL(config.siteUrl),
-  icons: {
-    icon: [{ url: '/icons/icon.png', type: 'image/png' }],
-    apple: '/icons/apple-icon.png',
-    shortcut: ['/favicon.ico'],
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  formatDetection: {
+    email: false,
+    telephone: false,
   },
+  alternates: {
+    canonical: config.siteUrl,
+  },
+  // icons: {
+  //   icon: [{ url: '/icons/icon.png', type: 'image/png' }],
+  //   apple: '/icons/apple-icon.png',
+  //   shortcut: ['/favicon.ico'],
+  // },
   appleWebApp: {
     capable: true,
   },
