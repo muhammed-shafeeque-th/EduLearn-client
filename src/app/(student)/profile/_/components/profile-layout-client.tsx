@@ -52,6 +52,7 @@ export function ProfileLayoutClient({ children }: ProfileLayoutClientProps) {
         {/* Mobile Header - Glassmorphism */}
         <div className="lg:hidden sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3">
+            <MobileSidebar user={userData} />
             <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xs">
               {userData.firstName?.[0]}
             </div>
@@ -59,7 +60,6 @@ export function ProfileLayoutClient({ children }: ProfileLayoutClientProps) {
               Profile
             </h1>
           </div>
-          <MobileSidebar user={userData} />
         </div>
 
         {/* Page Content with Transition */}
