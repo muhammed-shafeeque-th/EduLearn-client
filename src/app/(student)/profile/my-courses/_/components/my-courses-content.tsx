@@ -107,7 +107,7 @@ export function MyCoursesContent() {
             Start your learning journey by enrolling in your first course.
           </p>
           <Button asChild size="lg">
-            <Link href={ROUTES.public.courses.root}>Browse Courses</Link>{' '}
+            <Link href={ROUTES.public.courses.root}>Browse Courses</Link>
           </Button>
         </div>
       </div>
