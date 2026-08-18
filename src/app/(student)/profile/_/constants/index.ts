@@ -27,7 +27,7 @@ export const PROFILE_NAVIGATION = [
     description: 'Chat with teachers',
   },
   {
-    href: ROUTES.student.profile.chats.root,
+    href: ROUTES.student.profile.orders.root,
     label: 'My Orders',
     icon: BookOpen,
     description: 'View and manage your course orders and purchases',
