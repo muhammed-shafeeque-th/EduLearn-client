@@ -131,9 +131,10 @@ export function buildCourseMetadata(course: {
 
 /** Instructor profile page metadata. */
 export function buildInstructorMetadata(instructor: Instructor): Metadata {
+  const instructorName = instructor.username || instructor.firstName + instructor.lastName;
   return buildMetadata({
-    title: `${instructor.username} — ${instructor.instructorProfile?.headline}`,
-    description: `Learn from ${instructor.username}: ${instructor.instructorProfile?.headline}.`,
+    title: `${instructorName} — ${instructor.instructorProfile?.headline}`,
+    description: `Learn from ${instructorName}: ${instructor.instructorProfile?.headline}.`,
     path: `/instructors/${instructor.id}`,
     keywords: instructor.instructorProfile?.tags,
     ogImage: instructor.avatar ?? '/og/default-instructor.png',

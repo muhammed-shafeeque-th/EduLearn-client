@@ -109,12 +109,14 @@ export function InstructorHeader({ instructor }: InstructorHeaderProps) {
               <div className="flex items-center gap-3">
                 <div className="h-2 w-2 rounded-full bg-blue-600" />
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                  About {instructor.username.split(' ')[0]}
+                  About {instructor.username?.split(' ')[0]}
                 </h2>
               </div>
-              <div className="prose prose-lg max-w-none dark:prose-invert prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-p:font-medium prose-headings:font-black">
-                <MarkdownRenderer markdown={instructor.instructorProfile!.bio!} />
-              </div>
+              {instructor.instructorProfile?.bio ? (
+                <div className="prose prose-lg max-w-none dark:prose-invert prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-p:font-medium prose-headings:font-black">
+                  <MarkdownRenderer markdown={instructor.instructorProfile.bio} />
+                </div>
+              ) : null}
             </div>
 
             {/* Expertise */}
