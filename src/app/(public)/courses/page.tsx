@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { CoursesPageContainer } from './_/components/course-page-container';
 import { CoursesPageSkeleton } from './_/components/skeletons';
 import { Metadata } from 'next';
-import { fetchServerCourses } from '@/lib/server-apis';
+import { fetchServerCourses } from '@/lib/server-apis/courses-api';
 import type { CourseMeta } from '@/types/course';
 import { buildListingMetadata } from '@/lib/seo/metadata';
 import { absoluteUrl, ROUTES } from '@/lib/constants/routes';
