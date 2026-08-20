@@ -96,17 +96,19 @@ export default async function InstructorPage({ params }: InstructorPageProps) {
 
   return (
     <>
-      {' '}
       <JsonLd data={personJsonLd(instructor)} />
-      <Breadcrumbs
-        items={[
-          { label: 'Home', path: ROUTES.public.home },
-          { label: 'Instructors', path: ROUTES.public.instructors.root },
-          { label: instructor.firstName, path: ROUTES.public.instructors.profile(instructor.id) },
-        ]}
-      />
       <main className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
+          <Breadcrumbs
+            items={[
+              { label: 'Home', path: ROUTES.public.home },
+              { label: 'Instructors', path: ROUTES.public.instructors.root },
+              {
+                label: instructor.firstName,
+                path: ROUTES.public.instructors.profile(instructor.id),
+              },
+            ]}
+          />
           <Suspense fallback={<InstructorPageSkeleton />}>
             <InstructorPageContent instructorId={id} initialData={instructor} />
           </Suspense>
