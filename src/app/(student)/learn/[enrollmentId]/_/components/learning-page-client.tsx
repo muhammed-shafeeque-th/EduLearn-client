@@ -172,7 +172,7 @@ export function EnrollmentLearningClient({
     if (completedToastRef.current === currentItem?.id) return;
     completedToastRef.current = currentItem?.id;
 
-    toast.success({ title: 'Lesson completed 🎉' });
+    toast.success({ title: 'Lesson completed' });
 
     refetchProgress();
 
@@ -180,7 +180,7 @@ export function EnrollmentLearningClient({
     const nextItem = courseItems[currentIndex + 1];
 
     if (!nextItem) {
-      toast.success({ title: "🎉 Congratulations! You've completed all items!" });
+      toast.success({ title: "Congratulations! You've completed all items!" });
       return;
     }
 
@@ -207,7 +207,7 @@ export function EnrollmentLearningClient({
 
         if (result.passed) {
           toast.success({
-            title: `🎉 Quiz passed! Score: ${result.score}% (${result.attempts} ${result.attempts === 1 ? 'attempt' : 'attempts'})`,
+            title: `Quiz passed! Score: ${result.score}% (${result.attempts} ${result.attempts === 1 ? 'attempt' : 'attempts'})`,
           });
 
           setShowQuizMode(false);
@@ -226,7 +226,7 @@ export function EnrollmentLearningClient({
 
         if (result.milestone) {
           setTimeout(() => {
-            toast.success({ title: `🏆 ${result.milestone?.type.replace('_', ' ')}` });
+            toast.success({ title: `${result.milestone?.type.replace('_', ' ')}` });
           }, 500);
         }
       } catch (error) {
