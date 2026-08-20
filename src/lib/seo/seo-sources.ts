@@ -6,10 +6,9 @@
  */
 
 import { BLOG_POSTS } from '@/app/(public)/blog/[slug]/_/data/blog-data';
-import { fetchApi, fetchServerCourses } from '../server-apis';
 import { Course } from '@/types/course';
-import { serverInstructorService } from '@/services/server-service-clients';
-import { Instructor, User } from '@/types/user';
+import { fetchServerCourses } from '../server-apis/courses-api';
+import { getServerInstructors } from '../server-apis/instructor-api';
 
 export async function getAllCourseSlugs(): Promise<{ slug: string; updatedAt: Date }[]> {
   const { courses } = await fetchServerCourses(
@@ -36,30 +35,9 @@ export async function searchCourses(params: { category?: string; page?: string; 
 }
 
 export async function getAllInstructorIds(): Promise<{ id: string; updatedAt: Date }[]> {
-  try {
-    const instructors = await serverInstructorService.getInstructors({ page: 1, pageSize: 50 });
+  const instructors = await getServerInstructors({}, { next: { revalidate: 600 } });
 
-    if (!instructors?.success) return [];
-    return instructors.data.map((i) => ({ id: i.id, updatedAt: new Date(i.updatedAt) }));
-  } catch {
-    return [];
-  }
-}
-
-export async function getInstructorById(id: string): Promise<Instructor | null> {
-  try {
-    const userResponse = await fetchApi<User>(`users/${id}`, {
-      next: { revalidate: 600 },
-    });
-
-    if (!userResponse.success) return null;
-    if (userResponse.data?.role !== 'instructor') return null;
-
-    return userResponse.data as Instructor;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+  return instructors?.map((i) => ({ id: i.id, updatedAt: new Date(i.updatedAt) }));
 }
 
 export async function getAllBlogSlugs(): Promise<{ slug: string; updatedAt: Date }[]> {
