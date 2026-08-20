@@ -26,6 +26,7 @@ import { getPaginationParams, WalletParams } from './types/wallet.types';
 import { UserWallet, WalletTransaction } from '@/types/wallet';
 import { Wishlist, WishlistItem } from '@/types/wishlist';
 import { Cart, CartItem } from '@/types/cart';
+import { PasswordChangeRequest } from '@/types/auth';
 
 export class UserService extends BaseService implements IUserDomainService {
   constructor({
@@ -169,6 +170,13 @@ export class UserService extends BaseService implements IUserDomainService {
 
   public async getUser(userId: string, options?: RequestOptions): Promise<ApiResponse<User>> {
     return this.get<ApiResponse<User>>(`/${userId}`, options);
+  }
+
+  public async changePassword(
+    data: PasswordChangeRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ message: string }>> {
+    return this.post<ApiResponse<{ message: string }>>('/me/change-password', data, options);
   }
 
   static create(serviceOptions: BaseServiceOptions): IUserDomainService {

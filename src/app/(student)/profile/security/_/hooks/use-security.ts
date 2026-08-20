@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { authService } from '@/services/auth';
+import { userService } from '@/services/user';
 import { PasswordChangeType } from '../schema';
 import { toast } from '@/hooks/use-toast';
 import { UseFormReset } from 'react-hook-form';
@@ -27,7 +27,7 @@ export function useSecurityForm(reset: UseFormReset<PasswordChangeType>) {
   const handleSubmit = useCallback(
     async (data: PasswordChangeType) => {
       try {
-        const result = await authService.changePassword(data);
+        const result = await userService.changePassword(data);
         if (!result?.success) {
           throw new Error(result.message);
         }

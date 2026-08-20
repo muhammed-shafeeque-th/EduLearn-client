@@ -12,6 +12,7 @@ import { UsersParams, UsersStats } from '../types/user.types';
 import { IWishlistService } from './user-wishlist.service.interface';
 import { ICartService } from './user-cart.service.interface';
 import { IWalletService } from './user-wallet.service.interface';
+import { PasswordChangeRequest } from '@/types/auth';
 
 export interface IUserService {
   getCurrentUser(options?: RequestOptions): Promise<ApiResponse<User>>;
@@ -33,6 +34,11 @@ export interface IUserService {
   ): Promise<ApiResponse<CheckUsernameResponse>>;
 
   getOnlineUsers(options?: RequestOptions): Promise<ApiResponse<string[]>>;
+
+  changePassword(
+    data: PasswordChangeRequest,
+    options?: RequestOptions
+  ): Promise<ApiResponse<{ message: string }>>;
 }
 
 export interface IUserDomainService

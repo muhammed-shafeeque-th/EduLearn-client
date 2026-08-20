@@ -2,8 +2,8 @@
 
 import { useAppSelector, useAuthIsAuthenticated } from '@/states/client';
 import { useMemo } from 'react';
-import { selectUser } from '@/states/client/slices/auth-slice';
 import { AuthUser } from '@/types/auth';
+import { selectUser } from '@/states/client/selectors/auth.selectors';
 
 /**
  * Hook to get instructor authentication state and user info.

@@ -69,6 +69,8 @@ export async function generateStaticParams() {
   }));
 }
 
+const DESCRIPTION_MAX_LEN = 30;
+
 export async function generateMetadata({
   params,
 }: {
@@ -83,9 +85,12 @@ export async function generateMetadata({
 
   const url = `${config.siteUrl}/courses/${course.slug}`;
 
+  const trimStr = (str: string, maxLen: number) =>
+    str.length > maxLen ? str.slice(0, maxLen) + '...' : str;
+
   return {
     title: course.title,
-    description: course.description?.slice(0, 150),
+    description: trimStr(course.description, DESCRIPTION_MAX_LEN),
     keywords: [
       course.title,
       'online course',
@@ -98,7 +103,7 @@ export async function generateMetadata({
     },
     openGraph: {
       title: course.title,
-      description: course.description?.slice(0, 150),
+      description: trimStr(course.description, DESCRIPTION_MAX_LEN),
       url,
       siteName: 'EduLearn',
       images: [
@@ -113,7 +118,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: course.title,
-      description: course.description?.slice(0, 150),
+      description: trimStr(course.description, DESCRIPTION_MAX_LEN),
       images: [course.thumbnail],
     },
   };

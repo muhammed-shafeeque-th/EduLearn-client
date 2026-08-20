@@ -2,16 +2,16 @@ import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { InstructorPageContent } from './_/components/instructor-page-content';
 import type { Metadata } from 'next';
-import { Instructor, User } from '@/types/user';
+import { Instructor } from '@/types/user';
 import { InstructorPageSkeleton } from '../_/components/skeletons/instructor-page-skeleton';
-import { fetchApi } from '@/lib/server-apis';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
-import { getAllInstructorIds, getInstructorById } from '@/lib/seo/seo-sources';
+import { getAllInstructorIds } from '@/lib/seo/seo-sources';
 import { buildInstructorMetadata } from '@/lib/seo/metadata';
 import { ROUTES } from '@/lib/constants/routes';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { personJsonLd } from '@/lib/seo/json-ld';
 import { JsonLd } from '@/components/seo/json-ld';
+import { getInstructorById } from '@/lib/server-apis/instructor-api';
 
 interface InstructorPageProps {
   params: Promise<{
@@ -34,19 +34,13 @@ export async function generateMetadata({ params }: InstructorPageProps): Promise
   return buildInstructorMetadata(instructor);
 }
 
-async function getInstructor(userId: string): Promise<Instructor | null> {
+async function getInstructor(instructorId: string): Promise<Instructor | null> {
   try {
-    const userResponse = await fetchApi<User>(`users/${userId}`, {
+    const response = await getInstructorById(instructorId, {
       next: { revalidate: 600 }, // refresh every 2 min
     });
 
-    if (!userResponse.success) {
-      throw new Error(userResponse.message);
-    }
-    if (userResponse.data.role !== 'instructor') {
-      throw new Error('User is not an instructor.');
-    }
-    return userResponse.data as Instructor;
+    return response;
   } catch (error) {
     console.error(error);
     return null;

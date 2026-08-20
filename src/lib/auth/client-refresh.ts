@@ -4,12 +4,11 @@
 import { AuthResponse } from '@/types/auth';
 
 import { ApiResponse } from '@/types/api-response';
-import { logout as logoutAction } from '@/states/client/slices/auth-slice';
 import { apiClient } from '../utils/api-client';
 import { getDocument, getWindow } from '../utils';
 import { ERROR_CODES } from '../errors/error-codes';
 import { AxiosError } from 'axios';
-import { getStore } from '@/states/client';
+import { AuthCustomEvents } from '../constants/auth-events';
 
 // ---------------------------------------------------------------------------
 // CSRF helper — reads the CSRF token from the __Host-csrf cookie.
@@ -58,9 +57,18 @@ export const clientRefreshApi = async () => {
             url.searchParams.set('error_code', respErrorCode || ERROR_CODES.ACCOUNT_BLOCKED);
             window.history.replaceState({}, '', url.toString());
           } catch {}
+
+          getWindow()?.dispatchEvent(
+            new CustomEvent(AuthCustomEvents.ForceLogout, {
+              detail: {
+                message: 'Account Blocked',
+              },
+            })
+          );
         }
-        getStore()?.dispatch(logoutAction());
+        break;
       }
+
       lastError = error;
       attempt++;
       if (attempt < maxRetries && status >= 500) {
