@@ -1,49 +1,28 @@
 'use client';
 
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer, { AuthState } from './slices/auth-slice';
-import adminReducer, { AdminState } from './slices/admin-slice';
-// import uiReducer from './slices/_ui-slice';
-// import messagingReducer from './slices/_messaging-slice';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { AuthUser } from '@/types/auth';
 
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    admin: adminReducer,
-    // ui: uiReducer,
-    // messaging: messagingReducer,
-  },
-  devTools: process.env.NODE_ENV !== 'production',
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['messaging/setSocket'],
-        ignoredPaths: ['messaging.socket'],
-      },
-    }),
-});
+import type { AuthUser } from '@/types/auth';
+import type { AuthState } from './slices/auth-slice';
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+import { store } from './store';
 
-export const useAppDispatch: () => AppDispatch = useDispatch;
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export type { RootState, AppDispatch } from './store';
 
-// Typed Selector hooks
-export const useAuthUserSelector: () => AuthUser | null = () =>
+export const useAppDispatch = () => useDispatch<typeof store.dispatch>();
+
+export const useAppSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> = useSelector;
+
+export const useAuthUserSelector = (): AuthUser | null =>
   useAppSelector((state) => state.auth.user);
-export const useAuthSelector: () => AuthState = () => useAppSelector((state) => state.auth);
 
-export const useIsAuthenticatedSelector: () => boolean = () =>
+export const useAuthSelector = (): AuthState => useAppSelector((state) => state.auth);
+
+export const useIsAuthenticatedSelector = (): boolean =>
   useAppSelector((state) => state.auth.status === 'authenticated');
 
-/** @deprecated use `useIsAuthenticatedSelector` instead */
 export const useAuthIsAuthenticated = useIsAuthenticatedSelector;
 
-export const useAdminSelector: () => AdminState = () => useAppSelector((state) => state.admin);
+export const useAdminSelector = () => useAppSelector((state) => state.admin);
 
-export function getStore() {
-  return store;
-}
+export { store };

@@ -56,8 +56,12 @@ export const adminLogin = createAsyncThunk(
   }
 );
 let isRefreshing = false;
+
 export const adminRefresh = createAsyncThunk('admin/refresh', async (_, { rejectWithValue }) => {
-  if (isRefreshing) return rejectWithValue('Refresh already in progress');
+  if (isRefreshing) {
+    return rejectWithValue('Refresh already in progress');
+  }
+
   isRefreshing = true;
 
   try {
@@ -65,6 +69,8 @@ export const adminRefresh = createAsyncThunk('admin/refresh', async (_, { reject
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to refresh token'));
+  } finally {
+    isRefreshing = false;
   }
 });
 
