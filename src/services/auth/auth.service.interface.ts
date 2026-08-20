@@ -6,7 +6,6 @@ import { Auth2SignData, AuthResponse, OAuthResponse, RegisterData } from '@/type
 import {
   CheckEmailRequest,
   CheckEmailResponse,
-  PasswordChangeRequest,
   PasswordResetRequest,
   ResendOTPRequest,
   VerifyOTPRequest,
@@ -40,10 +39,7 @@ export interface IAuthService {
     data: PasswordResetRequest,
     options?: RequestOptions
   ): Promise<ApiResponse<{ message: string }>>;
-  changePassword(
-    data: PasswordChangeRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<{ message: string }>>;
+
   checkEmail(
     params: CheckEmailRequest,
     options?: RequestOptions

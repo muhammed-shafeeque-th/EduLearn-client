@@ -67,10 +67,7 @@ export class InstructorService extends BaseService implements IInstructorService
   ): Promise<ApiResponse<InstructorMeta[]>> {
     const searchParams = buildQueryParams(params);
     const queryString = searchParams.toString();
-    return this.get<ApiResponse<InstructorMeta[]>>(
-      queryString ? `/?${queryString}` : '/instructors',
-      options
-    );
+    return this.get<ApiResponse<InstructorMeta[]>>(queryString ? `/?${queryString}` : '/', options);
   }
 
   public async getInstructorCoursesStats(

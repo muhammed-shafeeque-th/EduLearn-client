@@ -1,14 +1,12 @@
 import { BaseService, BaseServiceOptions, RequestOptions } from '../base-service';
 import { config } from '@/lib/config';
 import { ApiResponse } from '@/types/api-response';
-import { authRefreshToken, getClientAuthToken } from '@/lib/auth/auth-client-apis';
 import { LoginCredentials } from '@/types/auth';
 import { Auth2SignData, AuthResponse, OAuthResponse, RegisterData } from '@/types/auth';
 
 import {
   CheckEmailRequest,
   CheckEmailResponse,
-  PasswordChangeRequest,
   PasswordResetRequest,
   ResendOTPRequest,
   VerifyOTPRequest,
@@ -16,16 +14,9 @@ import {
 import { IAuthService } from './auth.service.interface';
 
 export class AuthService extends BaseService implements IAuthService {
-  constructor({
-    getToken = getClientAuthToken,
-    authRefresh = authRefreshToken,
-    hooks,
-    ...options
-  }: BaseServiceOptions = {}) {
+  constructor({ hooks, ...options }: BaseServiceOptions = {}) {
     super(`${config.apiUrl}/auth`, {
       ...options,
-      getToken,
-      authRefresh,
       hooks,
     });
   }
@@ -94,15 +85,8 @@ export class AuthService extends BaseService implements IAuthService {
     return this.post<ApiResponse<{ message: string }>>('/reset-password', data, options);
   }
 
-  changePassword(
-    data: PasswordChangeRequest,
-    options?: RequestOptions
-  ): Promise<ApiResponse<{ message: string }>> {
-    return this.post<ApiResponse<{ message: string }>>('/change-password', data, options);
-  }
-
   refreshToken(options?: RequestOptions): Promise<ApiResponse<AuthResponse>> {
-    return this.post<ApiResponse<AuthResponse>>('/refresh', options);
+    return this.post<ApiResponse<AuthResponse>>('/refresh', {}, options);
   }
 
   static create(serviceOptions: BaseServiceOptions) {
