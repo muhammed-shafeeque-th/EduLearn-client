@@ -5,7 +5,6 @@ import { InstructorCourses } from './instructor-courses';
 import { InstructorReviews } from './instructor-review';
 import { InstructorPageSkeleton } from '../../../_/components/skeletons/instructor-page-skeleton';
 import { User } from '@/types/user';
-import { useUser } from '@/states/server/user/use-users';
 import { useInstructorCourses } from '@/states/server/course/use-courses';
 import { getWindow } from '@/lib/utils';
 
@@ -16,16 +15,16 @@ interface InstructorPageContentProps {
 
 export function InstructorPageContent({
   instructorId,
-  initialData: _,
+  initialData: instructor,
 }: InstructorPageContentProps) {
-  const { data: instructor, isLoading, error } = useUser(instructorId, { enabled: true });
-  const { courses, isLoading: isCourseLoading } = useInstructorCourses(instructorId);
+  // const { data: instructor, isLoading, error } = useUser(instructorId, { enabled: true });
+  const { courses, isLoading: isCourseLoading, error } = useInstructorCourses(instructorId);
 
-  if (isLoading || isCourseLoading) {
+  if (isCourseLoading) {
     return <InstructorPageSkeleton />;
   }
 
-  if (error || !instructor || instructor.role !== 'instructor') {
+  if (error || instructor.role !== 'instructor') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
