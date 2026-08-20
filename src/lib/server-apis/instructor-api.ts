@@ -1,6 +1,6 @@
 import { Instructor, InstructorMeta, User } from '@/types/user';
 import { fetchApi, FetchOptions } from './fetch-api';
-import { UsersParams } from '@/services/instructor';
+import { UsersParams } from '@/services/instructor/types/user.types';
 
 export async function getInstructorById(
   id: string,
