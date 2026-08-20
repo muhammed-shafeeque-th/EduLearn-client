@@ -158,67 +158,72 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
     }
   }, [toggleWishlist, isToggleError, toggleError, course, wishlist, isInWishlist, isEnrolled]);
 
-  const handleShare = (platform?: string) => {
-    const url = getWindow()?.location.href;
-    if (!url) return;
+  // const handleShare = (platform?: string) => {
+  //   const url = courseUrl;
+  //   if (!url) return;
 
-    const title = course.title;
+  //   const title = course.title;
 
-    if (platform) {
-      let shareUrl = '';
-      switch (platform) {
-        case 'facebook':
-          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-          break;
-        case 'twitter':
-          shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
-          break;
-        case 'linkedin':
-          shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-          break;
-        case 'email':
-          shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Check out this course: ${url}`)}`;
-          break;
-      }
+  //   if (platform) {
+  //     let shareUrl = '';
+  //     switch (platform) {
+  //       case 'facebook':
+  //         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  //         break;
+  //       case 'twitter':
+  //         shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+  //         break;
+  //       case 'linkedin':
+  //         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+  //         break;
+  //       case 'email':
+  //         shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Check out this course: ${url}`)}`;
+  //         break;
+  //     }
 
-      if (shareUrl) {
-        getWindow()?.open(shareUrl, '_blank', 'width=600,height=400');
-        setShowShareDialog(false);
-        toast.success({ title: 'Shared successfully!' });
-      }
-    } else {
-      getNavigator()?.clipboard.writeText(url);
-      toast.success({ title: 'Course link copied to clipboard!' });
-    }
-  };
+  //     if (shareUrl) {
+  //       getWindow()?.open(shareUrl, '_blank', 'width=600,height=400');
+  //       setShowShareDialog(false);
+  //       toast.success({ title: 'Shared successfully!' });
+  //     }
+  //   } else {
+  //     getNavigator()?.clipboard.writeText(url);
+  //     toast.success({ title: 'Course link copied to clipboard!' });
+  //   }
+  // };
 
-  /**
-   * const handleShare = async () => {
+  const handleShare = async () => {
+    const courseUrl = ROUTES.public.courses.course(course.slug);
+    const shortDescription =
+      course.description.length > 30 ? course.description.slice(0, 30) + '...' : course.description;
     try {
       const shareData = {
         title: course.title,
-        text: course.shortDescription || course.description,
-        url: getWindow()?.location.href,
+        text: shortDescription,
+        url: courseUrl,
       };
 
-      if (getNavigator!~()?.share &&!~ getNavigator()?.canShare!~ && getNavigator()?.canShare(shareData)) {
+      if (
+        getNavigator!()?.share &&
+        getNavigator()?.canShare &&
+        getNavigator()?.canShare(shareData)
+      ) {
         await getNavigator()?.share(shareData);
       } else {
-        // Fallback!~ to clipboard
-        await getNavigator()?.!~clipboard.writeText(getWindow()?.location.href);
+        // Fallback! to clipboard
+        await getNavigator()?.clipboard.writeText(courseUrl);
         // Note: In a real app, show a toast notification here
       }
     } catch (error) {
       console.error('Error sharing:', error);
       // Fallback: try to copy to clipboard
       try {
-        await getNavigator()?.clipboard!~.writeText(getWindow()?.location.href);
+        await getNavigator()?.clipboard!.writeText(courseUrl);
       } catch (clipboardError) {
         console.error('Clipboard error:', clipboardError);
       }
     }
   };
-   */
 
   // const handleApplyCoupon = () => {
   //   const validCoupons = ['SAVE20', 'STUDENT50', 'NEWUSER'];
@@ -594,7 +599,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
-                onClick={() => handleShare('facebook')}
+                onClick={handleShare}
                 className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
               >
                 <Facebook className="w-4 h-4 text-blue-600" />
@@ -603,7 +608,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
               <Button
                 variant="outline"
-                onClick={() => handleShare('twitter')}
+                onClick={handleShare}
                 className="flex items-center gap-2 hover:bg-sky-50 hover:border-sky-200"
               >
                 <Twitter className="w-4 h-4 text-sky-500" />
@@ -612,7 +617,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
               <Button
                 variant="outline"
-                onClick={() => handleShare('linkedin')}
+                onClick={handleShare}
                 className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
               >
                 <Linkedin className="w-4 h-4 text-blue-700" />
@@ -621,7 +626,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
               <Button
                 variant="outline"
-                onClick={() => handleShare('email')}
+                onClick={handleShare}
                 className="flex items-center gap-2 hover:bg-gray-50 hover:border-gray-200"
               >
                 <Mail className="w-4 h-4 text-gray-600" />
