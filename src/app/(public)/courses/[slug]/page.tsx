@@ -145,9 +145,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
               { label: course.title, path: ROUTES.public.courses.course(course.slug) },
             ]}
           />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="min-w-0 space-y-6 lg:col-span-2">
               <Suspense fallback={<CourseHeaderSkeleton />}>
                 <CourseHeader course={course} />
               </Suspense>

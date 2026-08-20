@@ -97,26 +97,54 @@ export function VideoPreview({ isOpen, onClose, videoData }: VideoPreviewProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black text-white">
-        <DialogHeader className="p-4 pb-2">
-          <DialogTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
-            {videoData.title}
-            {videoData.type === 'preview' && <Badge>Free Preview</Badge>}
+      <DialogContent
+        className="
+          w-[calc(100%-1rem)]
+          max-w-4xl
+          max-h-[90dvh]
+          overflow-y-auto
+          overflow-x-hidden
+          border-0
+          bg-black
+          p-0
+          text-white
+        "
+      >
+        <DialogHeader className="px-4 pt-4 pb-3 sm:px-6">
+          <DialogTitle
+            className="
+              flex
+              min-w-0
+              flex-wrap
+              items-center
+              gap-2
+              pr-8
+              text-base
+              font-semibold
+              sm:text-xl
+            "
+          >
+            <span className="min-w-0 break-words">{videoData.title}</span>
+
+            {videoData.type === 'preview' && <Badge className="shrink-0">Free Preview</Badge>}
           </DialogTitle>
         </DialogHeader>
-        <div className="relative w-full aspect-video bg-black">
+
+        <div className="relative w-full overflow-hidden bg-black">
           {videoData.url ? (
-            <video
-              ref={videoRef}
-              playsInline
-              controls={false}
-              preload="metadata"
-              className="w-full h-full object-contain bg-black"
-            >
-              <track kind="captions" />
-            </video>
+            <div className="aspect-video w-full">
+              <video
+                ref={videoRef}
+                playsInline
+                controls={false}
+                preload="metadata"
+                className="h-full w-full object-contain"
+              >
+                <track kind="captions" />
+              </video>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex aspect-video items-center justify-center text-gray-400">
               No preview available
             </div>
           )}

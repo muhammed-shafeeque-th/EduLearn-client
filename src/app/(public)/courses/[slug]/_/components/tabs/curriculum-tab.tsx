@@ -290,7 +290,7 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                                   }`}
                                   onClick={() => handleLessonClick(lesson)}
                                 >
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center min-w-0 gap-3">
                                     <div className="relative">
                                       <Icon
                                         className={`w-4 h-4 ${getLessonTypeColor(lesson.contentType)}`}
@@ -300,10 +300,10 @@ export function CurriculumTab({ course }: CurriculumTabProps) {
                                       )} */}
                                     </div>
 
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex  items-center gap-2">
                                         <span
-                                          className={`text-sm font-medium ${
+                                          className={`text-sm break-words font-medium  ${
                                             // isCompleted
                                             //   ? 'text-green-700 dark:text-green-400'
                                             //   :
