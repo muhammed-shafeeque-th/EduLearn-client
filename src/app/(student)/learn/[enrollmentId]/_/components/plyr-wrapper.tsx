@@ -7,7 +7,6 @@ import Plyr from 'plyr';
 import type { LessonWithProgress } from '@/types/enrollment/enrollment.type';
 import { useVideoProgress } from '@/states/server/enrollment/use-enrollment-progress';
 
-// import 'plyr/dist/plyr.css';
 // import { toast } from '@/hooks/use-toast';
 
 interface Props {
