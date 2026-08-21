@@ -1,4 +1,6 @@
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/constants/routes';
+import Link from 'next/link';
 
 export function CTASection() {
   return (
@@ -12,15 +14,8 @@ export function CTASection() {
           Join millions of learners and advance your career with expert-led courses.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-            Start Learning Today
-          </Button>
-          <Button
-            variant="default"
-            size="lg"
-            className="border-white text-white bg-primary hover:bg-white hover:text-primary"
-          >
-            Browse Courses
+          <Button asChild size="lg" className="bg-white primary/90 hover:bg-gray-100">
+            <Link href={ROUTES.public.courses.root}>Explore Courses</Link>
           </Button>
         </div>
       </div>
