@@ -4,26 +4,30 @@ import { CoursesPageSkeleton } from './_/components/skeletons';
 import { Metadata } from 'next';
 import { fetchServerCourses } from '@/lib/server-apis/courses-api';
 import type { CourseMeta } from '@/types/course';
-import { buildListingMetadata } from '@/lib/seo/metadata';
 import { absoluteUrl, ROUTES } from '@/lib/constants/routes';
 import { itemListJsonLd } from '@/lib/seo/json-ld';
 import { JsonLd } from '@/components/seo/json-ld';
 import { SITE_NAME } from '@/lib/constants';
+import { truncateText } from '@/lib/utils';
+
+const TITLE_MAX = 60; // Google truncates around here in SERPs
+const DESC_MAX = 160;
 
 export async function generateMetadata({}: PageProps): Promise<Metadata> {
   const title = 'Browse Courses | Online Learning Platform';
   const description =
     'Discover expert-led online courses across design, tech, business, and more. Learn from industry practitioners with structured, practical courses.';
-  const courseUrl = absoluteUrl(ROUTES.public.courses.root);
+  const url = absoluteUrl(ROUTES.public.courses.root);
+
+  const safeTitle = truncateText(title, TITLE_MAX);
+  const safeDescription = truncateText(description, DESC_MAX);
+  const fullTitle = `${safeTitle}`;
 
   return {
-    ...buildListingMetadata({
-      title,
-      description,
-      path: ROUTES.public.courses.root,
-    }),
+    title: fullTitle,
+    description: safeDescription,
+    alternates: { canonical: url },
 
-    description,
     keywords: [
       'online courses',
       'learn design',
@@ -37,7 +41,7 @@ export async function generateMetadata({}: PageProps): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      url: courseUrl,
+      url,
       siteName: SITE_NAME,
       type: 'website',
       locale: 'en_US',
