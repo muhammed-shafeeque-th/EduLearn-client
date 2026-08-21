@@ -7,6 +7,7 @@ import { fetchServerEnrollment } from '@/lib/server-apis/enrollment-api';
 import { authGuard } from '@/lib/auth';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 import { ROUTES } from '@/lib/constants/routes';
+import 'plyr/dist/plyr.css';
 
 interface EnrollmentPageProps {
   params: Promise<{ enrollmentId: string }>;
