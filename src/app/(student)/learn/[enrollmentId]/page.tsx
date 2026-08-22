@@ -11,7 +11,6 @@ import 'plyr/dist/plyr.css';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { getServerQueryClient } from '@/lib/react-query/server';
 import { QUERY_KEYS } from '@/lib/react-query/query-keys';
-import { serverEnrollmentService } from '@/services/server-service-clients';
 
 interface EnrollmentPageProps {
   params: Promise<{ enrollmentId: string }>;
