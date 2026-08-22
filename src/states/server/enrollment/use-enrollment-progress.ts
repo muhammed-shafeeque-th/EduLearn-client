@@ -31,12 +31,12 @@ export function useEnrollmentProgress(enrollmentId: string) {
     queryFn: async ({ signal }) => {
       try {
         const result = await enrollmentService.getEnrollment(enrollmentId, { signal });
-        if (!result.success) return [];
+        if (!result.success) return null;
 
         return result.data;
       } catch (error) {
         console.error(error);
-        return [];
+        return null;
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -313,7 +313,9 @@ export function useEnrollmentProgress(enrollmentId: string) {
 
   return {
     // Queries
-    enrollmentDetail: enrollmentDetailQuery.data as unknown as EnrollmentDetail,
+    enrollmentDetail: (enrollmentDetailQuery.data
+      ? enrollmentDetailQuery.data
+      : { modules: [] }) as EnrollmentDetail,
     progress: progressQuery.data,
 
     // Loading states
