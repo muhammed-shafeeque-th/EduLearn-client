@@ -28,7 +28,17 @@ export function useEnrollmentProgress(enrollmentId: string) {
    */
   const enrollmentDetailQuery = useQuery({
     queryKey: QUERY_KEYS.enrollment.detail(authUser?.userId || 'current', enrollmentId),
-    queryFn: ({ signal }) => enrollmentService.getEnrollment(enrollmentId, { signal }),
+    queryFn: async ({ signal }) => {
+      try {
+        const result = await enrollmentService.getEnrollment(enrollmentId, { signal });
+        if (!result.success) return [];
+
+        return result.data;
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     retry: 2,
@@ -303,9 +313,7 @@ export function useEnrollmentProgress(enrollmentId: string) {
 
   return {
     // Queries
-    enrollmentDetail: enrollmentDetailQuery.data?.success
-      ? enrollmentDetailQuery.data.data
-      : ([] as unknown as EnrollmentDetail),
+    enrollmentDetail: enrollmentDetailQuery.data as unknown as EnrollmentDetail,
     progress: progressQuery.data,
 
     // Loading states

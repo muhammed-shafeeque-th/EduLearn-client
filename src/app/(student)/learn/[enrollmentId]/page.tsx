@@ -8,6 +8,10 @@ import { authGuard } from '@/lib/auth';
 import { ERROR_CODES } from '@/lib/errors/error-codes';
 import { ROUTES } from '@/lib/constants/routes';
 import 'plyr/dist/plyr.css';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
+import { getServerQueryClient } from '@/lib/react-query/server';
+import { QUERY_KEYS } from '@/lib/react-query/query-keys';
+import { serverEnrollmentService } from '@/services/server-service-clients';
 
 interface EnrollmentPageProps {
   params: Promise<{ enrollmentId: string }>;
@@ -86,16 +90,25 @@ export default async function EnrollmentPage({ params, searchParams }: Enrollmen
   if (enrollment.status === 'DROPPED') {
     redirect(`${ROUTES.public.courses.root}?error_code=${ERROR_CODES.COURSE_ENROLLMENT_DROPPED}`);
   }
+  const queryClient = getServerQueryClient();
+
+  // Prefetch enrollment
+  await queryClient.prefetchQuery({
+    queryKey: QUERY_KEYS.enrollment.detail(currentUser?.id || 'current', enrollmentId),
+    queryFn: () => enrollment,
+  });
 
   return (
-    <Suspense fallback={<EnrollmentPageSkeleton />}>
-      <EnrollmentLearningClient
-        enrollmentId={enrollmentId}
-        initialEnrollment={enrollment}
-        user={currentUser!}
-        initialItemId={itemId}
-        initialItemType={itemType}
-      />
-    </Suspense>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Suspense fallback={<EnrollmentPageSkeleton />}>
+        <EnrollmentLearningClient
+          enrollmentId={enrollmentId}
+          initialEnrollment={enrollment}
+          user={currentUser!}
+          initialItemId={itemId}
+          initialItemType={itemType}
+        />
+      </Suspense>
+    </HydrationBoundary>
   );
 }
