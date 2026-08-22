@@ -51,7 +51,6 @@ interface EnrollmentLearningClientProps {
 
 export function EnrollmentLearningClient({
   enrollmentId,
-  initialEnrollment,
   user,
   initialItemId,
   initialItemType,
@@ -59,6 +58,7 @@ export function EnrollmentLearningClient({
   const router = useRouter();
 
   const {
+    enrollmentDetail,
     progress,
     isLoading,
     isLoadingProgress,
@@ -78,7 +78,7 @@ export function EnrollmentLearningClient({
   const completedToastRef = useRef<string | null>(null);
 
   const courseItems = useMemo<CourseItem[]>(() => {
-    const sortedModules = [...initialEnrollment.modules].sort((a, b) => a.order - b.order);
+    const sortedModules = [...enrollmentDetail.modules].sort((a, b) => a.order - b.order);
 
     const items: CourseItem[] = [];
 
@@ -111,7 +111,7 @@ export function EnrollmentLearningClient({
     });
 
     return items;
-  }, [initialEnrollment]);
+  }, [enrollmentDetail]);
 
   const currentItem = useMemo(() => {
     if (currentItemId) {
@@ -364,22 +364,22 @@ export function EnrollmentLearningClient({
                   transition={{ duration: 0.2 }}
                 >
                   <TabsContent value="progress" className="mt-0">
-                    <CourseProgressTab enrollment={initialEnrollment} progress={progress} />
+                    <CourseProgressTab enrollment={enrollmentDetail} progress={progress} />
                   </TabsContent>
 
                   <TabsContent value="discussion" className="mt-0">
                     <CourseDiscussionTab
-                      courseId={initialEnrollment.courseId}
+                      courseId={enrollmentDetail.courseId}
                       enrollmentId={enrollmentId}
                       userId={user.id}
                       userName={user.name || ''}
-                      // instructorId={initialEnrollment.instructorId}
+                      // instructorId={enrollmentDetail.instructorId}
                     />
                   </TabsContent>
 
                   <TabsContent value="structure" className="mt-0">
                     <CourseStructureTab
-                      enrollment={initialEnrollment}
+                      enrollment={enrollmentDetail}
                       progress={progress}
                       onItemClick={handleItemClick}
                       isItemLocked={isItemLocked}
@@ -388,7 +388,7 @@ export function EnrollmentLearningClient({
 
                   <TabsContent value="quizzes" className="mt-0">
                     <CourseQuizzesTab
-                      enrollment={initialEnrollment}
+                      enrollment={enrollmentDetail}
                       progress={progress}
                       onQuizStart={(quizId) => {
                         const quizItem = courseItems.find(
@@ -412,7 +412,7 @@ export function EnrollmentLearningClient({
                   <TabsContent value="certificate" className="mt-0">
                     <CourseCertificateTab
                       enrollmentId={enrollmentId}
-                      enrollment={initialEnrollment}
+                      enrollment={enrollmentDetail}
                       overallProgress={progress.overallProgress}
                       userName={user.name!}
                     />
