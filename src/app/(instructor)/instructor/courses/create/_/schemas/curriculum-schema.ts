@@ -128,7 +128,7 @@ const multipleChoiceQuestionSchema = z.object({
     .number()
     .min(1, 'Time limit must be at least 1')
     .max(3600, 'Time limit too high')
-    .default(2),
+    .default(60),
 });
 
 // const trueFalseQuestionSchema = z.object({
