@@ -1,6 +1,6 @@
 'use client';
 
-import { toast } from '@/hooks/use-toast';
+import { commonToasts, toast } from '@/hooks/use-toast';
 import { useGoogleOneTapLogin } from '@react-oauth/google';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -120,7 +120,8 @@ export default function GoogleOneTapSignIn({
       })
         .then((result) => {
           if (result?.ok) {
-            router.refresh();
+            commonToasts.loginSuccess();
+            setTimeout(() => router.refresh(), 1000);
           } else {
             toast.error({
               title: 'Sign-in failed',
