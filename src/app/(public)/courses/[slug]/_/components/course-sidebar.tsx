@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+// import { Input } from '@/components/ui/input';
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from '@/components/ui/dialog';
 import {
   ShoppingCart,
   Heart,
@@ -29,11 +29,11 @@ import {
   Timer,
   Zap,
   Check,
-  Copy,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Mail,
+  // Copy,
+  // Facebook,
+  // Twitter,
+  // Linkedin,
+  // Mail,
   ArrowRight,
   GraduationCap,
   Eye,
@@ -42,7 +42,7 @@ import { Course } from '@/types/course';
 import { toast } from '@/hooks/use-toast';
 import { useCart } from '@/states/server/cart/use-cart';
 import { useWishlist } from '@/states/server/wishlist/use-wishlists';
-import { getNavigator, getWindow } from '@/lib/utils';
+import { getNavigator } from '@/lib/utils';
 import Link from 'next/link';
 import { useIsEnrolled } from '@/states/server/enrollment/use-enrollment';
 import { useAuthSelector } from '@/states/client';
@@ -89,7 +89,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
   // Later, this should be replaced by real per-user/per-offer logic from backend.
   const [timeLeft, setTimeLeft] = useState<number>(() => generateRandomInitialTime());
-  const [showShareDialog, setShowShareDialog] = useState(false);
+  // const [showShareDialog, setShowShareDialog] = useState(false);
 
   // Countdown timer for discount
   useEffect(() => {
@@ -429,18 +429,19 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
                 Wishlist
               </Button>
             )}
-            <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 hover:border-primary hover:text-primary"
-                >
-                  <Share2 className="w-4 h-4 mr-1" />
-                  Share
-                </Button>
-              </DialogTrigger>
-            </Dialog>
+            {/* <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+              <DialogTrigger asChild> */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 hover:border-primary hover:text-primary"
+              onClick={handleShare}
+            >
+              <Share2 className="w-4 h-4 mr-1" />
+              Share
+            </Button>
+            {/* </DialogTrigger>
+            </Dialog> */}
           </div>
 
           {/* Coupon Section */}
@@ -588,18 +589,18 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
       </Card>
 
       {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+      {/* <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Share this Course</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {/* Social Share Buttons */}
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-4"> */}
+      {/* Social Share Buttons */}
+      {/* <div className="grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
-                onClick={handleShare}
+                onClick={() => handleShare('facebook')}
                 className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
               >
                 <Facebook className="w-4 h-4 text-blue-600" />
@@ -608,7 +609,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
               <Button
                 variant="outline"
-                onClick={handleShare}
+                onClick={() => handleShare('twitter')}
                 className="flex items-center gap-2 hover:bg-sky-50 hover:border-sky-200"
               >
                 <Twitter className="w-4 h-4 text-sky-500" />
@@ -617,7 +618,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
               <Button
                 variant="outline"
-                onClick={handleShare}
+                onClick={() => handleShare('linkedin')}
                 className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
               >
                 <Linkedin className="w-4 h-4 text-blue-700" />
@@ -626,16 +627,16 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
 
               <Button
                 variant="outline"
-                onClick={handleShare}
+                onClick={() => handleShare('email')}
                 className="flex items-center gap-2 hover:bg-gray-50 hover:border-gray-200"
               >
                 <Mail className="w-4 h-4 text-gray-600" />
                 Email
               </Button>
-            </div>
+            </div> */}
 
-            {/* Copy Link */}
-            <div className="border-t pt-4">
+      {/* Copy Link */}
+      {/* <div className="border-t pt-4">
               <div className="flex gap-2">
                 <Input value={getWindow()?.location?.href || ''} readOnly className="text-sm" />
                 <Button onClick={() => handleShare()} variant="outline" size="sm">
@@ -646,7 +647,7 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </motion.div>
   );
 }
