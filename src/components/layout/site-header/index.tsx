@@ -26,13 +26,7 @@ const UserMenu = dynamic(() => import('./components/user-menu').then((m) => m.Us
   ssr: false,
 });
 
-// Previously statically imported. Both only ever render behind
-// `isAuthenticated`, so the conditional already stopped their *hooks* from
-// running for anonymous visitors — but a static import still puts their
-// code in the same chunk Header ships to everyone. Dynamic import means
 // this code is only fetched at all once a user is actually logged in,
-// which matters most here since (public) pages are exactly where
-// anonymous/SEO traffic is heaviest.
 const CartButton = dynamic(() => import('./components/cart-button'), { ssr: false });
 const NotificationButton = dynamic(
   () => import('./components/notification-dropdown').then((m) => m.NotificationButton),

@@ -29,7 +29,7 @@ function parseQueryArray(value: string | null): string[] {
     .filter(Boolean);
 }
 
-export function CoursesPageContainer({ initialPage }: CoursesPageContainerProps) {
+export function CoursesPageContainer({}: CoursesPageContainerProps) {
   // const router = useRouter();
   // const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -105,7 +105,7 @@ export function CoursesPageContainer({ initialPage }: CoursesPageContainerProps)
         sortBy: sortBy as CourseSortBy,
         pageSize,
       },
-      { initialPage }
+      {}
     );
 
   const handleFiltersChange = useCallback(
