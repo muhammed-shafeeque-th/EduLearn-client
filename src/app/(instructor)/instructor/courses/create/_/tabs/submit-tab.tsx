@@ -590,7 +590,7 @@ export const SubmitTab = React.memo(
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    Publish Course
+                    Submit Course
                   </>
                 )}
               </Button>

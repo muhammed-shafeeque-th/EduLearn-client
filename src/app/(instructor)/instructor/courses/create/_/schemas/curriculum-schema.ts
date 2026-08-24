@@ -216,7 +216,8 @@ export const lessonSchema = z.object({
   estimatedDuration: z
     .number({ required_error: 'Estimated duration is required' })
     .min(1, 'Estimated duration must be at least 1 minute')
-    .max(1440, 'Lesson cannot be longer than 24 hours'),
+    .max(1440, 'Lesson cannot be longer than 24 hours')
+    .default(6),
   isPublished: z.boolean().default(true),
   order: z.number().min(0, 'Order cannot be negative').default(0),
 });

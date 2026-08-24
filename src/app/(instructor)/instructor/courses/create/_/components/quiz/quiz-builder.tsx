@@ -604,7 +604,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = React.memo(
 
                     <div className="space-y-3">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 flex items-center gap-1">
-                        Time (Min) <span className="text-destructive">*</span>
+                        Time (Sec) <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         type="number"
